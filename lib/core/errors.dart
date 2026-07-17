@@ -22,6 +22,25 @@ class SessionExpiredException extends UnauthorizedException {
     : super(message ?? 'La sesión ha expirado');
 }
 
+/// Las credenciales fueron rechazadas positivamente por el servidor de
+/// autenticación. Es la ÚNICA condición que debe terminar la sesión (logout).
+class InvalidCredentialsException extends ApiException {
+  const InvalidCredentialsException([String? message])
+    : super(message ?? 'Usuario o contraseña incorrectos.');
+}
+
+/// No se pudo (re)autenticar porque el servidor de auth estaba inaccesible,
+/// lento o con error transitorio. NO debe hacer logout: se conserva la sesión
+/// y el caché, y se degrada con gracia (reintento + datos locales).
+class AuthUnavailableException extends ApiException {
+  const AuthUnavailableException([String? message])
+    : super(
+        message ??
+            'No se pudo verificar tu sesión en este momento. '
+                'Mostrando datos guardados.',
+      );
+}
+
 class DataParsingException implements Exception {
   final String model;
   final String? field;
@@ -83,6 +102,15 @@ String humanizeError(Object? error) {
   if (error is ServerException) {
     return 'El servidor reportó un error (${error.status}). '
         'No es algo que tú hiciste mal; reintenta más tarde.';
+  }
+  if (error is AuthUnavailableException) {
+    return 'No se pudo verificar tu sesión (servidor no disponible). '
+        'Mostrando datos guardados; reintenta en unos segundos.';
+  }
+  if (error is InvalidCredentialsException) {
+    return error.message.isNotEmpty
+        ? error.message
+        : 'Usuario o contraseña incorrectos.';
   }
   if (error is UnauthorizedException) {
     return error.message.isNotEmpty

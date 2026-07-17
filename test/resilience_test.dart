@@ -151,30 +151,100 @@ void main() {
       expect(cacheCalled, true);
     });
 
-    test('withFallback handles session expired and logs out', () async {
+    test(
+      'session expired serves cache and does NOT log out (logout is ApiClient\'s job)',
+      () async {
+        final conn = ConnectivityService(
+          connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
+          httpClient: MockHttpClient((req) async => http.Response('', 200)),
+        );
+        await conn.checkNow();
+
+        final session = MockSessionService();
+        final handler = ErrorHandler(connectivity: conn, session: session);
+
+        // Con caché disponible: se sirve el caché, sin lanzar.
+        final res = await handler.withFallback<String>(
+          remote: () async => throw const SessionExpiredException(),
+          cached: () async => 'cached',
+          operationName: 'test_op',
+        );
+
+        expect(res, 'cached');
+        // El logout lo dispara ApiClient.onUnauthorized (fuente única). El
+        // ErrorHandler NUNCA debe cerrar sesión: eso causaba el doble-logout.
+        expect(session.loggedOut, false);
+      },
+    );
+
+    test('session expired rethrows when there is no cache', () async {
       final conn = ConnectivityService(
         connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
         httpClient: MockHttpClient((req) async => http.Response('', 200)),
       );
       await conn.checkNow();
-
       final session = MockSessionService();
+      final handler = ErrorHandler(connectivity: conn, session: session);
+
+      await expectLater(
+        handler.withFallback<String>(
+          remote: () async => throw const SessionExpiredException(),
+          cached: () async => null,
+          operationName: 'test_op',
+        ),
+        throwsA(isA<SessionExpiredException>()),
+      );
+      expect(session.loggedOut, false);
+    });
+
+    test(
+      'AuthUnavailable is transient: serves cache and keeps the session',
+      () async {
+        final conn = ConnectivityService(
+          connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
+          httpClient: MockHttpClient((req) async => http.Response('', 200)),
+        );
+        await conn.checkNow();
+        final session = MockSessionService();
+        final handler = ErrorHandler(connectivity: conn, session: session);
+
+        final res = await handler.withFallback<String>(
+          remote: () async => throw const AuthUnavailableException(),
+          cached: () async => 'cached',
+          operationName: 'test_op',
+        );
+
+        expect(res, 'cached');
+        expect(session.loggedOut, false);
+      },
+    );
+
+    test('retries once on a transient failure, then succeeds', () async {
+      final conn = ConnectivityService(
+        connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
+        httpClient: MockHttpClient((req) async => http.Response('', 200)),
+      );
+      await conn.checkNow();
       final handler = ErrorHandler(
         connectivity: conn,
-        session: session,
+        session: MockSessionService(),
       );
 
-      final future = handler.withFallback<String>(
+      var attempts = 0;
+      final res = await handler.withFallback<String>(
         remote: () async {
-          throw const SessionExpiredException();
+          attempts++;
+          // Primer hit falla (servidor "frío" tras inactividad); el reintento
+          // recupera. Este es justo el caso que rompía antes.
+          if (attempts == 1) throw const NetworkException('cold start');
+          return 'success';
         },
-        cached: () async => 'cached',
+        cached: () async => null,
         operationName: 'test_op',
       );
 
-      await expectLater(future, throwsA(isA<SessionExpiredException>()));
-
-      expect(session.loggedOut, true);
+      expect(res, 'success');
+      expect(attempts, 2);
     });
   });
 }
