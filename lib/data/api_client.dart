@@ -135,6 +135,7 @@ class ApiClient {
           authorize: authorize,
           decode: decode,
           isRetry: isRetry,
+          isHtmlChallenge: true,
           expiredMessage: 'Sesión expirada.',
         );
       }
@@ -156,6 +157,7 @@ class ApiClient {
         authorize: authorize,
         decode: decode,
         isRetry: isRetry,
+        isHtmlChallenge: false,
         expiredMessage: payload?['mensaje'] as String? ?? 'Sesión expirada.',
       );
     }
@@ -184,12 +186,17 @@ class ApiClient {
   }
 
   /// Punto ÚNICO de decisión ante un reto de autenticación (401 o página HTML
-  /// de login en una petición autorizada). Distingue tres desenlaces:
+  /// de login en una petición autorizada). Desenlaces:
   ///   - refreshed          → reintenta la petición con el token nuevo.
-  ///   - unavailable        → transitorio: NO cierra sesión; lanza
-  ///                          AuthUnavailableException para que el ErrorHandler
-  ///                          caiga al caché y reintente.
-  ///   - invalidCredentials → cierra sesión (única condición que hace logout).
+  ///   - invalidCredentials → ÚNICA condición que cierra sesión (logout): el
+  ///                          servidor rechazó las credenciales al reautenticar.
+  ///   - unavailable        → transitorio: NO cierra sesión.
+  ///
+  /// IMPORTANTE: un 401/HTML que PERSISTE tras un refresh exitoso (isRetry), o
+  /// un reto sin forma de reautenticar, NO cierra sesión. Con credenciales
+  /// válidas el refresh habría devuelto 'refreshed', así que persistir no es
+  /// prueba de credenciales inválidas — es un problema del servidor. Cerrar
+  /// sesión ahí era lo que rebotaba al usuario al login justo tras entrar.
   Future<ApiEnvelope<T>> _handleAuthChallenge<T>(
     String method,
     String path, {
@@ -198,6 +205,7 @@ class ApiClient {
     required bool authorize,
     required T Function(Object? raw) decode,
     required bool isRetry,
+    required bool isHtmlChallenge,
     required String expiredMessage,
   }) async {
     if (authorize && !isRetry && reauthenticate != null) {
@@ -213,15 +221,23 @@ class ApiClient {
             decode: decode,
             isRetry: true,
           );
+        case ReauthOutcome.invalidCredentials:
+          // Único caso de logout: SIGMA rechazó las credenciales.
+          onUnauthorized?.call();
+          throw SessionExpiredException(expiredMessage);
         case ReauthOutcome.unavailable:
           throw const AuthUnavailableException();
-        case ReauthOutcome.invalidCredentials:
-          break; // cae al logout de abajo
       }
     }
-    // Credenciales confirmadas inválidas (o no hay forma de reautenticar).
-    if (authorize) onUnauthorized?.call();
-    throw SessionExpiredException(expiredMessage);
+    // Reto persistente o sin reautenticación posible: se CONSERVA la sesión y
+    // se degrada al caché (el ErrorHandler lo trata como transitorio).
+    if (isHtmlChallenge) {
+      throw const ServerException(
+        'El servicio no está disponible temporalmente.',
+        status: 503,
+      );
+    }
+    throw const AuthUnavailableException();
   }
 
   Uri _buildUri(String path, Map<String, String>? query) {

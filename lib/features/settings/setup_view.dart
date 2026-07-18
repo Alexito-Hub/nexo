@@ -90,13 +90,15 @@ class _InstallViewState extends State<InstallView> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget content;
     if (_step == InstallProgressStep.error) {
-      return _buildErrorView();
+      content = _buildErrorView();
+    } else if (_step == InstallProgressStep.done) {
+      content = _buildSuccessView();
+    } else {
+      content = _buildProgressView();
     }
-    if (_step == InstallProgressStep.done) {
-      return _buildSuccessView();
-    }
-    return _buildProgressView();
+    return installerButtonScope(context, content);
   }
 
   Widget _buildProgressView() {
@@ -370,7 +372,9 @@ class _UninstallViewState extends State<UninstallView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return installerButtonScope(
+      context,
+      Scaffold(
       backgroundColor: NexoTheme.bg,
       body: Center(
         child: SingleChildScrollView(
@@ -393,6 +397,7 @@ class _UninstallViewState extends State<UninstallView> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

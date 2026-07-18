@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nexo/core/error_handler.dart';
 import 'package:nexo/core/errors.dart';
+import 'package:nexo/data/api_client.dart';
 import 'package:nexo/data/connectivity_service.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/data/session.dart';
@@ -245,6 +246,48 @@ void main() {
 
       expect(res, 'success');
       expect(attempts, 2);
+    });
+  });
+
+  group('ApiClient auth challenge (regresión rebote-al-login)', () {
+    test('401 persistente tras un refresh exitoso NO cierra sesión', () async {
+      // Simula el caso real: el token vencido se refresca bien, pero el
+      // endpoint sigue respondiendo 401/HTML. Antes esto hacía logout y
+      // rebotaba al usuario al login justo tras entrar.
+      final api = ApiClient(
+        transport: MockHttpClient(
+          (req) async => http.Response('{"mensaje":"no"}', 401),
+        ),
+      );
+      var loggedOut = false;
+      api.onUnauthorized = () => loggedOut = true;
+      api.reauthenticate = () async => ReauthOutcome.refreshed; // creds válidas
+      api.setToken('tok');
+
+      await expectLater(
+        api.get<String>('X', decode: (_) => 'x'),
+        throwsA(isA<AuthUnavailableException>()),
+      );
+      expect(loggedOut, false,
+          reason: 'un 401 persistente con credenciales válidas no debe cerrar sesión');
+    });
+
+    test('credenciales rechazadas al reautenticar SÍ cierra sesión', () async {
+      final api = ApiClient(
+        transport: MockHttpClient(
+          (req) async => http.Response('{"mensaje":"no"}', 401),
+        ),
+      );
+      var loggedOut = false;
+      api.onUnauthorized = () => loggedOut = true;
+      api.reauthenticate = () async => ReauthOutcome.invalidCredentials;
+      api.setToken('tok');
+
+      await expectLater(
+        api.get<String>('X', decode: (_) => 'x'),
+        throwsA(isA<SessionExpiredException>()),
+      );
+      expect(loggedOut, true);
     });
   });
 }
