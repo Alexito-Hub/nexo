@@ -53,9 +53,10 @@ class _HorarioScreenState extends State<ScheduleScreen> {
                 child: PageHeader(
                   title: AppLocalizations.of(context).titleSchedule,
                   subtitle: state.hasValue
-                      ? 'Periodo activo · $agrupadas '
-                            '${agrupadas == 1 ? "clase" : "clases"}'
-                      : 'Periodo activo',
+                      ? AppLocalizations.of(
+                          context,
+                        ).schedulePeriodActiveCount(agrupadas)
+                      : AppLocalizations.of(context).schedulePeriodActive,
                   actions: [
                     _ViewToggle(
                       weekView: _weekView,
@@ -100,17 +101,18 @@ class _HorarioScreenState extends State<ScheduleScreen> {
     BuildContext context,
     AsyncValue<List<ScheduleClass>> state,
   ) {
-    if (state.loading && !state.hasValue) {
+    final l = AppLocalizations.of(context);
+    if (state.showSkeleton) {
       return const _Loading();
     }
     if (state.error != null && !state.hasValue) {
       return SectionCard(
-        title: 'Error',
+        title: l.scheduleErrorTitle,
         icon: Icons.cloud_off_outlined,
         iconColor: NexoTheme.danger,
         child: EmptyState(
           icon: Icons.cloud_off_outlined,
-          title: 'No se pudo cargar el horario',
+          title: l.scheduleLoadError,
           subtitle: humanizeError(state.error),
           color: NexoTheme.danger,
           onRetry: () => widget.store.loadHorarioActual(),
@@ -119,12 +121,12 @@ class _HorarioScreenState extends State<ScheduleScreen> {
     }
     final clases = state.value ?? const <ScheduleClass>[];
     if (clases.isEmpty) {
-      return const SectionCard(
-        title: 'Sin clases',
+      return SectionCard(
+        title: l.scheduleNoClassesTitle,
         icon: Icons.calendar_today_outlined,
         child: EmptyState(
           icon: Icons.event_busy_rounded,
-          title: 'No hay clases registradas',
+          title: l.scheduleNoClassesSubtitle,
         ),
       );
     }
@@ -138,6 +140,7 @@ class _ViewToggle extends StatelessWidget {
   const _ViewToggle({required this.weekView, required this.onChanged});
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -148,8 +151,8 @@ class _ViewToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _toggle('Semana', weekView, () => onChanged(true)),
-          _toggle('Lista', !weekView, () => onChanged(false)),
+          _toggle(l.scheduleToggleWeek, weekView, () => onChanged(true)),
+          _toggle(l.scheduleToggleList, !weekView, () => onChanged(false)),
         ],
       ),
     );
@@ -202,9 +205,9 @@ class _WeekView extends StatelessWidget {
       7,
     ].where((d) => byDay.containsKey(d)).toList();
     if (daysOrder.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.event_busy_rounded,
-        title: 'Sin clases programadas',
+        title: AppLocalizations.of(context).scheduleNoClassesScheduled,
       );
     }
     final cards = [
@@ -315,7 +318,8 @@ class _DaySection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                if (isToday) StatusChip(text: 'HOY', color: NexoTheme.primary),
+                if (isToday)
+                  StatusChip(text: l.detailToday, color: NexoTheme.primary),
                 const Spacer(),
                 Text(
                   l.gradesCoursesCount(grupos.length),

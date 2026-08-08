@@ -316,6 +316,36 @@ abstract class AppLocalizations {
   /// **'Aula'**
   String get detailRoom;
 
+  /// No description provided for @detailPavilion.
+  ///
+  /// In es, this message translates to:
+  /// **'Pabellón'**
+  String get detailPavilion;
+
+  /// No description provided for @weekdayFull.
+  ///
+  /// In es, this message translates to:
+  /// **'{day, select, mon{Lunes} tue{Martes} wed{Miércoles} thu{Jueves} fri{Viernes} sat{Sábado} sun{Domingo} other{—}}'**
+  String weekdayFull(String day);
+
+  /// No description provided for @weekdayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{day, select, mon{Lun} tue{Mar} wed{Mié} thu{Jue} fri{Vie} sat{Sáb} sun{Dom} other{—}}'**
+  String weekdayShort(String day);
+
+  /// No description provided for @monthShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{month, select, jan{Ene} feb{Feb} mar{Mar} apr{Abr} may{May} jun{Jun} jul{Jul} aug{Ago} sep{Sep} oct{Oct} nov{Nov} dec{Dic} other{—}}'**
+  String monthShort(String month);
+
+  /// No description provided for @timeGreeting.
+  ///
+  /// In es, this message translates to:
+  /// **'{period, select, morning{Buenos días} afternoon{Buenas tardes} evening{Buenas noches} other{Hola}}'**
+  String timeGreeting(String period);
+
   /// No description provided for @detailBuilding.
   ///
   /// In es, this message translates to:
@@ -1183,7 +1213,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsItemPrivacyBody.
   ///
   /// In es, this message translates to:
-  /// **'Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.'**
+  /// **'Tus credenciales y datos académicos se guardan únicamente en tu dispositivo. Nexo no envía tu información a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.'**
   String get termsItemPrivacyBody;
 
   /// No description provided for @termsItemSecurityTitle.
@@ -1887,6 +1917,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'EN PROCESO'**
   String get statusInProcess;
+
+  /// No description provided for @paymentsFilterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get paymentsFilterAll;
+
+  /// No description provided for @paymentsNoneInPeriod.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin pagos en este periodo'**
+  String get paymentsNoneInPeriod;
+
+  /// No description provided for @homeMoreClassesToday.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{+ 1 clase más hoy} other{+ {count} clases más hoy}}'**
+  String homeMoreClassesToday(int count);
+
+  /// No description provided for @statusApproved.
+  ///
+  /// In es, this message translates to:
+  /// **'APROBADO'**
+  String get statusApproved;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'DESAPROBADO'**
+  String get statusFailed;
 
   /// No description provided for @gradesPromedioLabel.
   ///
@@ -2889,6 +2949,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'+ {count} cuotas más'**
   String homePendingPaymentsMore(int count);
+
+  /// No description provided for @termsItemRightsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus derechos'**
+  String get termsItemRightsTitle;
+
+  /// No description provided for @termsItemRightsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes consultar, corregir o eliminar lo que hayas compartido, y retirar tu permiso en cualquier momento desde Ajustes. Escríbenos desde la sección de soporte para ejercer estos derechos o resolver cualquier duda sobre el tratamiento de tus datos.'**
+  String get termsItemRightsBody;
 }
 
 class _AppLocalizationsDelegate

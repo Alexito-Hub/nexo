@@ -117,6 +117,70 @@ class AppLocalizationsQu extends AppLocalizations {
   String get detailRoom => 'Wasi';
 
   @override
+  String get detailPavilion => 'Pabellón';
+
+  @override
+  String weekdayFull(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Killachaw',
+      'tue': 'Atipachaw',
+      'wed': 'Quyllurchaw',
+      'thu': 'Chaskachaw',
+      'fri': 'Illapachaw',
+      'sat': 'Kuychichaw',
+      'sun': 'Intichaw',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Kil',
+      'tue': 'Ati',
+      'wed': 'Quy',
+      'thu': 'Cha',
+      'fri': 'Illa',
+      'sat': 'Kuy',
+      'sun': 'Inti',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String monthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      'jan': 'Ene',
+      'feb': 'Feb',
+      'mar': 'Mar',
+      'apr': 'Abr',
+      'may': 'May',
+      'jun': 'Jun',
+      'jul': 'Jul',
+      'aug': 'Ago',
+      'sep': 'Sep',
+      'oct': 'Oct',
+      'nov': 'Nov',
+      'dec': 'Dic',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String timeGreeting(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'morning': 'Allin punchaw',
+      'afternoon': 'Allin sukha',
+      'evening': 'Allin tuta',
+      'other': 'Rimaykullayki',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get detailBuilding => 'Wasi';
 
   @override
@@ -602,7 +666,7 @@ class AppLocalizationsQu extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.';
+      'Credencialniykikuna hinaspa yachay willakuyniykikunaqa dispositivoykipillam waqaychakun. Nexoqa manam servidorninman nitaq hukkunamanpas apachinchu: UPLA servicionkunamanmi chawpillanpi rin.';
 
   @override
   String get termsItemSecurityTitle => 'Seguridad';
@@ -1024,6 +1088,29 @@ class AppLocalizationsQu extends AppLocalizations {
 
   @override
   String get statusInProcess => 'LLANKASHKAN';
+
+  @override
+  String get paymentsFilterAll => 'Llapan';
+
+  @override
+  String get paymentsNoneInPeriod => 'Mana pagokuna kay periodopi';
+
+  @override
+  String homeMoreClassesToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count clases astawan kunan',
+      one: '+ 1 clase astawan kunan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusApproved => 'APROBADO';
+
+  @override
+  String get statusFailed => 'MANA APROBADO';
 
   @override
   String get gradesPromedioLabel => 'Promedio';
@@ -1601,4 +1688,11 @@ class AppLocalizationsQu extends AppLocalizations {
   String homePendingPaymentsMore(int count) {
     return '+ $count tasakuna';
   }
+
+  @override
+  String get termsItemRightsTitle => 'Derechoykikuna';
+
+  @override
+  String get termsItemRightsBody =>
+      'Willasqaykikunata qawanki, allichanki utaq pichanki, hinaspa mayqin pachapipas Ajustespi permisoykita qichunki. Soporte sectionmanta qillqamuwayku.';
 }

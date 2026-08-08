@@ -36,6 +36,11 @@
   "detailSchedule": "Schedule",
   "detailLocation": "Location",
   "detailRoom": "Room",
+  "detailPavilion": "Building",
+  "weekdayFull": "{day, select, mon{Monday} tue{Tuesday} wed{Wednesday} thu{Thursday} fri{Friday} sat{Saturday} sun{Sunday} other{—}}",
+  "weekdayShort": "{day, select, mon{Mon} tue{Tue} wed{Wed} thu{Thu} fri{Fri} sat{Sat} sun{Sun} other{—}}",
+  "monthShort": "{month, select, jan{Jan} feb{Feb} mar{Mar} apr{Apr} may{May} jun{Jun} jul{Jul} aug{Aug} sep{Sep} oct{Oct} nov{Nov} dec{Dec} other{—}}",
+  "timeGreeting": "{period, select, morning{Good morning} afternoon{Good afternoon} evening{Good evening} other{Hello}}",
   "detailBuilding": "Building",
   "detailCampus": "Campus",
   "detailTeacher": "Teacher",
@@ -250,7 +255,7 @@
   "termsItemWhatTitle": "What is Nexo",
   "termsItemWhatBody": "An independent, unofficial app created by and for students that reorganizes your UPLA academic information more clearly. It is not affiliated with or endorsed by UPLA.",
   "termsItemPrivacyTitle": "Your data and privacy",
-  "termsItemPrivacyBody": "Your credentials and data are stored only on your device. Nexo does not send anything to its own servers or third parties: requests go directly to UPLA services, just like the official portal.",
+  "termsItemPrivacyBody": "Your credentials and academic data are stored only on your device. Nexo does not send your information to its own servers or to third parties: requests go straight to UPLA services, just like the official portal.",
   "termsItemSecurityTitle": "Security",
   "termsItemSecurityBody": "Local storage is not encrypted at the system level. Use it only on devices you trust. You can sign out to clear credentials and cache at any time.",
   "termsItemResponsibleTitle": "Responsible use",
@@ -454,6 +459,11 @@
   "gradesNoHistoryYet": "No history yet",
   "gradesEvolutionByPeriod": "Evolution by term",
   "statusInProcess": "IN PROGRESS",
+  "paymentsFilterAll": "All",
+  "paymentsNoneInPeriod": "No payments in this period",
+  "homeMoreClassesToday": "{count, plural, =1{+ 1 more class today} other{+ {count} more classes today}}",
+  "statusApproved": "PASSED",
+  "statusFailed": "FAILED",
   "gradesPromedioLabel": "Average",
   "gradesParcial1": "Partial 1",
   "gradesParcial2": "Partial 2",
@@ -793,5 +803,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "termsItemRightsTitle": "Your rights",
+  "termsItemRightsBody": "You can review, correct or delete whatever you shared, and withdraw your permission anytime from Settings. Write to us from the support section to exercise these rights or ask anything about how your data is handled."
 }

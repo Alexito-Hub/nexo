@@ -31,6 +31,13 @@ class AsyncValue<T> {
       loading = false,
       error = e;
   bool get hasValue => value != null;
+
+  /// Aún no se inició ninguna carga: sin valor, sin error y sin loading.
+  /// La UI debe tratarlo como "cargando" (esqueleto), no como vacío.
+  bool get isIdle => !loading && value == null && error == null;
+
+  /// La UI debe mostrar esqueleto: cargando o todavía sin iniciar.
+  bool get showSkeleton => (loading || isIdle) && value == null;
 }
 
 class AppStore extends ChangeNotifier {
@@ -45,7 +52,12 @@ class AppStore extends ChangeNotifier {
        _errorHandler = errorHandler,
        _intranet = intranet,
        _teams = teams,
-       _teacher = teacher;
+       _teacher = teacher {
+    // El layout del dashboard debe cargarse SIEMPRE (no solo al hidratar):
+    // tras un login fresco `hydrateFromCache` no corre y el Home quedaba con
+    // spans por defecto rotos (tarjetas aplastadas en móvil).
+    _loadDashboardLayout();
+  }
   DataSource<T> _sigma<T>(SourceId id, Future<T> Function() fn) =>
       DataSource(id: id, fetch: fn);
   List<DataSource<T>> _intra<T>(Future<T> Function(IntranetRepository) fn) {
@@ -204,6 +216,11 @@ class AppStore extends ChangeNotifier {
   }
 
   double? get promedioAcumulado {
+    // Preferimos el promedio oficial del resumen académico (ponderado por
+    // créditos, calculado por la universidad). El promedio simple de los
+    // promedios por ciclo solo queda como respaldo.
+    final oficial = resumen.value?.average;
+    if (oficial != null && oficial > 0) return oficial;
     final list = promedios.value;
     if (list == null) return null;
     final activo = periodoActivo;
@@ -220,11 +237,33 @@ class AppStore extends ChangeNotifier {
     if (isNewModel(activo.year, activo.number)) {
       final courses = boletaOf(activo.year, activo.number).value;
       if (courses == null) return null;
-      return GradeCalculator.promedioPonderadoBoleta(courses);
+      // `realAverageOf` ya devuelve nota vigesimal (los talleres 0-100 caen a
+      // su nota vigesimal oficial), así que se pueden promediar directamente.
+      return GradeCalculator.promedioPonderadoBoleta(
+        courses,
+        gradeOf: realAverageOf,
+      );
     }
     final courses = boletaLegacyOf(activo.year, activo.number).value;
     if (courses == null) return null;
     return GradeCalculator.promedioPonderadoLegacy(courses);
+  }
+
+  /// Promedio a mostrar para un curso de la boleta (modelo nuevo).
+  /// El servidor redondea el promedio del curso (11.60 → 12); para cursos en
+  /// proceso usamos el promedio real calculado desde sus unidades (si el
+  /// detalle ya está cargado) para que lista y detalle muestren lo mismo.
+  /// Los cursos cerrados conservan la nota oficial.
+  /// Nota a mostrar (y a promediar) para un curso de la boleta, siempre en
+  /// escala vigesimal. En proceso: promedio real desde las unidades si está en
+  /// rango; cerrado o taller (0-100): la nota vigesimal oficial. Así lista,
+  /// detalle y promedio del ciclo muestran exactamente lo mismo.
+  double? realAverageOf(ReportCardCourse c) {
+    if (c.inProgress) {
+      final computed = _detalle[c.enrollmentSubjectId]?.value?.computedAverage;
+      if (computed != null && computed >= 0 && computed <= 20.5) return computed;
+    }
+    return c.vigesimalAverage;
   }
 
   int? get approvedCredits {
@@ -291,15 +330,16 @@ class AppStore extends ChangeNotifier {
   void _setStorageCache(String key, Object data) =>
       AppStorage.instance.setCache(key, data);
 
-  List<DashboardWidgetConfig> dashboardLayout = [
-    const DashboardWidgetConfig(id: 'stats_promedio', span: 1),
-    const DashboardWidgetConfig(id: 'stats_creditos', span: 1),
-    const DashboardWidgetConfig(id: 'stats_clases_hoy', span: 1),
-    const DashboardWidgetConfig(id: 'stats_pagos', span: 1),
-    const DashboardWidgetConfig(id: 'next_class', span: 2),
-    const DashboardWidgetConfig(id: 'today_classes', span: 2),
-    const DashboardWidgetConfig(id: 'pending_payments', span: 2),
+  static const List<DashboardWidgetConfig> _defaultDashboardLayout = [
+    DashboardWidgetConfig(id: 'stats_promedio', span: 2),
+    DashboardWidgetConfig(id: 'stats_creditos', span: 2),
+    DashboardWidgetConfig(id: 'stats_clases_hoy', span: 2),
+    DashboardWidgetConfig(id: 'stats_pagos', span: 2),
+    DashboardWidgetConfig(id: 'next_class', span: 4),
+    DashboardWidgetConfig(id: 'today_classes', span: 4),
+    DashboardWidgetConfig(id: 'pending_payments', span: 4),
   ];
+  List<DashboardWidgetConfig> dashboardLayout = [..._defaultDashboardLayout];
 
   void _loadDashboardLayout() {
     final s = AppStorage.instance.dashboardConfigJson;
@@ -352,15 +392,7 @@ class AppStore extends ChangeNotifier {
         }
       } catch (_) {}
     }
-    dashboardLayout = [
-      const DashboardWidgetConfig(id: 'stats_promedio', span: 2),
-      const DashboardWidgetConfig(id: 'stats_creditos', span: 2),
-      const DashboardWidgetConfig(id: 'stats_clases_hoy', span: 2),
-      const DashboardWidgetConfig(id: 'stats_pagos', span: 2),
-      const DashboardWidgetConfig(id: 'next_class', span: 4),
-      const DashboardWidgetConfig(id: 'today_classes', span: 4),
-      const DashboardWidgetConfig(id: 'pending_payments', span: 4),
-    ];
+    dashboardLayout = [..._defaultDashboardLayout];
   }
 
   void saveDashboardLayout() {
@@ -464,15 +496,43 @@ class AppStore extends ChangeNotifier {
   }
 
   Future<void> loadHomeEssentials() async {
+    // Los periodos van primero: `periodoActivo` alimenta al perfil, horario y
+    // boleta. Cargarlos en paralelo provocaba que esas fuentes consultaran un
+    // periodo adivinado por fecha y a veces volvieran vacías ("no aparecen
+    // los datos hasta recargar").
+    await loadPeriodos();
     await Future.wait([
       loadProfile(),
       loadHorarioActual(),
       loadCuotasPendientes(),
-      loadPeriodos(),
       loadPromedios(),
     ]);
     final p = profile.value;
     if (p != null && p.studyPlan.isNotEmpty && p.level.isNotEmpty) {
+      await loadResumen(p.studyPlan, p.level);
+    }
+    unawaited(checkActiveBoleta());
+  }
+
+  /// Reintenta solo lo que falló (o nunca llegó a cargar) en el Home.
+  /// Se invoca al recuperar conectividad para no obligar al usuario a
+  /// refrescar manualmente.
+  Future<void> retryFailedEssentials() async {
+    bool needs(AsyncValue s) => !s.loading && !s.hasValue;
+    if (needs(periodos)) await loadPeriodos();
+    final tasks = <Future<void>>[
+      if (needs(profile)) loadProfile(),
+      if (needs(schedule)) loadHorarioActual(),
+      if (needs(pendingInstallments)) loadCuotasPendientes(),
+      if (needs(promedios)) loadPromedios(),
+    ];
+    if (tasks.isEmpty) return;
+    await Future.wait(tasks);
+    final p = profile.value;
+    if (needs(resumen) &&
+        p != null &&
+        p.studyPlan.isNotEmpty &&
+        p.level.isNotEmpty) {
       await loadResumen(p.studyPlan, p.level);
     }
     unawaited(checkActiveBoleta());
@@ -597,10 +657,24 @@ class AppStore extends ChangeNotifier {
       _boleta[key] = AsyncValue.data(data);
       _checkGrades(data.map((c) => (c.name, c.promedioText)));
       await _cache.saveBoleta(year.toString(), periodo.toString(), data);
+      // Trae el detalle de los cursos en proceso para poder mostrar el
+      // promedio real (con decimales) en la lista, no el redondeado.
+      unawaited(_prefetchDetalles(year, periodo, data));
     } catch (e) {
       _boleta[key] = AsyncValue.failure(e, _boleta[key]?.value);
     }
     _notify();
+  }
+
+  Future<void> _prefetchDetalles(
+    int year,
+    int periodo,
+    List<ReportCardCourse> courses,
+  ) async {
+    for (final c in courses.where((c) => c.inProgress)) {
+      if (_detalle[c.enrollmentSubjectId]?.hasValue ?? false) continue;
+      await loadDetalle(year, periodo, c.enrollmentSubjectId);
+    }
   }
 
   Future<void> loadDetalle(

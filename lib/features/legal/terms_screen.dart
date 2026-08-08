@@ -27,6 +27,12 @@ List<_Item> _items(AppLocalizations l) => <_Item>[
     NexoTheme.accent,
   ),
   _Item(
+    Icons.how_to_reg_outlined,
+    l.termsItemRightsTitle,
+    l.termsItemRightsBody,
+    NexoTheme.accent,
+  ),
+  _Item(
     Icons.shield_outlined,
     l.termsItemSecurityTitle,
     l.termsItemSecurityBody,

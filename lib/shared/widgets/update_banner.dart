@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexo/core/config.dart';
 import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/data/update_service.dart';
 import 'package:nexo/l10n/app_localizations.dart';
@@ -13,6 +14,8 @@ class _UpdateBannerState extends State<UpdateBanner> {
   bool _dismissed = false;
   @override
   Widget build(BuildContext context) {
+    // En la Store, las actualizaciones las gestiona Windows: sin banner propio.
+    if (StoreBuild.isStore) return const SizedBox.shrink();
     final updater = UpdateService.instance;
     if (updater == null || !updater.isSupported || _dismissed) {
       return const SizedBox.shrink();

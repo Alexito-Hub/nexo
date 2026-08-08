@@ -260,7 +260,7 @@ class _LocationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (pabellon != null) _kv('Pabellón', pabellon),
+          if (pabellon != null) _kv(label.detailPavilion, pabellon),
           if (aulaOnly != null) _kv(label.detailRoom, aulaOnly),
           if (first.building.isNotEmpty)
             _kv(label.detailBuilding, first.building),

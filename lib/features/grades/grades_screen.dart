@@ -3,6 +3,7 @@ import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/errors.dart';
 import 'package:nexo/data/app_store.dart';
 import 'package:nexo/l10n/app_localizations.dart';
+import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/features/grades/grade_widgets.dart';
@@ -204,7 +205,7 @@ class _BoletaList extends StatelessWidget {
         ),
       );
     }
-    if (state.loading && !state.hasValue) {
+    if (state.showSkeleton) {
       return const Card(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -285,7 +286,11 @@ class _CursoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final color = _gradeColor(course.average);
+    // Promedio real con decimales (desde las unidades) cuando el curso está
+    // en proceso; el servidor entrega el promedio redondeado.
+    final avg = store.realAverageOf(course);
+    final avgText = avg == null ? '—' : avg.toStringAsFixed(2);
+    final color = _gradeColor(avg);
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(14),
@@ -323,7 +328,7 @@ class _CursoTile extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    course.promedioText,
+                    avgText,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w900,
@@ -367,6 +372,15 @@ class _CursoTile extends StatelessWidget {
                           StatusChip(
                             text: l.statusInProcess,
                             color: NexoTheme.warning,
+                          )
+                        else if (avg != null)
+                          StatusChip(
+                            text: avg >= GradeCalculator.notaAprobatoria
+                                ? l.statusApproved
+                                : l.statusFailed,
+                            color: avg >= GradeCalculator.notaAprobatoria
+                                ? NexoTheme.success
+                                : NexoTheme.danger,
                           ),
                       ],
                     ),
@@ -458,6 +472,12 @@ class BoletaDetalleBody extends StatelessWidget {
       builder: (context, _) {
         final st = store.detalleOf(course.enrollmentSubjectId);
         final det = st.value;
+        // Fuente única de verdad: el MISMO promedio que muestra la lista.
+        // El promedio final del detalle (tbl4/tbl6) viene redondeado por el
+        // servidor (11.60 → 12), así que no se usa: causaba que el número de
+        // adentro no coincidiera con el de afuera.
+        final avg = store.realAverageOf(course);
+        final notaText = avg == null ? course.promedioText : avg.toStringAsFixed(2);
         return ListView(
           controller: controller,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
@@ -466,7 +486,7 @@ class BoletaDetalleBody extends StatelessWidget {
               titulo: course.name,
               subtitulo:
                   '${course.code} · ${l.detailSection} ${course.section}',
-              notaFinalText: det?.finalAverageText ?? course.promedioText,
+              notaFinalText: notaText,
               inProgress: course.inProgress,
             ),
             const SizedBox(height: 16),
@@ -492,7 +512,7 @@ class BoletaDetalleBody extends StatelessWidget {
                   pesoText: u.weight != null
                       ? '${u.weight!.toStringAsFixed(0)}%'
                       : null,
-                  rawAverage: u.rawAverage,
+                  rawAverage: u.average?.toStringAsFixed(2) ?? u.rawAverage,
                   rows: [
                     for (var i = 0; i < u.evidences.length; i++)
                       GradeRow(
@@ -729,7 +749,10 @@ class _PromediosChart extends StatelessWidget {
       );
       final idx = data.indexWhere(_esActivo);
       if (idx >= 0) {
-        data[idx] = entry;
+        // Solo sustituimos el promedio oficial del servidor por el cálculo
+        // local cuando el servidor todavía no publicó el promedio del ciclo
+        // activo (average 0). Si ya lo tiene, ese es el valor correcto.
+        if (data[idx].average == 0) data[idx] = entry;
       } else {
         data.add(entry);
       }
@@ -799,7 +822,7 @@ class _BarColumn extends StatelessWidget {
   const _BarColumn({required this.p, this.inProgress = false});
   @override
   Widget build(BuildContext context) {
-    final ok = p.average >= 11;
+    final ok = p.average >= GradeCalculator.notaAprobatoria;
     final List<Color> barColors = p.average == 0
         ? [NexoTheme.border, NexoTheme.border]
         : inProgress

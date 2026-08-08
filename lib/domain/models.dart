@@ -378,6 +378,9 @@ class ReportCardCourse {
   final double credit;
   final String rawAttendance;
   final String rawAverage;
+  // Nota vigesimal oficial (col. 9 de la boleta). El promedio crudo de algunos
+  // cursos (talleres) viene en escala 0-100; esta columna siempre es vigesimal.
+  final String rawVigesimal;
   final String state;
   const ReportCardCourse({
     required this.enrollmentSubjectId,
@@ -388,6 +391,7 @@ class ReportCardCourse {
     required this.rawAttendance,
     required this.rawAverage,
     required this.state,
+    this.rawVigesimal = '',
     this.credit = 0,
   });
   factory ReportCardCourse.fromRow(List<dynamic> r) {
@@ -401,6 +405,7 @@ class ReportCardCourse {
       section: at(6),
       rawAttendance: at(7),
       rawAverage: at(8),
+      rawVigesimal: at(9),
       state: at(10),
     );
   }
@@ -413,6 +418,7 @@ class ReportCardCourse {
     credit: _toDouble(j['credito']) ?? 0,
     rawAttendance: _toStr(j['asistenciaRaw']),
     rawAverage: _toStr(j['promedioRaw']),
+    rawVigesimal: _toStr(j['notaVigesimalRaw']),
     state: _toStr(j['estado']),
   );
   Map<String, dynamic> toJson() => {
@@ -424,10 +430,24 @@ class ReportCardCourse {
     'credito': credit,
     'asistenciaRaw': rawAttendance,
     'promedioRaw': rawAverage,
+    'notaVigesimalRaw': rawVigesimal,
     'estado': state,
   };
+
+  /// Promedio crudo del curso tal como aparece en la boleta (col. 8). Puede
+  /// venir en escala 0-100 para talleres.
   double? get average => parseGrade(rawAverage);
   String get promedioText => formatGrade(rawAverage);
+
+  /// Nota siempre en escala vigesimal: usa el promedio crudo si ya está en
+  /// rango; si no (talleres 0-100), cae a la nota vigesimal oficial (col. 9).
+  /// Es la que debe promediarse para el promedio del ciclo.
+  double? get vigesimalAverage {
+    final raw = parseGrade(rawAverage);
+    if (raw != null && raw >= 0 && raw <= 20.5) return raw;
+    return parseGrade(rawVigesimal);
+  }
+
   int? get attendance => int.tryParse(rawAttendance.trim());
   bool get inProgress => state.toLowerCase().startsWith('dsp');
 }
@@ -490,6 +510,31 @@ class CourseGradeDetail {
   });
   double? get promedioFinal => parseGrade(rawFinalAverage);
   String get finalAverageText => formatGrade(rawFinalAverage);
+
+  /// Promedio real del curso calculado desde las unidades (con decimales),
+  /// ponderado por el peso de cada unidad. El servidor entrega el promedio
+  /// del curso redondeado (11.60 → 12); este getter permite mostrar el valor
+  /// real de forma consistente en la lista y en el detalle.
+  double? get computedAverage {
+    double weighted = 0, weights = 0;
+    final plain = <double>[];
+    var allWeighted = true;
+    for (final u in units) {
+      final a = u.average;
+      if (a == null) continue;
+      plain.add(a);
+      final w = u.weight;
+      if (w != null && w > 0) {
+        weighted += a * w;
+        weights += w;
+      } else {
+        allWeighted = false;
+      }
+    }
+    if (plain.isEmpty) return promedioFinal;
+    if (allWeighted && weights > 0) return weighted / weights;
+    return plain.reduce((a, b) => a + b) / plain.length;
+  }
   String get sustitutorioText => formatGrade(rawSubstitute);
   bool get hasSubstitute => parseGrade(rawSubstitute) != null;
   factory CourseGradeDetail.fromRows(List<dynamic> rows) {

@@ -15,6 +15,7 @@ import 'package:nexo/features/settings/setup_view.dart';
 import 'package:nexo/features/settings/install_dialog.dart';
 import 'package:nexo/widgets/custom_title_bar.dart';
 import 'package:nexo/app/shell.dart';
+import 'package:nexo/core/config.dart';
 import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/design/theme_controller.dart';
 import 'package:nexo/core/error_handler.dart';
@@ -51,10 +52,13 @@ Future<void> main(List<String> args) async {
   bool isUninstall = false;
   if (!kIsWeb && Platform.isWindows) {
     await windowManager.ensureInitialized();
-    isUninstall = args.contains('--uninstall');
+    // En la build de Store, la instalación la gestiona Windows: no hay
+    // asistente propio ni desinstalador embebido.
+    isUninstall = !StoreBuild.isStore && args.contains('--uninstall');
     final isInstalled = WinSetupService.isInstalledInstance;
     final isPortable = AppStorage.instance.runPortable;
-    isSetup = isUninstall || (!isInstalled && !isPortable);
+    isSetup =
+        !StoreBuild.isStore && (isUninstall || (!isInstalled && !isPortable));
     final themeMode = AppStorage.instance.themeMode ?? 'system';
     bool isDark = false;
     if (themeMode == 'system') {
@@ -134,8 +138,11 @@ Future<void> main(List<String> args) async {
   ShortcutService.instance.init();
   await NotificationService.instance.init();
   final updater = UpdateService(httpClient: secureHttp);
-  NotificationService.instance.onInstallUpdateTap = updater.installDownloaded;
-  unawaited(updater.bootstrap());
+  // La Store se encarga de las actualizaciones: no arrancamos el updater propio.
+  if (!StoreBuild.isStore) {
+    NotificationService.instance.onInstallUpdateTap = updater.installDownloaded;
+    unawaited(updater.bootstrap());
+  }
   store.onGradeChange = (course, grade) =>
       NotificationService.instance.showGradeChanged(course, grade);
   session.addListener(() {

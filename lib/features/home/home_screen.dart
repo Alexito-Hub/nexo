@@ -658,7 +658,7 @@ class _DashboardWidgetWrapper extends StatelessWidget {
           value: promedioAcum == null ? '—' : promedioAcum.toStringAsFixed(2),
           icon: Icons.trending_up_rounded,
           color: NexoTheme.primary,
-          loading: store.promedios.loading && !store.promedios.hasValue,
+          loading: store.promedios.showSkeleton && store.resumen.showSkeleton,
         ));
       case 'stats_creditos':
         final p = store.profile.value;
@@ -670,7 +670,7 @@ class _DashboardWidgetWrapper extends StatelessWidget {
           value: creditosLabel,
           icon: Icons.school_rounded,
           color: NexoTheme.accent,
-          loading: store.profile.loading && !store.profile.hasValue,
+          loading: store.profile.showSkeleton,
         ));
       case 'stats_clases_hoy':
         final schedule = store.schedule.value ?? const <ScheduleClass>[];
@@ -681,17 +681,17 @@ class _DashboardWidgetWrapper extends StatelessWidget {
           value: '$clasesHoy',
           icon: Icons.today_rounded,
           color: NexoTheme.success,
-          loading: store.schedule.loading && !store.schedule.hasValue,
+          loading: store.schedule.showSkeleton,
         ));
       case 'stats_pagos':
         final installments = store.pendingInstallments.value ?? const <Payment>[];
         final montoPendiente = installments.fold<double>(0, (acc, c) => acc + c.total);
         return _StatTile(data: _StatData(
           label: l.homeMetricPorPagar,
-          value: installments.isEmpty ? 'S/ 0' : Fmt.currency(montoPendiente),
+          value: Fmt.currency(montoPendiente),
           icon: Icons.account_balance_wallet_rounded,
           color: NexoTheme.warning,
-          loading: store.pendingInstallments.loading && !store.pendingInstallments.hasValue,
+          loading: store.pendingInstallments.showSkeleton,
         ));
       case 'next_class':
         final schedule = store.schedule.value ?? const <ScheduleClass>[];
@@ -721,15 +721,20 @@ class _DashboardWidgetWrapper extends StatelessWidget {
     final child = _buildChild(context);
     if (child is SizedBox) return child;
 
-    final totalSpacing = 12.0;
+    const totalSpacing = 12.0;
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = context.contentPadding * 2;
-    final availableWidth = screenWidth - padding;
+    final availableWidth = (screenWidth - padding).clamp(160.0, 1600.0);
     final colWidth = (availableWidth - totalSpacing * 3) / 4;
-    
-    final itemWidth = config.span >= 4 
-        ? availableWidth 
-        : (colWidth * config.span + totalSpacing * (config.span - 1)) - 0.5;
+
+    // Los bloques de contenido (horario, pagos, próxima clase) necesitan al
+    // menos media pantalla en móvil; con span 1 el texto colapsa en vertical.
+    final minSpan = config.id.startsWith('stats_') ? config.span : 4;
+    final span = minSpan > config.span ? minSpan : config.span;
+    final itemWidth = (span >= 4
+            ? availableWidth
+            : (colWidth * span + totalSpacing * (span - 1)) - 0.5)
+        .clamp(72.0, availableWidth);
 
     final isEditing = store.editingDashboardWidgetId == config.id;
 
@@ -883,7 +888,7 @@ class _ClasesHoyBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    if (state.loading && !state.hasValue) {
+    if (state.showSkeleton) {
       return SectionCard(
         title: l.homeTodayTitle,
         icon: Icons.today_outlined,
@@ -942,7 +947,7 @@ class _PagosBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    if (state.loading && !state.hasValue) {
+    if (state.showSkeleton) {
       return SectionCard(
         title: l.homePendingPaymentsTitle,
         icon: Icons.account_balance_wallet_outlined,

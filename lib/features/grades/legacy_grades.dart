@@ -31,7 +31,7 @@ class LegacyGradesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    if (state.loading && !state.hasValue) {
+    if (state.showSkeleton) {
       return const Card(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -184,6 +184,15 @@ class _Tile extends StatelessWidget {
                               StatusChip(
                                 text: l.statusInProcess,
                                 color: NexoTheme.warning,
+                              )
+                            else
+                              StatusChip(
+                                text: grade.isApproved
+                                    ? l.statusApproved
+                                    : l.statusFailed,
+                                color: grade.isApproved
+                                    ? NexoTheme.success
+                                    : NexoTheme.danger,
                               ),
                           ],
                         ),

@@ -52,6 +52,7 @@ class AppStorage {
   String? get dashboardConfigJson => _prefs.getString(_kDashboardConfig);
   Future<void> setDashboardConfigJson(String value) =>
       _prefs.setString(_kDashboardConfig, value);
+
   String? get msSessionJson => _prefs.getString(_kMsSession);
   Future<void> setMsSessionJson(String? value) async {
     if (value == null) {

@@ -58,7 +58,7 @@ class TodayClassesWidget extends StatelessWidget {
                   const SizedBox(height: 12),
                   Center(
                     child: Text(
-                      '+ ${groups.length - 1} clases más hoy',
+                      l.homeMoreClassesToday(groups.length - 1),
                       style: TextStyle(
                         color: NexoTheme.textSecondary,
                         fontSize: 13,

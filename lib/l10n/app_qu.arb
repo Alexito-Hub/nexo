@@ -16,6 +16,11 @@
   "timeFormat": "Pachap rikuchinan",
   "detailTeacher": "Yachachiq",
   "detailRoom": "Wasi",
+  "detailPavilion": "Pabellón",
+  "weekdayFull": "{day, select, mon{Killachaw} tue{Atipachaw} wed{Quyllurchaw} thu{Chaskachaw} fri{Illapachaw} sat{Kuychichaw} sun{Intichaw} other{—}}",
+  "weekdayShort": "{day, select, mon{Kil} tue{Ati} wed{Quy} thu{Cha} fri{Illa} sat{Kuy} sun{Inti} other{—}}",
+  "monthShort": "{month, select, jan{Ene} feb{Feb} mar{Mar} apr{Abr} may{May} jun{Jun} jul{Jul} aug{Ago} sep{Sep} oct{Oct} nov{Nov} dec{Dic} other{—}}",
+  "timeGreeting": "{period, select, morning{Allin punchaw} afternoon{Allin sukha} evening{Allin tuta} other{Rimaykullayki}}",
   "detailNrc": "NRC",
   "detailSection": "Sec.",
   "detailLevel": "Nivel",
@@ -220,7 +225,7 @@
   "termsItemWhatTitle": "Qué es Nexo",
   "termsItemWhatBody": "Aplicación independiente y no oficial, creada por y para estudiantes, que reorganiza tu información académica de la UPLA de forma más clara. No está afiliada ni respaldada por la UPLA.",
   "termsItemPrivacyTitle": "Tus datos y privacidad",
-  "termsItemPrivacyBody": "Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.",
+  "termsItemPrivacyBody": "Credencialniykikuna hinaspa yachay willakuyniykikunaqa dispositivoykipillam waqaychakun. Nexoqa manam servidorninman nitaq hukkunamanpas apachinchu: UPLA servicionkunamanmi chawpillanpi rin.",
   "termsItemSecurityTitle": "Seguridad",
   "termsItemSecurityBody": "El almacenamiento local no está cifrado a nivel de sistema. Úsala solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.",
   "termsItemResponsibleTitle": "Uso responsable",
@@ -424,6 +429,11 @@
   "gradesNoHistoryYet": "Manaraq ñawpa willakuyniyuq",
   "gradesEvolutionByPeriod": "Evolución por periodo",
   "statusInProcess": "LLANKASHKAN",
+  "paymentsFilterAll": "Llapan",
+  "paymentsNoneInPeriod": "Mana pagokuna kay periodopi",
+  "homeMoreClassesToday": "{count, plural, =1{+ 1 clase astawan kunan} other{+ {count} clases astawan kunan}}",
+  "statusApproved": "APROBADO",
+  "statusFailed": "MANA APROBADO",
   "gradesPromedioLabel": "Promedio",
   "gradesParcial1": "Parcial 1",
   "gradesParcial2": "Parcial 2",
@@ -786,5 +796,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "termsItemRightsTitle": "Derechoykikuna",
+  "termsItemRightsBody": "Willasqaykikunata qawanki, allichanki utaq pichanki, hinaspa mayqin pachapipas Ajustespi permisoykita qichunki. Soporte sectionmanta qillqamuwayku."
 }

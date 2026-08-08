@@ -60,6 +60,39 @@
   "detailSchedule": "Horario",
   "detailLocation": "Ubicación",
   "detailRoom": "Aula",
+  "detailPavilion": "Pabellón",
+  "weekdayFull": "{day, select, mon{Lunes} tue{Martes} wed{Miércoles} thu{Jueves} fri{Viernes} sat{Sábado} sun{Domingo} other{—}}",
+  "@weekdayFull": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayShort": "{day, select, mon{Lun} tue{Mar} wed{Mié} thu{Jue} fri{Vie} sat{Sáb} sun{Dom} other{—}}",
+  "@weekdayShort": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "monthShort": "{month, select, jan{Ene} feb{Feb} mar{Mar} apr{Abr} may{May} jun{Jun} jul{Jul} aug{Ago} sep{Sep} oct{Oct} nov{Nov} dec{Dic} other{—}}",
+  "@monthShort": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "timeGreeting": "{period, select, morning{Buenos días} afternoon{Buenas tardes} evening{Buenas noches} other{Hola}}",
+  "@timeGreeting": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "detailBuilding": "Local",
   "detailCampus": "Sede",
   "detailTeacher": "Docente",
@@ -275,7 +308,7 @@
   "termsItemWhatTitle": "Qué es Nexo",
   "termsItemWhatBody": "Aplicación independiente y no oficial, creada por y para estudiantes, que reorganiza tu información académica de la UPLA de forma más clara. No está afiliada ni respaldada por la UPLA.",
   "termsItemPrivacyTitle": "Tus datos y privacidad",
-  "termsItemPrivacyBody": "Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.",
+  "termsItemPrivacyBody": "Tus credenciales y datos académicos se guardan únicamente en tu dispositivo. Nexo no envía tu información a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.",
   "termsItemSecurityTitle": "Seguridad",
   "termsItemSecurityBody": "El almacenamiento local no está cifrado a nivel de sistema. Úsala solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.",
   "termsItemResponsibleTitle": "Uso responsable",
@@ -479,6 +512,18 @@
   "gradesNoHistoryYet": "Sin historial aún",
   "gradesEvolutionByPeriod": "Evolución por periodo",
   "statusInProcess": "EN PROCESO",
+  "paymentsFilterAll": "Todos",
+  "paymentsNoneInPeriod": "Sin pagos en este periodo",
+  "homeMoreClassesToday": "{count, plural, =1{+ 1 clase más hoy} other{+ {count} clases más hoy}}",
+  "@homeMoreClassesToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusApproved": "APROBADO",
+  "statusFailed": "DESAPROBADO",
   "gradesPromedioLabel": "Promedio",
   "gradesParcial1": "Parcial 1",
   "gradesParcial2": "Parcial 2",
@@ -846,5 +891,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "termsItemRightsTitle": "Tus derechos",
+  "termsItemRightsBody": "Puedes consultar, corregir o eliminar lo que hayas compartido, y retirar tu permiso en cualquier momento desde Ajustes. Escríbenos desde la sección de soporte para ejercer estos derechos o resolver cualquier duda sobre el tratamiento de tus datos."
 }

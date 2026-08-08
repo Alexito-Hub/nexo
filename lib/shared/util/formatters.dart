@@ -1,4 +1,19 @@
+import 'package:flutter/widgets.dart';
+import 'package:nexo/core/storage.dart';
+import 'package:nexo/l10n/app_localizations.dart';
+
 abstract final class Fmt {
+  /// Localizaciones según el idioma elegido en la app. Se resuelve perezoso
+  /// para que los formateadores sirvan también fuera del árbol de widgets
+  /// (notificaciones, widgets de Android), igual que hacen esos servicios.
+  static AppLocalizations get _l {
+    String code = 'es';
+    try {
+      code = AppStorage.instance.localeCode ?? 'es';
+    } catch (_) {}
+    return lookupAppLocalizations(Locale(code));
+  }
+
   static String currency(double v, [String simbolo = 'S/']) {
     final negativo = v < 0;
     final abs = v.abs();
@@ -12,35 +27,27 @@ abstract final class Fmt {
     return negativo ? '-$s' : s;
   }
 
-  static const _meses = [
+  static const _dayKeys = ['', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+  static const _monthKeys = [
     '',
-    'Ene',
-    'Feb',
-    'Mar',
-    'Abr',
-    'May',
-    'Jun',
-    'Jul',
-    'Ago',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dic',
-  ];
-  static const _dias = [
-    '',
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
+    'jan',
+    'feb',
+    'mar',
+    'apr',
+    'may',
+    'jun',
+    'jul',
+    'aug',
+    'sep',
+    'oct',
+    'nov',
+    'dec',
   ];
   static String dayLabel(int idDia) =>
-      idDia >= 1 && idDia <= 7 ? _dias[idDia] : '';
+      idDia >= 1 && idDia <= 7 ? _l.weekdayFull(_dayKeys[idDia]) : '';
   static String shortDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')} ${_meses[d.month]} ${d.year}';
+      '${d.day.toString().padLeft(2, '0')} '
+      '${_l.monthShort(_monthKeys[d.month])} ${d.year}';
   static String time(String rawHm, {required bool h24}) {
     if (h24) return rawHm;
     final parts = rawHm.split(':');
@@ -53,16 +60,18 @@ abstract final class Fmt {
     return '$hh:$m $period';
   }
 
-  static String fullDate(DateTime d) {
-    const dias = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    return '${dias[d.weekday]}, ${d.day} ${_meses[d.month]}';
-  }
+  static String fullDate(DateTime d) =>
+      '${_l.weekdayShort(_dayKeys[d.weekday])}, ${d.day} '
+      '${_l.monthShort(_monthKeys[d.month])}';
 
   static String greeting(DateTime now) {
     final h = now.hour;
-    if (h < 12) return 'Buenos días';
-    if (h < 19) return 'Buenas tardes';
-    return 'Buenas noches';
+    final period = h < 12
+        ? 'morning'
+        : h < 19
+        ? 'afternoon'
+        : 'evening';
+    return _l.timeGreeting(period);
   }
 
   static String firstName(String full) {

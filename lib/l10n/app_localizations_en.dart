@@ -117,6 +117,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailRoom => 'Room';
 
   @override
+  String get detailPavilion => 'Building';
+
+  @override
+  String weekdayFull(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Monday',
+      'tue': 'Tuesday',
+      'wed': 'Wednesday',
+      'thu': 'Thursday',
+      'fri': 'Friday',
+      'sat': 'Saturday',
+      'sun': 'Sunday',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Mon',
+      'tue': 'Tue',
+      'wed': 'Wed',
+      'thu': 'Thu',
+      'fri': 'Fri',
+      'sat': 'Sat',
+      'sun': 'Sun',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String monthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      'jan': 'Jan',
+      'feb': 'Feb',
+      'mar': 'Mar',
+      'apr': 'Apr',
+      'may': 'May',
+      'jun': 'Jun',
+      'jul': 'Jul',
+      'aug': 'Aug',
+      'sep': 'Sep',
+      'oct': 'Oct',
+      'nov': 'Nov',
+      'dec': 'Dec',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String timeGreeting(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'morning': 'Good morning',
+      'afternoon': 'Good afternoon',
+      'evening': 'Good evening',
+      'other': 'Hello',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get detailBuilding => 'Building';
 
   @override
@@ -602,7 +666,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Your credentials and data are stored only on your device. Nexo does not send anything to its own servers or third parties: requests go directly to UPLA services, just like the official portal.';
+      'Your credentials and academic data are stored only on your device. Nexo does not send your information to its own servers or to third parties: requests go straight to UPLA services, just like the official portal.';
 
   @override
   String get termsItemSecurityTitle => 'Security';
@@ -1019,6 +1083,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusInProcess => 'IN PROGRESS';
+
+  @override
+  String get paymentsFilterAll => 'All';
+
+  @override
+  String get paymentsNoneInPeriod => 'No payments in this period';
+
+  @override
+  String homeMoreClassesToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count more classes today',
+      one: '+ 1 more class today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusApproved => 'PASSED';
+
+  @override
+  String get statusFailed => 'FAILED';
 
   @override
   String get gradesPromedioLabel => 'Average';
@@ -1593,4 +1680,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String homePendingPaymentsMore(int count) {
     return '+ $count more fees';
   }
+
+  @override
+  String get termsItemRightsTitle => 'Your rights';
+
+  @override
+  String get termsItemRightsBody =>
+      'You can review, correct or delete whatever you shared, and withdraw your permission anytime from Settings. Write to us from the support section to exercise these rights or ask anything about how your data is handled.';
 }

@@ -4,33 +4,27 @@ import 'package:nexo/domain/unified_models.dart';
 class GradeCalculator {
   GradeCalculator._();
   static const double notaAprobatoria = 10.5;
-  static double? promedioPonderadoBoleta(List<ReportCardCourse> courses) {
+  static double? promedioPonderado(Iterable<(double?, double)> notas) {
     double sumaPonderada = 0;
     double sumaCreditos = 0;
-    for (final c in courses) {
-      final grade = c.average;
-      if (grade == null) continue;
-      if (c.credit <= 0) continue;
-      sumaPonderada += grade * c.credit;
-      sumaCreditos += c.credit;
+    for (final (grade, credit) in notas) {
+      if (grade == null || credit <= 0) continue;
+      sumaPonderada += grade * credit;
+      sumaCreditos += credit;
     }
     if (sumaCreditos == 0) return null;
     return sumaPonderada / sumaCreditos;
   }
 
-  static double? promedioPonderadoLegacy(List<CourseGrade> courses) {
-    double sumaPonderada = 0;
-    double sumaCreditos = 0;
-    for (final c in courses) {
-      final grade = c.currentGradeNum;
-      if (grade == null) continue;
-      if (c.credit <= 0) continue;
-      sumaPonderada += grade * c.credit;
-      sumaCreditos += c.credit;
-    }
-    if (sumaCreditos == 0) return null;
-    return sumaPonderada / sumaCreditos;
-  }
+  static double? promedioPonderadoBoleta(
+    List<ReportCardCourse> courses, {
+    double? Function(ReportCardCourse)? gradeOf,
+  }) => promedioPonderado(
+    courses.map((c) => ((gradeOf ?? (c) => c.average)(c), c.credit)),
+  );
+
+  static double? promedioPonderadoLegacy(List<CourseGrade> courses) =>
+      promedioPonderado(courses.map((c) => (c.currentGradeNum, c.credit)));
 
   static double? promedioAcumulado(
     List<TermAverage> periodos, {

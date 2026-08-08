@@ -98,6 +98,19 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     });
   }
 
+  bool _wasOnline = false;
+  void _onConnectivityChange() {
+    final online = widget.connectivity.hasInternet;
+    if (online && !_wasOnline) {
+      // Volvió la conexión: reintenta lo que quedó sin datos en el Home
+      // en lugar de esperar un refresh manual.
+      if (!(widget.session.user?.isTeacher ?? false)) {
+        widget.store.retryFailedEssentials();
+      }
+    }
+    _wasOnline = online;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -108,6 +121,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _lastBoletaCheck = DateTime.now();
     WidgetsBinding.instance.addObserver(this);
     ShortcutService.instance.addListener(_handleShortcut);
+    _wasOnline = widget.connectivity.hasInternet;
+    widget.connectivity.addListener(_onConnectivityChange);
     _handleShortcut();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) maybeShowWhatsappInvite(context);
@@ -118,6 +133,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     ShortcutService.instance.removeListener(_handleShortcut);
+    widget.connectivity.removeListener(_onConnectivityChange);
     for (final c in _scrollControllers) {
       c.dispose();
     }

@@ -1,7 +1,7 @@
-name: nexo
+﻿name: nexo
 description: "Cliente UPLA multiplataforma — SIGMA reimaginado."
 publish_to: 'none'
-version: 1.6.1+10
+version: 1.6.2+11
 
 environment:
   sdk: ^3.10.1
@@ -57,6 +57,8 @@ dev_dependencies:
   # Genera splash screens nativos (Android/iOS/Web) con el logo de Nexo,
   # sin pantalla blanca antes de que Flutter arranque.
   flutter_native_splash: ^2.4.4
+  # Empaqueta la app como MSIX para la Microsoft Store.
+  msix: ^3.16.8
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -113,3 +115,26 @@ flutter:
     - family: SuperMindset
       fonts:
         - asset: assets/fonts/Super Mindset.ttf
+
+# ---------------------------------------------------------------------------
+# Empaquetado MSIX para la Microsoft Store.
+#
+# Identidad tomada de Partner Center (App management -> Product identity).
+# Debe coincidir EXACTAMENTE o la Store rechaza el paquete.
+#
+# Paquete para subir a la Store (SIN firmar; la firma la pone Microsoft):
+#   flutter build windows --release --dart-define=STORE_BUILD=true
+#   dart run msix:create --store --build-windows false
+#
+# El archivo queda en build/windows/x64/runner/Release/nexo.msix
+# ---------------------------------------------------------------------------
+msix_config:
+  display_name: "Nexo - UPLA"      # DEBE coincidir EXACTO con el nombre reservado en Partner Center
+  publisher_display_name: Auralix
+  identity_name: Auralix.Nexo-UPLA
+  publisher: CN=0C513058-5490-4C90-BD21-30ED8BB68E51
+  msix_version: 1.6.2.0
+  logo_path: assets/icon.png
+  capabilities: internetClient
+  store: true
+  languages: es-PE, en-US, qu

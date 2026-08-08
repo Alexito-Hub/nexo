@@ -13,9 +13,19 @@
   static const Duration checkInterval = Duration(hours: 24);
 }
 
+/// Build empaquetada para la Microsoft Store.
+///
+/// La Store gestiona la instalación y las actualizaciones: una app empaquetada
+/// que se auto-instala o se actualiza sola viola sus políticas. Con este flag
+/// (`--dart-define=STORE_BUILD=true`) se desactivan el asistente de instalación
+/// (`WinSetupService`/`InstallView`) y el auto-actualizador (`UpdateService`).
+class StoreBuild {
+  static const bool isStore = bool.fromEnvironment('STORE_BUILD');
+}
+
 class AppConfig {
-  static const String appVersion = '1.6.1';
-  static const int appBuild = 10;
+  static const String appVersion = '1.6.2';
+  static const int appBuild = 11;
   static const String apiBaseUrl = 'https://sigma.upla.edu.pe/api';
   static const String nomSys = 'SIGMA';
   static const Duration httpTimeout = Duration(seconds: 30);
