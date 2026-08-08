@@ -1,7 +1,7 @@
 ﻿name: nexo
 description: "Cliente UPLA multiplataforma — SIGMA reimaginado."
 publish_to: 'none'
-version: 1.6.2+11
+version: 1.6.3+12
 
 environment:
   sdk: ^3.10.1
@@ -133,7 +133,7 @@ msix_config:
   publisher_display_name: Auralix
   identity_name: Auralix.Nexo-UPLA
   publisher: CN=0C513058-5490-4C90-BD21-30ED8BB68E51
-  msix_version: 1.6.2.0
+  msix_version: 1.6.3.0
   logo_path: assets/icon.png
   capabilities: internetClient
   store: true

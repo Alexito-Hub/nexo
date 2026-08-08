@@ -284,7 +284,9 @@ class UpdateService extends ChangeNotifier {
     final isWindows = defaultTargetPlatform == TargetPlatform.windows;
     _GhAsset? chosen;
     for (final a in assets.whereType<Map<String, dynamic>>()) {
-      final name = a['nombre'] as String? ?? '';
+      // La API de GitHub nombra este campo "name" (no "nombre"): con la clave
+      // equivocada ningún asset coincidía y el updater nunca veía versiones.
+      final name = a['name'] as String? ?? '';
       final matches = isWindows
           ? UpdateConfig.isWindowsAsset(name)
           : UpdateConfig.isApkAsset(name);
