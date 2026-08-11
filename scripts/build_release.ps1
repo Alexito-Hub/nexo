@@ -178,7 +178,7 @@ if (-not $SkipBuild) {
           $zip = Join-Path $dist "nexo-$tag-windows-x64.zip"
           Compress-Archive -Path "$winDir/*" -DestinationPath $zip -Force
           $sizeMB = [math]::Round((Get-Item $zip).Length / 1MB, 1)
-          Write-Host "  + nexo-`$tag-windows-x64.zip (`$sizeMB MB)" -ForegroundColor Green
+          Write-Host "  + nexo-$tag-windows-x64.zip ($sizeMB MB)" -ForegroundColor Green
 
           # El ZIP de arriba NO usa nada externo: se extrae y nexo.exe muestra
           # tu asistente interno (SetupWizard en lib/features/settings/).
@@ -208,7 +208,7 @@ if (-not $SkipBuild) {
                   Write-Host "  (No se generó el instalador .exe)" -ForegroundColor DarkYellow
                 }
               } catch {
-                Write-Host "  (Fallo al compilar el instalador .exe: $_)" -ForegroundColor DarkYellow
+                  Write-Host "  (Fallo al compilar el instalador .exe: $_)" -ForegroundColor DarkYellow
               }
             } else {
               Write-Host "  (installer/build_installer.ps1 no encontrado - omitido el .exe)" -ForegroundColor DarkYellow
@@ -282,11 +282,15 @@ if ($Publish) {
     # Commit de los cambios de sync (config.dart) si los hay
     Push-Location $root
     try {
+      $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
       $syncChanges = git diff --name-only 2>$null
+      $ErrorActionPreference = $prevEAP
       if ($syncChanges) {
         Write-Host "  Commiteando cambios de sync..." -ForegroundColor DarkGray
-        git add -A
-        git commit -m "chore: release $tag — sync version"
+        $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
+        git add -A 2>$null
+        git commit -m "chore: release $tag — sync version" 2>$null
+        $ErrorActionPreference = $prevEAP
       }
 
       # Crear tag
@@ -295,8 +299,10 @@ if ($Publish) {
 
       # Push commits + tag
       Write-Host "  Pushing..." -ForegroundColor DarkGray
-      git push
-      git push origin $tag
+      $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
+      git push 2>$null
+      git push origin $tag 2>$null
+      $ErrorActionPreference = $prevEAP
     } finally {
       Pop-Location
     }
