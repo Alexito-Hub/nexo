@@ -38,7 +38,7 @@ void main() {
     });
   });
 
-  testWidgets('los términos cubren el servidor propio y los datos ajenos', (
+  testWidgets('los términos cubren Microsoft, el dispositivo y los cambios', (
     tester,
   ) async {
     await tester.pumpWidget(_app(const TermsScreen()));
@@ -46,9 +46,8 @@ void main() {
 
     // La lista es larga: hay que bajar hasta cada bloque para comprobarlo.
     for (final title in [
-      'El apartado Estudiantes',
-      'Datos de otras personas',
-      'Datos de demostración',
+      'Cuenta de Microsoft',
+      'Lo que queda en tu dispositivo',
       'Cambios en estos términos',
       'Versión ${LegalTerms.version}',
     ]) {
@@ -58,6 +57,24 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.textContaining(title), findsOneWidget);
+    }
+  });
+
+  testWidgets('no prometen nada sobre servidores propios ni datos ajenos', (
+    tester,
+  ) async {
+    // La app volvió a no hablar con ningún servidor de Nexo: los términos no
+    // deben describir un apartado que ya no existe.
+    await tester.pumpWidget(_app(const TermsScreen()));
+    await tester.pumpAndSettle();
+
+    for (final gone in [
+      'El apartado Estudiantes',
+      'Datos de otras personas',
+      'Datos de demostración',
+      'servidor de Nexo',
+    ]) {
+      expect(find.textContaining(gone), findsNothing, reason: gone);
     }
   });
 

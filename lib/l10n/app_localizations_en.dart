@@ -667,21 +667,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Your credentials and academic data are stored only on your device, and requests go straight to UPLA services, just like the official portal. The only exception is the Students section, which does go through a Nexo server: we explain it right below.';
+      'Your credentials and academic data are stored only on your device. Nexo does not send your information to its own servers or to third parties: requests go straight to UPLA services, just like the official portal.';
 
   @override
   String get termsItemSecurityTitle => 'Security';
 
   @override
   String get termsItemSecurityBody =>
-      'Local storage is not encrypted at the system level, so use Nexo only on devices you trust. The session with the Nexo server lives in memory and is lost when you close the app. You can sign out to wipe credentials and cache at any time.';
+      'Local storage is not encrypted at the system level, so use Nexo only on devices you trust. You can sign out to wipe credentials and cache at any time.';
 
   @override
   String get termsItemResponsibleTitle => 'Responsible use';
 
   @override
   String get termsItemResponsibleBody =>
-      'Use your own credentials and access only the information that belongs to you or that you have been authorized to see. This is an educational, personal-use project: use it in line with your university\'s rules.';
+      'Access only your own information, with your own credentials. This is an educational, personal-use project: use it in line with your university\'s rules.';
 
   @override
   String get termsItemDisclaimerTitle => 'No guarantees';
@@ -1687,252 +1687,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsItemRightsBody =>
-      'You can ask what information about you is on the Nexo server, correct or delete it, and request the log of who looked at your record. You can also give up your directory access whenever you want. Write to us from the support section to exercise these rights or ask anything about how your data is handled.';
-
-  @override
-  String get tabDirectory => 'Students';
-
-  @override
-  String get directoryTitle => 'Students';
-
-  @override
-  String get directorySubtitle => 'Institutional directory';
-
-  @override
-  String directoryCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count students',
-      one: '1 student',
-      zero: 'No students',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get directorySearchHint => 'Search by name or code';
-
-  @override
-  String get directoryFilterSchool => 'Program';
-
-  @override
-  String get directoryAllSchools => 'All programs';
-
-  @override
-  String directoryCycle(String n) {
-    return 'Term $n';
-  }
-
-  @override
-  String directoryCredits(String aprobados, String total) {
-    return '$aprobados/$total credits';
-  }
-
-  @override
-  String get directoryNoResults => 'No results';
-
-  @override
-  String get directoryNoResultsHint => 'Try another name, code or filter.';
-
-  @override
-  String directoryEndOfList(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count students in total',
-      one: '1 student in total',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get directoryManageAccess => 'Manage access';
-
-  @override
-  String get directoryDeniedTitle => 'No directory access';
-
-  @override
-  String get directoryDeniedHint =>
-      'Your account is not authorized. Ask a system administrator.';
-
-  @override
-  String get directoryUnavailableTitle => 'Could not connect';
-
-  @override
-  String get directoryUnavailableHint => 'Check your connection and try again.';
-
-  @override
-  String get directoryRecordTitle => 'Student record';
-
-  @override
-  String get directoryTabSummary => 'Overview';
-
-  @override
-  String get directoryTabGrades => 'Grades';
-
-  @override
-  String get directoryTabSchedule => 'Schedule';
-
-  @override
-  String get directoryTabPayments => 'Payments';
-
-  @override
-  String get directoryAverageShort => 'Average';
-
-  @override
-  String get directoryEmptyModule => 'Nothing to show.';
-
-  @override
-  String get directoryRecordMissing => 'Record not found';
-
-  @override
-  String get directoryRecordMissingHint =>
-      'That code is no longer in the directory.';
-
-  @override
-  String get directoryStatAverage => 'Average';
-
-  @override
-  String get directoryStatCredits => 'Credits passed';
-
-  @override
-  String get directoryPersonalData => 'Student details';
-
-  @override
-  String get directoryFieldCode => 'Code';
-
-  @override
-  String get directoryFieldEmail => 'Email';
-
-  @override
-  String get directoryFieldPhone => 'Phone';
-
-  @override
-  String get directoryFieldFaculty => 'Faculty';
-
-  @override
-  String get directoryFieldSchool => 'Program';
-
-  @override
-  String get directoryFieldPlan => 'Curriculum';
-
-  @override
-  String get directoryFieldEntry => 'Enrolled';
-
-  @override
-  String get directoryFieldStatus => 'Standing';
-
-  @override
-  String get directoryProgressByTerm => 'Average per term';
-
-  @override
-  String directoryCourseCredits(String value) {
-    return '$value credits';
-  }
-
-  @override
-  String directoryAttendance(String value) {
-    return 'Attendance $value%';
-  }
-
-  @override
-  String get directoryNoUnits => 'No breakdown by unit.';
-
-  @override
-  String get directoryPaymentsOverdue => 'Overdue';
-
-  @override
-  String get directoryPaymentsPending => 'Pending';
-
-  @override
-  String get directoryAccessExplainer =>
-      'Directory access is granted per code. System administrators are configured on the server and cannot be changed from here.';
-
-  @override
-  String get directoryAdmins => 'System administrators';
-
-  @override
-  String get directoryAdminsHint => 'They always have access and can grant it.';
-
-  @override
-  String directoryGrantsActive(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'With access · $count',
-      one: 'With access · 1',
-      zero: 'With access',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get directoryGrantsRevoked => 'Access revoked';
-
-  @override
-  String get directoryNoGrants => 'You have not authorized anyone yet.';
-
-  @override
-  String get directoryGrantAdd => 'Grant access';
-
-  @override
-  String get directoryGrantCodeLabel => 'Code or ID';
-
-  @override
-  String get directoryGrantCodeHelp => 'As it appears on the intranet.';
-
-  @override
-  String get directoryGrantConfirm => 'Grant';
-
-  @override
-  String get directoryGrantFailed => 'Could not change the access.';
-
-  @override
-  String directoryGrantedBy(String code) {
-    return 'Granted by $code';
-  }
-
-  @override
-  String get directoryGrant => 'Grant';
-
-  @override
-  String get directoryRevoke => 'Revoke';
-
-  @override
-  String get directoryAdminOnlyTitle => 'Administrators only';
-
-  @override
-  String get directoryAdminOnlyHint =>
-      'Granting access is reserved for system administrators.';
+      'Your data lives on your device, so you are in control: you can review it, update it from the intranet, or delete it by signing out. Write to us from the support section with any question about how your data is handled.';
 
   @override
   String get termsHeaderUpdatedPre => 'Something changed';
 
   @override
   String get termsUpdatedNotice =>
-      'We updated these terms because Nexo now includes the Students section, which uses its own server and may show other people\'s data. Please read them again before continuing.';
-
-  @override
-  String get termsItemDirectoryTitle => 'The Students section';
-
-  @override
-  String get termsItemDirectoryBody =>
-      'It is a directory only authorized accounts can enter, and it shows up in the app only if yours is one of them. To check that, your username and password travel once to the Nexo server, which verifies them against SIGMA and does not store them; from then on a temporary session is used. Every time you open a student record, your code, the date and whose record you opened are logged.';
-
-  @override
-  String get termsItemThirdPartyTitle => 'Other people\'s data';
-
-  @override
-  String get termsItemThirdPartyBody =>
-      'If you have directory access you will be seeing other people\'s information. Use it only for what you were authorized to: do not download, copy, share or publish it. Peru\'s Personal Data Protection Act (Law 29733) applies to you too, and access can be revoked at any time.';
-
-  @override
-  String get termsItemDemoDataTitle => 'Demo data';
-
-  @override
-  String get termsItemDemoDataBody =>
-      'Until there is institutional authorization to query the real directory, the Students section shows generated test data: people who do not exist. When it is replaced with real data we will update these terms and ask you to accept them again.';
+      'We updated these terms to explain better what stays on your device, what happens if you connect your Microsoft account, and how we will tell you about future changes. Please read them again before continuing.';
 
   @override
   String get termsItemMicrosoftTitle => 'Microsoft account (optional)';
@@ -1959,93 +1721,4 @@ class AppLocalizationsEn extends AppLocalizations {
   String termsVersionLine(String version, String date) {
     return 'Version $version · Updated on $date';
   }
-
-  @override
-  String get directoryClearFilters => 'Clear filters';
-
-  @override
-  String get directoryFieldCycle => 'Term';
-
-  @override
-  String get directoryCumulativeAverage => 'Cumulative average';
-
-  @override
-  String get directoryApprovedCourses => 'Courses passed';
-
-  @override
-  String directoryCoursesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count courses',
-      one: '1 course',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String directoryOverdueCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count overdue',
-      one: '1 overdue',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get guardianEntry => 'I\'m a parent or guardian';
-
-  @override
-  String get guardianTitle => 'Guardian access';
-
-  @override
-  String get guardianHeadline => 'Check your child\'s record';
-
-  @override
-  String get guardianIntro =>
-      'Sign in with your ID number and the PIN you were given. No university account needed.';
-
-  @override
-  String get guardianDniLabel => 'ID number';
-
-  @override
-  String get guardianDniInvalid => 'Enter the 8 digits of your ID';
-
-  @override
-  String get guardianPinLabel => 'PIN';
-
-  @override
-  String get guardianPinHelp => 'The 6 digits the university gave you';
-
-  @override
-  String get guardianPinInvalid => 'The PIN has 6 digits';
-
-  @override
-  String get guardianEnter => 'Enter';
-
-  @override
-  String get guardianBadCredentials =>
-      'Wrong ID or PIN. Check them and try again.';
-
-  @override
-  String get guardianLocked =>
-      'Too many failed attempts. Wait a few minutes before trying again.';
-
-  @override
-  String get guardianUnavailable =>
-      'Could not connect. Check your connection and try again.';
-
-  @override
-  String get guardianAuditNotice => 'Every lookup is logged.';
-
-  @override
-  String get guardianPickTitle => 'Who do you want to see?';
-
-  @override
-  String get guardianNoStudents => 'No student is linked to your ID yet.';
-
-  @override
-  String get guardianSignOut => 'Sign out';
 }

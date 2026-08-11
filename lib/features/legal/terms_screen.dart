@@ -30,24 +30,6 @@ List<_Item> _items(AppLocalizations l) => <_Item>[
     NexoTheme.accent,
   ),
   _Item(
-    Icons.groups_outlined,
-    l.termsItemDirectoryTitle,
-    l.termsItemDirectoryBody,
-    NexoTheme.info,
-  ),
-  _Item(
-    Icons.policy_outlined,
-    l.termsItemThirdPartyTitle,
-    l.termsItemThirdPartyBody,
-    NexoTheme.warning,
-  ),
-  _Item(
-    Icons.science_outlined,
-    l.termsItemDemoDataTitle,
-    l.termsItemDemoDataBody,
-    NexoTheme.warning,
-  ),
-  _Item(
     Icons.cloud_outlined,
     l.termsItemMicrosoftTitle,
     l.termsItemMicrosoftBody,

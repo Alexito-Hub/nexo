@@ -35,15 +35,6 @@ class LegalTerms {
   static final DateTime updatedAt = DateTime(2026, 8, 10);
 }
 
-class BackendConfig {
-  static const String baseUrl = String.fromEnvironment(
-    'NEXO_BACKEND_URL',
-    defaultValue: 'https://nexo.naziventas.shop',
-  );
-  static String get apiBaseUrl => '$baseUrl/api/v1';
-  static const Duration timeout = Duration(seconds: 25);
-}
-
 class MsConfig {
   static const String clientId = 'TODO_AZURE_CLIENT_ID';
   static const String tenant = 'organizations';

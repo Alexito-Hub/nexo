@@ -23,7 +23,6 @@ import 'package:nexo/core/error_handler.dart';
 import 'package:nexo/core/storage.dart';
 import 'package:nexo/data/api_client.dart';
 import 'package:nexo/data/app_store.dart';
-import 'package:nexo/data/directory_service.dart';
 import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/connectivity_service.dart';
 import 'package:nexo/data/home_widget_service.dart';
@@ -145,17 +144,13 @@ Future<void> main(List<String> args) async {
     teams: teams,
     teacher: teacher,
   );
-  final directory = DirectoryService(session: session);
   final theme = ThemeController()..load();
   final widgets = HomeWidgetService();
   final updater = UpdateService(httpClient: secureHttp);
   store.onGradeChange = (course, grade) =>
       NotificationService.instance.showGradeChanged(course, grade);
   session.addListener(() {
-    if (!session.isAuthenticated) {
-      store.clear();
-      directory.reset();
-    }
+    if (!session.isAuthenticated) store.clear();
   });
   store.addListener(() {
     if (!store.profile.loading && !store.schedule.loading) {
@@ -183,7 +178,6 @@ Future<void> main(List<String> args) async {
       theme: theme,
       msAuth: msAuth,
       connectivity: connectivity,
-      directory: directory,
       isSetup: isSetup,
       isUninstall: isUninstall,
     ),
@@ -283,7 +277,6 @@ class NexoApp extends StatelessWidget {
     required this.theme,
     required this.msAuth,
     required this.connectivity,
-    required this.directory,
     required this.isSetup,
     required this.isUninstall,
   });
@@ -292,7 +285,6 @@ class NexoApp extends StatelessWidget {
   final ThemeController theme;
   final MsAuthService msAuth;
   final ConnectivityService connectivity;
-  final DirectoryService directory;
   final bool isSetup;
   final bool isUninstall;
   @override
@@ -328,7 +320,6 @@ class NexoApp extends StatelessWidget {
             store: store,
             theme: theme,
             msAuth: msAuth,
-            directory: directory,
             connectivity: connectivity,
             isSetup: isSetup,
             isUninstall: isUninstall,
@@ -346,7 +337,6 @@ class _Gate extends StatefulWidget {
     required this.theme,
     required this.msAuth,
     required this.connectivity,
-    required this.directory,
     required this.isSetup,
     required this.isUninstall,
   });
@@ -355,7 +345,6 @@ class _Gate extends StatefulWidget {
   final ThemeController theme;
   final MsAuthService msAuth;
   final ConnectivityService connectivity;
-  final DirectoryService directory;
   final bool isSetup;
   final bool isUninstall;
   @override
@@ -488,7 +477,6 @@ class _GateState extends State<_Gate> {
                 theme: widget.theme,
                 msAuth: widget.msAuth,
                 connectivity: widget.connectivity,
-                directory: widget.directory,
               ),
               SessionStatus.unauthenticated => LoginScreen(
                 session: widget.session,
