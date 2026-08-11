@@ -309,11 +309,11 @@ class TermGrades {
         .where((g) => g != null && g > 0)
         .toList();
     if (valid.isEmpty) return parseGrade(practicesAverage);
-    
+
     final sum = valid.fold<double>(0, (a, b) => a + b!);
     return sum / valid.length;
   }
-  
+
   String get displayPracticesAverage {
     final p = predictedPracticesAverage;
     if (p != null) return formatGrade(p.toStringAsFixed(2));
@@ -477,7 +477,7 @@ class UnitGrades {
     required this.rawAverage,
   });
   double? get weight => parseGrade(rawWeight);
-  
+
   double? get predictedAverage {
     final validGrades = evidences
         .map((e) => e.grade)
@@ -489,7 +489,7 @@ class UnitGrades {
   }
 
   double? get average => predictedAverage ?? parseGrade(rawAverage);
-  
+
   String get promedioText {
     final p = predictedAverage;
     if (p != null) return formatGrade(p.toStringAsFixed(2));
@@ -535,6 +535,7 @@ class CourseGradeDetail {
     if (allWeighted && weights > 0) return weighted / weights;
     return plain.reduce((a, b) => a + b) / plain.length;
   }
+
   String get sustitutorioText => formatGrade(rawSubstitute);
   bool get hasSubstitute => parseGrade(rawSubstitute) != null;
   factory CourseGradeDetail.fromRows(List<dynamic> rows) {
@@ -593,87 +594,6 @@ class CourseGradeDetail {
       rawFinalAverage: promFinal,
       state: state,
     );
-  }
-}
-
-class TeamsClass {
-  final String id;
-  final String displayName;
-  final String description;
-  final String classCode;
-  const TeamsClass({
-    required this.id,
-    required this.displayName,
-    required this.description,
-    required this.classCode,
-  });
-  factory TeamsClass.fromJson(Map<String, dynamic> j) => TeamsClass(
-    id: _toStr(j['id']),
-    displayName: _toStr(j['displayName']),
-    description: _toStr(j['descripcion']),
-    classCode: _toStr(j['classCode']),
-  );
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'displayName': displayName,
-    'descripcion': description,
-    'classCode': classCode,
-  };
-}
-
-class TeamsAssignment {
-  final String id;
-  final String displayName;
-  final String classId;
-  final String status;
-  final DateTime? dueDateTime;
-  final String? instructions;
-  final String? webUrl;
-  const TeamsAssignment({
-    required this.id,
-    required this.displayName,
-    required this.classId,
-    required this.status,
-    required this.dueDateTime,
-    this.instructions,
-    this.webUrl,
-  });
-  factory TeamsAssignment.fromJson(Map<String, dynamic> j) {
-    final dueRaw = j['dueDateTime'];
-    DateTime? due;
-    if (dueRaw is String && dueRaw.isNotEmpty) {
-      due = DateTime.tryParse(dueRaw)?.toLocal();
-    } else if (dueRaw is Map) {
-      final dt = dueRaw['dateTime'];
-      if (dt is String) due = DateTime.tryParse(dt)?.toLocal();
-    }
-    final instr = j['instructions'];
-    final instrText = instr is Map ? instr['content'] as String? : null;
-    return TeamsAssignment(
-      id: _toStr(j['id']),
-      displayName: _toStr(j['displayName']),
-      classId: _toStr(j['classId']),
-      status: _toStr(j['status']),
-      dueDateTime: due,
-      instructions: (instrText != null && instrText.isNotEmpty)
-          ? instrText
-          : null,
-      webUrl: j['webUrl'] as String?,
-    );
-  }
-  int? daysUntilDue([DateTime? now]) {
-    final due = dueDateTime;
-    if (due == null) return null;
-    final t = now ?? DateTime.now();
-    final hoy = DateTime(t.year, t.month, t.day);
-    final venc = DateTime(due.year, due.month, due.day);
-    return venc.difference(hoy).inDays;
-  }
-
-  bool isOverdue([DateTime? now]) {
-    final due = dueDateTime;
-    if (due == null) return false;
-    return due.isBefore(now ?? DateTime.now());
   }
 }
 

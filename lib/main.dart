@@ -33,10 +33,7 @@ import 'package:nexo/core/shortcuts.dart';
 import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_client.dart';
 import 'package:nexo/data/intranet_repository.dart';
-import 'package:nexo/data/graph_client.dart';
-import 'package:nexo/data/ms_auth_service.dart';
 import 'package:nexo/data/secure_http.dart';
-import 'package:nexo/data/teams_repository.dart';
 import 'package:nexo/data/update_service.dart';
 import 'package:nexo/features/auth/login_screen.dart';
 import 'package:nexo/features/legal/terms_screen.dart';
@@ -132,16 +129,12 @@ Future<void> main(List<String> args) async {
     session: session,
   );
   final intranet = IntranetRepository(IntranetClient(transport: secureHttp));
-  final graph = GraphClient(transport: secureHttp);
-  final msAuth = MsAuthService(graph);
-  final teams = TeamsRepository(graph);
   final teacher = TeacherRepository(api);
   final store = AppStore(
     repo,
     cache: cache,
     errorHandler: errorHandler,
     intranet: intranet,
-    teams: teams,
     teacher: teacher,
   );
   final theme = ThemeController()..load();
@@ -176,7 +169,6 @@ Future<void> main(List<String> args) async {
       session: session,
       store: store,
       theme: theme,
-      msAuth: msAuth,
       connectivity: connectivity,
       isSetup: isSetup,
       isUninstall: isUninstall,
@@ -188,7 +180,6 @@ Future<void> main(List<String> args) async {
       cache: cache,
       connectivity: connectivity,
       session: session,
-      msAuth: msAuth,
       store: store,
       widgets: widgets,
       updater: updater,
@@ -206,7 +197,6 @@ Future<void> _bootstrap({
   required CacheManager cache,
   required ConnectivityService connectivity,
   required SessionService session,
-  required MsAuthService msAuth,
   required AppStore store,
   required HomeWidgetService widgets,
   required UpdateService updater,
@@ -227,7 +217,6 @@ Future<void> _bootstrap({
   // Lo que sí puede tardar o fallar, en paralelo y sin bloquear la pantalla.
   await Future.wait([
     _startupStep('connectivity', connectivity.start),
-    _startupStep('msauth', msAuth.bootstrap),
     _startupStep('widgets', widgets.init),
     _startupStep('notifications', NotificationService.instance.init),
   ]);
@@ -275,7 +264,6 @@ class NexoApp extends StatelessWidget {
     required this.session,
     required this.store,
     required this.theme,
-    required this.msAuth,
     required this.connectivity,
     required this.isSetup,
     required this.isUninstall,
@@ -283,7 +271,6 @@ class NexoApp extends StatelessWidget {
   final SessionService session;
   final AppStore store;
   final ThemeController theme;
-  final MsAuthService msAuth;
   final ConnectivityService connectivity;
   final bool isSetup;
   final bool isUninstall;
@@ -319,7 +306,6 @@ class NexoApp extends StatelessWidget {
             session: session,
             store: store,
             theme: theme,
-            msAuth: msAuth,
             connectivity: connectivity,
             isSetup: isSetup,
             isUninstall: isUninstall,
@@ -335,7 +321,6 @@ class _Gate extends StatefulWidget {
     required this.session,
     required this.store,
     required this.theme,
-    required this.msAuth,
     required this.connectivity,
     required this.isSetup,
     required this.isUninstall,
@@ -343,7 +328,6 @@ class _Gate extends StatefulWidget {
   final SessionService session;
   final AppStore store;
   final ThemeController theme;
-  final MsAuthService msAuth;
   final ConnectivityService connectivity;
   final bool isSetup;
   final bool isUninstall;
@@ -475,7 +459,6 @@ class _GateState extends State<_Gate> {
                 store: widget.store,
                 session: widget.session,
                 theme: widget.theme,
-                msAuth: widget.msAuth,
                 connectivity: widget.connectivity,
               ),
               SessionStatus.unauthenticated => LoginScreen(

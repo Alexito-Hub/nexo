@@ -30,7 +30,6 @@ class AppStorage {
   static const _kOnboard = 'nexo.seenOnboarding';
   static const _kNotifPrefs = 'nexo.notifPrefs';
   static const _kGradeSnap = 'nexo.gradeSnapshot';
-  static const _kMsSession = 'nexo.ms.session';
   static const _kLocale = 'nexo.locale';
   static const _kUse24h = 'nexo.use24h';
   static const _kRunPortable = 'nexo.runPortable';
@@ -54,15 +53,6 @@ class AppStorage {
   String? get dashboardConfigJson => _prefs.getString(_kDashboardConfig);
   Future<void> setDashboardConfigJson(String value) =>
       _prefs.setString(_kDashboardConfig, value);
-
-  String? get msSessionJson => _prefs.getString(_kMsSession);
-  Future<void> setMsSessionJson(String? value) async {
-    if (value == null) {
-      await _prefs.remove(_kMsSession);
-    } else {
-      await _prefs.setString(_kMsSession, value);
-    }
-  }
 
   /// Aceptados **estos** términos, no unos cualesquiera: si sube
   /// `LegalTerms.version` la aceptación anterior deja de valer y se vuelven a

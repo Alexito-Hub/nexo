@@ -406,12 +406,6 @@ abstract class AppLocalizations {
   /// **'Duración total: {minutes} minutos'**
   String detailDuration(int minutes);
 
-  /// No description provided for @tabTeams.
-  ///
-  /// In es, this message translates to:
-  /// **'Teams'**
-  String get tabTeams;
-
   /// No description provided for @settingsTitle.
   ///
   /// In es, this message translates to:
@@ -687,114 +681,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{count, plural, =1{{count} curso} other{{count} cursos}}'**
   String gradesCoursesCount(int count);
-
-  /// No description provided for @teamsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Tus asignaturas y tareas de Microsoft 365'**
-  String get teamsSubtitle;
-
-  /// No description provided for @teamsDisconnect.
-  ///
-  /// In es, this message translates to:
-  /// **'Desconectar'**
-  String get teamsDisconnect;
-
-  /// No description provided for @teamsMySubjects.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis asignaturas'**
-  String get teamsMySubjects;
-
-  /// No description provided for @teamsAssignments.
-  ///
-  /// In es, this message translates to:
-  /// **'Tareas'**
-  String get teamsAssignments;
-
-  /// No description provided for @teamsLoadError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar'**
-  String get teamsLoadError;
-
-  /// No description provided for @teamsConnectTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Conecta tu cuenta de Microsoft'**
-  String get teamsConnectTitle;
-
-  /// No description provided for @teamsConnectSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Para ver tus clases y tareas de Teams'**
-  String get teamsConnectSubtitle;
-
-  /// No description provided for @teamsConnectBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Inicia sesión con tu cuenta institucional de Microsoft 365. Te daremos un código para confirmarlo en el navegador.'**
-  String get teamsConnectBody;
-
-  /// No description provided for @teamsConnectButton.
-  ///
-  /// In es, this message translates to:
-  /// **'Conectar con Microsoft'**
-  String get teamsConnectButton;
-
-  /// No description provided for @teamsDeviceCodeGenerating.
-  ///
-  /// In es, this message translates to:
-  /// **'Generando código…'**
-  String get teamsDeviceCodeGenerating;
-
-  /// No description provided for @teamsDeviceCodeConfirmTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirma en el navegador'**
-  String get teamsDeviceCodeConfirmTitle;
-
-  /// No description provided for @teamsDeviceCodeConfirmSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Esperando que autorices la app…'**
-  String get teamsDeviceCodeConfirmSubtitle;
-
-  /// No description provided for @teamsDeviceCodeStep1Prefix.
-  ///
-  /// In es, this message translates to:
-  /// **'Abre '**
-  String get teamsDeviceCodeStep1Prefix;
-
-  /// No description provided for @teamsCopyLink.
-  ///
-  /// In es, this message translates to:
-  /// **'Copiar enlace'**
-  String get teamsCopyLink;
-
-  /// No description provided for @teamsLinkCopied.
-  ///
-  /// In es, this message translates to:
-  /// **'Enlace copiado'**
-  String get teamsLinkCopied;
-
-  /// No description provided for @teamsDeviceCodeStep2Label.
-  ///
-  /// In es, this message translates to:
-  /// **'Introduce este código:'**
-  String get teamsDeviceCodeStep2Label;
-
-  /// No description provided for @teamsDeviceCodeAutoRefresh.
-  ///
-  /// In es, this message translates to:
-  /// **'Esto se actualizará solo cuando termines.'**
-  String get teamsDeviceCodeAutoRefresh;
-
-  /// No description provided for @teamsCodeCopied.
-  ///
-  /// In es, this message translates to:
-  /// **'Código copiado'**
-  String get teamsCodeCopied;
 
   /// No description provided for @actionShow.
   ///
@@ -2254,36 +2140,6 @@ abstract class AppLocalizations {
   /// **'Información académica'**
   String get profileAcademicInfo;
 
-  /// No description provided for @teamsCopyCode.
-  ///
-  /// In es, this message translates to:
-  /// **'Copiar código'**
-  String get teamsCopyCode;
-
-  /// No description provided for @teamsUnderConstruction.
-  ///
-  /// In es, this message translates to:
-  /// **'En construcción'**
-  String get teamsUnderConstruction;
-
-  /// No description provided for @teamsSoonAvailable.
-  ///
-  /// In es, this message translates to:
-  /// **'Pronto disponible'**
-  String get teamsSoonAvailable;
-
-  /// No description provided for @teamsWorkingOnSection.
-  ///
-  /// In es, this message translates to:
-  /// **'Estamos trabajando en esta sección'**
-  String get teamsWorkingOnSection;
-
-  /// No description provided for @teamsComeBackLater.
-  ///
-  /// In es, this message translates to:
-  /// **'Vuelve más adelante.'**
-  String get teamsComeBackLater;
-
   /// No description provided for @pdfExportLoadConstanciaError.
   ///
   /// In es, this message translates to:
@@ -2890,24 +2746,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{{count} vencida} other{{count} vencidas}}'**
   String homePendingPaymentsOverdueCount(int count);
 
-  /// No description provided for @widgetTeamsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis asignaturas'**
-  String get widgetTeamsTitle;
-
-  /// No description provided for @widgetTeamsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupos de Teams'**
-  String get widgetTeamsSubtitle;
-
-  /// No description provided for @widgetTeamsEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay asignaturas en Teams'**
-  String get widgetTeamsEmpty;
-
   /// No description provided for @widgetAssignmentsTitle.
   ///
   /// In es, this message translates to:
@@ -2971,20 +2809,8 @@ abstract class AppLocalizations {
   /// No description provided for @termsUpdatedNotice.
   ///
   /// In es, this message translates to:
-  /// **'Actualizamos estos términos para explicar mejor qué se queda en tu dispositivo, qué ocurre si conectas tu cuenta de Microsoft y cómo te avisaremos de futuros cambios. Léelos de nuevo antes de continuar.'**
+  /// **'Actualizamos estos términos para explicar mejor qué se queda en tu dispositivo y cómo te avisaremos de futuros cambios. Léelos de nuevo antes de continuar.'**
   String get termsUpdatedNotice;
-
-  /// No description provided for @termsItemMicrosoftTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Cuenta de Microsoft (opcional)'**
-  String get termsItemMicrosoftTitle;
-
-  /// No description provided for @termsItemMicrosoftBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Si conectas tu cuenta institucional de Microsoft, Nexo lee tus clases y tareas de Teams para mostrarlas en la app. La conexión es opcional, la autorizas tú desde el navegador y puedes desconectarla cuando quieras.'**
-  String get termsItemMicrosoftBody;
 
   /// No description provided for @termsItemDeviceTitle.
   ///

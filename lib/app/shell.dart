@@ -7,7 +7,6 @@ import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/design/theme_controller.dart';
 import 'package:nexo/core/shortcuts.dart';
 import 'package:nexo/data/app_store.dart';
-import 'package:nexo/data/ms_auth_service.dart';
 import 'package:nexo/data/session.dart';
 import 'package:nexo/features/festivity/festivity_overlay.dart';
 import 'package:nexo/features/teacher/teacher_courses_screen.dart';
@@ -62,13 +61,11 @@ class AppShell extends StatefulWidget {
     required this.store,
     required this.session,
     required this.theme,
-    required this.msAuth,
     required this.connectivity,
   });
   final AppStore store;
   final SessionService session;
   final ThemeController theme;
-  final MsAuthService msAuth;
   final ConnectivityService connectivity;
   @override
   State<AppShell> createState() => _AppShellState();

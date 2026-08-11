@@ -213,9 +213,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get tabTeams => 'Teams';
-
-  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -380,64 +377,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get teamsSubtitle => 'Your classes and assignments from Microsoft 365';
-
-  @override
-  String get teamsDisconnect => 'Disconnect';
-
-  @override
-  String get teamsMySubjects => 'My subjects';
-
-  @override
-  String get teamsAssignments => 'Assignments';
-
-  @override
-  String get teamsLoadError => 'Couldn\'t load';
-
-  @override
-  String get teamsConnectTitle => 'Connect your Microsoft account';
-
-  @override
-  String get teamsConnectSubtitle =>
-      'To see your Teams classes and assignments';
-
-  @override
-  String get teamsConnectBody =>
-      'Sign in with your institutional Microsoft 365 account. We\'ll give you a code to confirm in the browser.';
-
-  @override
-  String get teamsConnectButton => 'Connect with Microsoft';
-
-  @override
-  String get teamsDeviceCodeGenerating => 'Generating code…';
-
-  @override
-  String get teamsDeviceCodeConfirmTitle => 'Confirm in the browser';
-
-  @override
-  String get teamsDeviceCodeConfirmSubtitle =>
-      'Waiting for you to authorize the app…';
-
-  @override
-  String get teamsDeviceCodeStep1Prefix => 'Open ';
-
-  @override
-  String get teamsCopyLink => 'Copy link';
-
-  @override
-  String get teamsLinkCopied => 'Link copied';
-
-  @override
-  String get teamsDeviceCodeStep2Label => 'Enter this code:';
-
-  @override
-  String get teamsDeviceCodeAutoRefresh =>
-      'This will update automatically when you\'re done.';
-
-  @override
-  String get teamsCodeCopied => 'Code copied';
 
   @override
   String get actionShow => 'Show';
@@ -1262,21 +1201,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAcademicInfo => 'Academic info';
 
   @override
-  String get teamsCopyCode => 'Copy code';
-
-  @override
-  String get teamsUnderConstruction => 'Under construction';
-
-  @override
-  String get teamsSoonAvailable => 'Soon available';
-
-  @override
-  String get teamsWorkingOnSection => 'We are working on this section';
-
-  @override
-  String get teamsComeBackLater => 'Come back later.';
-
-  @override
   String get pdfExportLoadConstanciaError => 'Could not load certificate.';
 
   @override
@@ -1650,15 +1574,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get widgetTeamsTitle => 'My subjects';
-
-  @override
-  String get widgetTeamsSubtitle => 'Teams groups';
-
-  @override
-  String get widgetTeamsEmpty => 'No subjects in Teams';
-
-  @override
   String get widgetAssignmentsTitle => 'Assignments';
 
   @override
@@ -1694,14 +1609,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsUpdatedNotice =>
-      'We updated these terms to explain better what stays on your device, what happens if you connect your Microsoft account, and how we will tell you about future changes. Please read them again before continuing.';
-
-  @override
-  String get termsItemMicrosoftTitle => 'Microsoft account (optional)';
-
-  @override
-  String get termsItemMicrosoftBody =>
-      'If you connect your institutional Microsoft account, Nexo reads your Teams classes and assignments to show them in the app. The connection is optional, you authorize it yourself in the browser, and you can disconnect it whenever you want.';
+      'We updated these terms to explain better what stays on your device and how we will tell you about future changes. Please read them again before continuing.';
 
   @override
   String get termsItemDeviceTitle => 'What stays on your device';

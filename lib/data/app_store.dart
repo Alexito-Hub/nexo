@@ -10,7 +10,6 @@ import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_repository.dart';
 import 'package:nexo/data/sigma_repository.dart';
-import 'package:nexo/data/teams_repository.dart';
 import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/unified_models.dart';
@@ -46,12 +45,10 @@ class AppStore extends ChangeNotifier {
     required CacheManager cache,
     required ErrorHandler errorHandler,
     IntranetRepository? intranet,
-    TeamsRepository? teams,
     TeacherRepository? teacher,
   }) : _cache = cache,
        _errorHandler = errorHandler,
        _intranet = intranet,
-       _teams = teams,
        _teacher = teacher {
     // El layout del dashboard debe cargarse SIEMPRE (no solo al hidratar):
     // tras un login fresco `hydrateFromCache` no corre y el Home quedaba con
@@ -153,7 +150,6 @@ class AppStore extends ChangeNotifier {
   final CacheManager _cache;
   final ErrorHandler _errorHandler;
   final IntranetRepository? _intranet;
-  final TeamsRepository? _teams;
   final TeacherRepository? _teacher;
   void Function(String course, String grade)? onGradeChange;
   void _checkGrades(Iterable<(String, String)> items) {
@@ -189,8 +185,6 @@ class AppStore extends ChangeNotifier {
   AsyncValue<List<Payment>> intranetInstallments = const AsyncValue.idle();
   AsyncValue<List<Fee>> tasas = const AsyncValue.idle();
   AsyncValue<List<PaymentRecord>> historico = const AsyncValue.idle();
-  AsyncValue<List<TeamsClass>> teamsClasses = const AsyncValue.idle();
-  AsyncValue<List<TeamsAssignment>> teamsAssignments = const AsyncValue.idle();
   AsyncValue<EnrollmentCertificate> certificate = const AsyncValue.idle();
   AsyncValue<PaymentSchedule> paymentSchedule = const AsyncValue.idle();
   AsyncValue<List<Publication>> publications = const AsyncValue.idle();
@@ -261,7 +255,8 @@ class AppStore extends ChangeNotifier {
   double? realAverageOf(ReportCardCourse c) {
     if (c.inProgress) {
       final computed = _detalle[c.enrollmentSubjectId]?.value?.computedAverage;
-      if (computed != null && computed >= 0 && computed <= 20.5) return computed;
+      if (computed != null && computed >= 0 && computed <= 20.5)
+        return computed;
     }
     return c.vigesimalAverage;
   }
@@ -748,36 +743,6 @@ class AppStore extends ChangeNotifier {
     (v) => historico = v,
     operationName: 'loadHistorico',
   );
-  TeamsRepository _teamsReady() {
-    final teams = _teams;
-    if (teams == null) {
-      throw Exception('Teams integration is not available.');
-    }
-    return teams;
-  }
-
-  Future<void> loadTeams() async {
-    await Future.wait([loadTeamsClasses(), loadTeamsAssignments()]);
-  }
-
-  Future<List<TeamsClass>?> loadTeamsClasses() => _wrap(
-    () => _teamsReady().classes(),
-    () => teamsClasses,
-    (v) => teamsClasses = v,
-    operationName: 'loadTeamsClasses',
-  );
-  Future<List<TeamsAssignment>?> loadTeamsAssignments() => _wrap(
-    () => _teamsReady().assignments(),
-    () => teamsAssignments,
-    (v) => teamsAssignments = v,
-    operationName: 'loadTeamsAssignments',
-  );
-  void clearTeams() {
-    teamsClasses = const AsyncValue.idle();
-    teamsAssignments = const AsyncValue.idle();
-    _notify();
-  }
-
   Future<EnrollmentCertificate?> loadCertificate({int? year, int? periodo}) {
     final p = periodoActivo;
     final a = year ?? p?.year ?? 0;
@@ -1016,8 +981,6 @@ class AppStore extends ChangeNotifier {
     _boletaLegacy.clear();
     _detalle.clear();
     record = const AsyncValue.idle();
-    teamsClasses = const AsyncValue.idle();
-    teamsAssignments = const AsyncValue.idle();
     certificate = const AsyncValue.idle();
     schedule = const AsyncValue.idle();
     publications = const AsyncValue.idle();

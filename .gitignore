@@ -55,3 +55,8 @@ dist/
 
 # Respaldo local de los archivos de diseno del instalador (redundante con git)
 _backup_diseno_instalador_*/
+
+# Claves de firma de Android (secreto)
+android/key.properties
+*.jks
+*.keystore

@@ -38,7 +38,7 @@ void main() {
     });
   });
 
-  testWidgets('los términos cubren Microsoft, el dispositivo y los cambios', (
+  testWidgets('los términos cubren el dispositivo y los cambios', (
     tester,
   ) async {
     await tester.pumpWidget(_app(const TermsScreen()));
@@ -46,7 +46,6 @@ void main() {
 
     // La lista es larga: hay que bajar hasta cada bloque para comprobarlo.
     for (final title in [
-      'Cuenta de Microsoft',
       'Lo que queda en tu dispositivo',
       'Cambios en estos términos',
       'Versión ${LegalTerms.version}',
@@ -73,6 +72,8 @@ void main() {
       'Datos de otras personas',
       'Datos de demostración',
       'servidor de Nexo',
+      'Cuenta de Microsoft',
+      'Teams',
     ]) {
       expect(find.textContaining(gone), findsNothing, reason: gone);
     }

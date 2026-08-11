@@ -1,4 +1,4 @@
-﻿class UpdateConfig {
+class UpdateConfig {
   static const String repo = 'auralix-studio/nexo';
   static const String latestReleaseApi =
       'https://api.github.com/repos/$repo/releases/latest';
@@ -33,24 +33,4 @@ class AppConfig {
 class LegalTerms {
   static const int version = 3;
   static final DateTime updatedAt = DateTime(2026, 8, 10);
-}
-
-class MsConfig {
-  static const String clientId = 'TODO_AZURE_CLIENT_ID';
-  static const String tenant = 'organizations';
-  static String get _authority =>
-      'https://login.microsoftonline.com/$tenant/oauth2/v2.0';
-  static String get deviceCodeUrl => '$_authority/devicecode';
-  static String get tokenUrl => '$_authority/token';
-  static const String graphBaseUrl = 'https://graph.microsoft.com/v1.0';
-  static const List<String> scopes = [
-    'offline_access',
-    'openid',
-    'profile',
-    'User.Read',
-    'EduRoster.ReadBasic',
-    'EduAssignments.ReadBasic',
-  ];
-  static String get scopeParam => scopes.join(' ');
-  static bool get isConfigured => clientId != 'TODO_AZURE_CLIENT_ID';
 }
