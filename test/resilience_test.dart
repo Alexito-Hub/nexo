@@ -2,9 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nexo/core/error_handler.dart';
 import 'package:nexo/core/errors.dart';
 import 'package:nexo/data/api_client.dart';
+import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/connectivity_service.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/data/session.dart';
+import 'package:nexo/data/sigma_repository.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,7 +20,8 @@ class MockConnectivity implements Connectivity {
   Future<List<ConnectivityResult>> checkConnectivity() async => result;
 
   @override
-  Stream<List<ConnectivityResult>> get onConnectivityChanged => Stream.value(result);
+  Stream<List<ConnectivityResult>> get onConnectivityChanged =>
+      Stream.value(result);
 }
 
 class MockHttpClient extends http.BaseClient {
@@ -268,8 +271,12 @@ void main() {
         api.get<String>('X', decode: (_) => 'x'),
         throwsA(isA<AuthUnavailableException>()),
       );
-      expect(loggedOut, false,
-          reason: 'un 401 persistente con credenciales válidas no debe cerrar sesión');
+      expect(
+        loggedOut,
+        false,
+        reason:
+            'un 401 persistente con credenciales válidas no debe cerrar sesión',
+      );
     });
 
     test('credenciales rechazadas al reautenticar SÍ cierra sesión', () async {
@@ -288,6 +295,43 @@ void main() {
         throwsA(isA<SessionExpiredException>()),
       );
       expect(loggedOut, true);
+    });
+  });
+
+  group('Arranque (regresión ventana en blanco de la Store)', () {
+    SessionService build() {
+      final api = ApiClient(
+        transport: MockHttpClient((_) async => http.Response('{}', 200)),
+      );
+      return SessionService(apiClient: api, repo: SigmaRepository(api));
+    }
+
+    test('un arranque que no decide acaba en login, no en el splash', () {
+      final session = build();
+      expect(session.status, SessionStatus.unknown);
+
+      // Es lo que hace `main` si `bootstrap` falla o tarda demasiado.
+      session.resolveUnknownAsUnauthenticated();
+
+      expect(session.status, SessionStatus.unauthenticated);
+    });
+
+    test('limpiar un caché sin abrir no revienta', () async {
+      // Al arrancar, la sesión puede resolverse antes de que el caché exista y
+      // el store intenta limpiarlo. Eso pasaba y tumbaba el arranque.
+      final cache = CacheManager();
+      expect(cache.isReady, isFalse);
+      await expectLater(cache.clearAll(), completes);
+    });
+
+    test('no pisa una sesión ya resuelta', () async {
+      final session = build();
+      session.resolveUnknownAsUnauthenticated();
+      expect(session.status, SessionStatus.unauthenticated);
+
+      // Segunda llamada: sigue igual, no reabre nada.
+      session.resolveUnknownAsUnauthenticated();
+      expect(session.status, SessionStatus.unauthenticated);
     });
   });
 }

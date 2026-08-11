@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:ui';
+import 'package:http/http.dart' as http;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/l10n/quechua_fallback.dart';
@@ -22,6 +23,7 @@ import 'package:nexo/core/error_handler.dart';
 import 'package:nexo/core/storage.dart';
 import 'package:nexo/data/api_client.dart';
 import 'package:nexo/data/app_store.dart';
+import 'package:nexo/data/directory_service.dart';
 import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/connectivity_service.dart';
 import 'package:nexo/data/home_widget_service.dart';
@@ -43,15 +45,25 @@ import 'package:nexo/features/onboarding/onboarding_screen.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+  _startupStepSync('sqlite', () {
+    if (!kIsWeb &&
+        (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+  });
+
+  // Único paso del que no se puede prescindir: sin preferencias no hay sesión
+  // ni tema. Si ni eso funciona, mejor decirlo que dejar la ventana vacía.
+  if (!await _startupStep('storage', AppStorage.init)) {
+    runApp(const _StartupErrorApp());
+    return;
   }
-  await AppStorage.init();
+
   bool isSetup = false;
   bool isUninstall = false;
   if (!kIsWeb && Platform.isWindows) {
-    await windowManager.ensureInitialized();
+    await _startupStep('window', windowManager.ensureInitialized);
     // En la build de Store, la instalación la gestiona Windows: no hay
     // asistente propio ni desinstalador embebido.
     isUninstall = !StoreBuild.isStore && args.contains('--uninstall');
@@ -107,14 +119,15 @@ Future<void> main(List<String> args) async {
     runApp(_UninstallApp(palette: palette));
     return;
   }
-  final secureHttp = await createSecureClient();
+  // Si falla la carga del bundle de certificados nos quedamos con las raíces
+  // del sistema: es peor arrancar sin app que arrancar sin ese extra.
+  final secureHttp =
+      await _startupValue('http', createSecureClient) ?? http.Client();
   final api = ApiClient(transport: secureHttp);
   final repo = SigmaRepository(api);
   final session = SessionService(apiClient: api, repo: repo);
   final connectivity = ConnectivityService(httpClient: secureHttp);
   final cache = CacheManager();
-  await cache.init();
-  await connectivity.start();
   final errorHandler = ErrorHandler(
     connectivity: connectivity,
     session: session,
@@ -132,21 +145,17 @@ Future<void> main(List<String> args) async {
     teams: teams,
     teacher: teacher,
   );
+  final directory = DirectoryService(session: session);
   final theme = ThemeController()..load();
   final widgets = HomeWidgetService();
-  await widgets.init();
-  ShortcutService.instance.init();
-  await NotificationService.instance.init();
   final updater = UpdateService(httpClient: secureHttp);
-  // La Store se encarga de las actualizaciones: no arrancamos el updater propio.
-  if (!StoreBuild.isStore) {
-    NotificationService.instance.onInstallUpdateTap = updater.installDownloaded;
-    unawaited(updater.bootstrap());
-  }
   store.onGradeChange = (course, grade) =>
       NotificationService.instance.showGradeChanged(course, grade);
   session.addListener(() {
-    if (!session.isAuthenticated) store.clear();
+    if (!session.isAuthenticated) {
+      store.clear();
+      directory.reset();
+    }
   });
   store.addListener(() {
     if (!store.profile.loading && !store.schedule.loading) {
@@ -160,9 +169,13 @@ Future<void> main(List<String> args) async {
       }
     }
   });
-  await session.bootstrap();
-  await msAuth.bootstrap();
-  if (session.isAuthenticated) await store.hydrateFromCache();
+  // Pintar ANTES de tocar red o disco. La certificación de la Microsoft Store
+  // rechazó la 1.6.3.0 (10.1.2.10 Functionality) con «the product does not
+  // display any content at launch»: antes de este `runApp` se hacía una docena
+  // de `await` —entre ellos un ping a SIGMA y otro a la Intranet, 6 s cada
+  // uno— y en una máquina que no alcanza los servidores de la UPLA la ventana
+  // se quedaba vacía. Ahora la primera pantalla aparece de inmediato y todo lo
+  // demás ocurre por detrás, tolerando fallos.
   runApp(
     NexoApp(
       session: session,
@@ -170,10 +183,96 @@ Future<void> main(List<String> args) async {
       theme: theme,
       msAuth: msAuth,
       connectivity: connectivity,
+      directory: directory,
       isSetup: isSetup,
       isUninstall: isUninstall,
     ),
   );
+
+  unawaited(
+    _bootstrap(
+      cache: cache,
+      connectivity: connectivity,
+      session: session,
+      msAuth: msAuth,
+      store: store,
+      widgets: widgets,
+      updater: updater,
+    ),
+  );
+}
+
+/// Arranque en segundo plano.
+///
+/// Cada paso va aislado: que falle el caché, las notificaciones o la red no
+/// puede impedir que la app se use. Lo que decide la primera pantalla
+/// —`session.bootstrap`— va primero; el resto en paralelo, porque no dependen
+/// entre sí.
+Future<void> _bootstrap({
+  required CacheManager cache,
+  required ConnectivityService connectivity,
+  required SessionService session,
+  required MsAuthService msAuth,
+  required AppStore store,
+  required HomeWidgetService widgets,
+  required UpdateService updater,
+}) async {
+  // El caché va primero porque la sesión depende de él: al resolverse avisa a
+  // sus oyentes y, si resulta que no hay sesión, el store limpia el caché. Es
+  // disco local y no red, así que no es lo que dejaba la ventana en blanco.
+  final cacheReady = await _startupStep('cache', cache.init);
+
+  await _startupStep('session', session.bootstrap);
+  // Si no se pudo decidir, a login: nunca dejar el splash colgado.
+  session.resolveUnknownAsUnauthenticated();
+
+  if (cacheReady && session.isAuthenticated) {
+    await _startupStep('hydrate', store.hydrateFromCache);
+  }
+
+  // Lo que sí puede tardar o fallar, en paralelo y sin bloquear la pantalla.
+  await Future.wait([
+    _startupStep('connectivity', connectivity.start),
+    _startupStep('msauth', msAuth.bootstrap),
+    _startupStep('widgets', widgets.init),
+    _startupStep('notifications', NotificationService.instance.init),
+  ]);
+
+  _startupStepSync('shortcuts', ShortcutService.instance.init);
+
+  // La Store se encarga de las actualizaciones: no arrancamos el updater propio.
+  if (!StoreBuild.isStore) {
+    NotificationService.instance.onInstallUpdateTap = updater.installDownloaded;
+    unawaited(_startupStep('updater', updater.bootstrap));
+  }
+}
+
+/// Ejecuta un paso de arranque sin dejar que tumbe la app ni la bloquee.
+/// Devuelve `false` si falló, para que quien dependa del paso se lo salte.
+Future<bool> _startupStep(String name, Future<void> Function() step) async {
+  return await _startupValue(name, () async {
+        await step();
+        return true;
+      }) ??
+      false;
+}
+
+/// Igual, pero para pasos que producen algo que la app necesita.
+Future<T?> _startupValue<T>(String name, Future<T> Function() step) async {
+  try {
+    return await step().timeout(const Duration(seconds: 20));
+  } catch (e) {
+    debugPrint('Arranque: «$name» falló y se omite ($e)');
+    return null;
+  }
+}
+
+void _startupStepSync(String name, void Function() step) {
+  try {
+    step();
+  } catch (e) {
+    debugPrint('Arranque: «$name» falló y se omite ($e)');
+  }
 }
 
 class NexoApp extends StatelessWidget {
@@ -184,6 +283,7 @@ class NexoApp extends StatelessWidget {
     required this.theme,
     required this.msAuth,
     required this.connectivity,
+    required this.directory,
     required this.isSetup,
     required this.isUninstall,
   });
@@ -192,6 +292,7 @@ class NexoApp extends StatelessWidget {
   final ThemeController theme;
   final MsAuthService msAuth;
   final ConnectivityService connectivity;
+  final DirectoryService directory;
   final bool isSetup;
   final bool isUninstall;
   @override
@@ -227,6 +328,7 @@ class NexoApp extends StatelessWidget {
             store: store,
             theme: theme,
             msAuth: msAuth,
+            directory: directory,
             connectivity: connectivity,
             isSetup: isSetup,
             isUninstall: isUninstall,
@@ -244,6 +346,7 @@ class _Gate extends StatefulWidget {
     required this.theme,
     required this.msAuth,
     required this.connectivity,
+    required this.directory,
     required this.isSetup,
     required this.isUninstall,
   });
@@ -252,6 +355,7 @@ class _Gate extends StatefulWidget {
   final ThemeController theme;
   final MsAuthService msAuth;
   final ConnectivityService connectivity;
+  final DirectoryService directory;
   final bool isSetup;
   final bool isUninstall;
   @override
@@ -270,9 +374,10 @@ class _GateState extends State<_Gate> {
   void initState() {
     super.initState();
     final active = FestivityService.active(DateTime.now());
-    final isFiestasPatrias = AppStorage.instance.festivityDecor && 
-                             active?.festivity.id == 'fiestas_patrias';
-    
+    final isFiestasPatrias =
+        AppStorage.instance.festivityDecor &&
+        active?.festivity.id == 'fiestas_patrias';
+
     if (isFiestasPatrias) {
       Future.delayed(const Duration(milliseconds: 3500), () {
         if (mounted) setState(() => _minSplashDone = true);
@@ -306,43 +411,46 @@ class _GateState extends State<_Gate> {
             const CustomTitleBar(),
             Expanded(
               child: SetupWizard(
-          theme: widget.theme,
-          onInstall: (options) async {
-            await AppStorage.instance.setAcceptedTerms(true);
-            await AppStorage.instance.setSeenOnboarding(true);
-            setState(() {
-              _installOptions = options;
-              _showInstallView = true;
-            });
-          },
-          onRunPortable: () async {
-            await AppStorage.instance.setRunPortable(true);
-            await AppStorage.instance.setAcceptedTerms(true);
-            await AppStorage.instance.setSeenOnboarding(true);
-            if (!kIsWeb && Platform.isWindows) {
-              await windowManager.setMinimumSize(const Size(800, 600));
-              await windowManager.setMaximumSize(const Size(9999, 9999));
-              await windowManager.setResizable(true);
-              await windowManager.setSize(const Size(1280, 800));
-              await windowManager.center();
-            }
-            setState(() {
-              _isSetup = false;
-              _accepted = true;
-              _seenOnboarding = true;
-            });
-          },
+                theme: widget.theme,
+                onInstall: (options) async {
+                  await AppStorage.instance.setAcceptedTerms(true);
+                  await AppStorage.instance.setSeenOnboarding(true);
+                  setState(() {
+                    _installOptions = options;
+                    _showInstallView = true;
+                  });
+                },
+                onRunPortable: () async {
+                  await AppStorage.instance.setRunPortable(true);
+                  await AppStorage.instance.setAcceptedTerms(true);
+                  await AppStorage.instance.setSeenOnboarding(true);
+                  if (!kIsWeb && Platform.isWindows) {
+                    await windowManager.setMinimumSize(const Size(800, 600));
+                    await windowManager.setMaximumSize(const Size(9999, 9999));
+                    await windowManager.setResizable(true);
+                    await windowManager.setSize(const Size(1280, 800));
+                    await windowManager.center();
+                  }
+                  setState(() {
+                    _isSetup = false;
+                    _accepted = true;
+                    _seenOnboarding = true;
+                  });
+                },
+              ),
+            ),
+          ],
         ),
-      ),
-    ],
-  ),
-);
+      );
     }
     Widget gated;
     String key;
     if (!_accepted) {
       key = 'terms';
       gated = TermsScreen(
+        // Quien ya había aceptado una versión anterior no está "empezando":
+        // está viendo unos términos que cambiaron.
+        isUpdate: AppStorage.instance.acceptedTermsVersion > 0,
         onAccept: () async {
           await AppStorage.instance.setAcceptedTerms(true);
           if (mounted) setState(() => _accepted = true);
@@ -352,7 +460,8 @@ class _GateState extends State<_Gate> {
       gated = ListenableBuilder(
         listenable: widget.session,
         builder: (context, _) {
-          final isWaiting = widget.session.status == SessionStatus.unknown || !_minSplashDone;
+          final isWaiting =
+              widget.session.status == SessionStatus.unknown || !_minSplashDone;
           final showOnboarding =
               !_seenOnboarding &&
               widget.session.status == SessionStatus.unauthenticated;
@@ -379,6 +488,7 @@ class _GateState extends State<_Gate> {
                 theme: widget.theme,
                 msAuth: widget.msAuth,
                 connectivity: widget.connectivity,
+                directory: widget.directory,
               ),
               SessionStatus.unauthenticated => LoginScreen(
                 session: widget.session,
@@ -438,6 +548,51 @@ class _GateState extends State<_Gate> {
   }
 }
 
+/// Pantalla de último recurso: si ni las preferencias locales arrancan, la
+/// app dice qué pasa en vez de mostrar una ventana en blanco. No usa
+/// localizaciones ni tema porque justamente puede que no haya nada cargado.
+class _StartupErrorApp extends StatelessWidget {
+  const _StartupErrorApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  'Nexo no pudo iniciarse',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'No se pudo acceder al almacenamiento local del dispositivo. '
+                  'Cierra la aplicación y vuelve a abrirla; si el problema '
+                  'sigue, reinstálala.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => exit(0),
+                  child: const Text('Cerrar'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SplashScreen extends StatefulWidget {
   const _SplashScreen();
   @override
@@ -476,7 +631,9 @@ class _SplashScreenState extends State<_SplashScreen>
       end: endBg,
     ).animate(CurvedAnimation(parent: _c, curve: const Interval(0.0, 0.7)));
     final active = FestivityService.active(DateTime.now());
-    final isFiestasPatrias = AppStorage.instance.festivityDecor && active?.festivity.id == 'fiestas_patrias';
+    final isFiestasPatrias =
+        AppStorage.instance.festivityDecor &&
+        active?.festivity.id == 'fiestas_patrias';
     final width = MediaQuery.sizeOf(context).width;
     final fontSize = (width * 0.22).clamp(60.0, 120.0);
     return AnimatedBuilder(
@@ -513,7 +670,10 @@ class _SplashScreenState extends State<_SplashScreen>
                     child: ScaleTransition(
                       scale: _logoScale,
                       child: Transform.translate(
-                        offset: Offset(0, fontSize + 120), // Desplaza los elementos hacia abajo libremente
+                        offset: Offset(
+                          0,
+                          fontSize + 120,
+                        ), // Desplaza los elementos hacia abajo libremente
                         child: const Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -529,7 +689,9 @@ class _SplashScreenState extends State<_SplashScreen>
                             const SizedBox(
                               width: 160,
                               height: 80,
-                              child: MarcaPeruEffect(color: Color(0xFFE2432A)), // Rojo patrio
+                              child: MarcaPeruEffect(
+                                color: Color(0xFFE2432A),
+                              ), // Rojo patrio
                             ),
                           ],
                         ),

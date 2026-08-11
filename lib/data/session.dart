@@ -137,6 +137,15 @@ class SessionService extends ChangeNotifier {
     _setStatus(SessionStatus.unauthenticated);
   }
 
+  /// Cierra el arranque cuando `bootstrap` no pudo decidir —falló o tardó
+  /// demasiado—. Sin esto la app se quedaría en el splash para siempre; la
+  /// pantalla de login siempre es recuperable, así que es el destino seguro.
+  void resolveUnknownAsUnauthenticated() {
+    if (_status == SessionStatus.unknown) {
+      _setStatus(SessionStatus.unauthenticated);
+    }
+  }
+
   void _onAuthFailed() {
     scheduleMicrotask(() async {
       await AppStorage.instance.clear(keepCredentials: false);

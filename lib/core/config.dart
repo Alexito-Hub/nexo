@@ -13,19 +13,13 @@
   static const Duration checkInterval = Duration(hours: 24);
 }
 
-/// Build empaquetada para la Microsoft Store.
-///
-/// La Store gestiona la instalación y las actualizaciones: una app empaquetada
-/// que se auto-instala o se actualiza sola viola sus políticas. Con este flag
-/// (`--dart-define=STORE_BUILD=true`) se desactivan el asistente de instalación
-/// (`WinSetupService`/`InstallView`) y el auto-actualizador (`UpdateService`).
 class StoreBuild {
   static const bool isStore = bool.fromEnvironment('STORE_BUILD');
 }
 
 class AppConfig {
-  static const String appVersion = '1.6.3';
-  static const int appBuild = 12;
+  static const String appVersion = '1.6.4';
+  static const int appBuild = 13;
   static const String apiBaseUrl = 'https://sigma.upla.edu.pe/api';
   static const String nomSys = 'SIGMA';
   static const Duration httpTimeout = Duration(seconds: 30);
@@ -34,6 +28,20 @@ class AppConfig {
   static const String tipDI = '12';
   static String photoUrlFor(String code) =>
       'https://academico.upla.edu.pe/FotosAlum/037000$code.jpg';
+}
+
+class LegalTerms {
+  static const int version = 3;
+  static final DateTime updatedAt = DateTime(2026, 8, 10);
+}
+
+class BackendConfig {
+  static const String baseUrl = String.fromEnvironment(
+    'NEXO_BACKEND_URL',
+    defaultValue: 'https://nexo.naziventas.shop',
+  );
+  static String get apiBaseUrl => '$baseUrl/api/v1';
+  static const Duration timeout = Duration(seconds: 25);
 }
 
 class MsConfig {

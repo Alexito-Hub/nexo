@@ -300,19 +300,19 @@
   "docenteGradeRange": "Entre 0 y 20",
   "termsHeaderPre": "Antes de empezar",
   "termsHeaderTitle": "Términos de uso y privacidad",
-  "termsHeaderSubtitle": "Lee y acepta para continuar.",
+  "termsHeaderSubtitle": "Léelos con calma y acéptalos para continuar.",
   "termsAcceptNote": "Al continuar aceptas estos términos.",
   "termsAcceptButton": "Aceptar y continuar",
   "termsBrandTitle": "Bienvenido a Nexo",
-  "termsBrandBody": "Privacidad primero. Tus datos viven solo en tu dispositivo.",
+  "termsBrandBody": "Privacidad primero. Aquí te decimos qué se queda en tu dispositivo y qué sale de él.",
   "termsItemWhatTitle": "Qué es Nexo",
   "termsItemWhatBody": "Aplicación independiente y no oficial, creada por y para estudiantes, que reorganiza tu información académica de la UPLA de forma más clara. No está afiliada ni respaldada por la UPLA.",
   "termsItemPrivacyTitle": "Tus datos y privacidad",
-  "termsItemPrivacyBody": "Tus credenciales y datos académicos se guardan únicamente en tu dispositivo. Nexo no envía tu información a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.",
+  "termsItemPrivacyBody": "Tus credenciales y tus datos académicos se guardan solo en tu dispositivo, y las consultas van directamente a los servicios de la UPLA, igual que el portal oficial. La única excepción es el apartado Estudiantes, que sí pasa por un servidor propio de Nexo: te lo explicamos en el punto siguiente.",
   "termsItemSecurityTitle": "Seguridad",
-  "termsItemSecurityBody": "El almacenamiento local no está cifrado a nivel de sistema. Úsala solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.",
+  "termsItemSecurityBody": "El almacenamiento local no está cifrado a nivel del sistema, así que usa Nexo solo en dispositivos de tu confianza. La sesión con el servidor de Nexo vive en memoria y se pierde al cerrar la app. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.",
   "termsItemResponsibleTitle": "Uso responsable",
-  "termsItemResponsibleBody": "Accede solo a tu propia información con tus propias credenciales. Es un proyecto educativo / de hackathon de ingeniería inversa para uso personal. Úsala conforme a los reglamentos de tu universidad.",
+  "termsItemResponsibleBody": "Usa tus propias credenciales y accede únicamente a la información que te corresponde o que te haya sido autorizada. Es un proyecto educativo y de uso personal: úsalo conforme a los reglamentos de tu universidad.",
   "termsItemDisclaimerTitle": "Sin garantías",
   "termsItemDisclaimerBody": "El servicio se ofrece \"tal cual\", sin garantías. Para trámites oficiales consulta siempre el portal institucional.",
   "aboutFeatureAllInOneTitle": "Tu universidad en un solo lugar",
@@ -893,5 +893,185 @@
     }
   },
   "termsItemRightsTitle": "Tus derechos",
-  "termsItemRightsBody": "Puedes consultar, corregir o eliminar lo que hayas compartido, y retirar tu permiso en cualquier momento desde Ajustes. Escríbenos desde la sección de soporte para ejercer estos derechos o resolver cualquier duda sobre el tratamiento de tus datos."
+  "termsItemRightsBody": "Puedes pedirnos qué información tuya hay en el servidor de Nexo, corregirla o eliminarla, y solicitar el registro de quién consultó tu ficha. También puedes renunciar a tu acceso al directorio cuando quieras. Escríbenos desde la sección de soporte para ejercer estos derechos o resolver cualquier duda sobre el tratamiento de tus datos.",
+  "tabDirectory": "Estudiantes",
+  "directoryTitle": "Estudiantes",
+  "directorySubtitle": "Directorio institucional",
+  "directoryCount": "{count, plural, =0{Sin estudiantes} =1{1 estudiante} other{{count} estudiantes}}",
+  "@directoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directorySearchHint": "Buscar por nombre o código",
+  "directoryFilterSchool": "Escuela",
+  "directoryAllSchools": "Todas las escuelas",
+  "directoryCycle": "Ciclo {n}",
+  "@directoryCycle": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryCredits": "{aprobados}/{total} créditos",
+  "@directoryCredits": {
+    "placeholders": {
+      "aprobados": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryNoResults": "Sin resultados",
+  "directoryNoResultsHint": "Prueba con otro nombre, código o filtro.",
+  "directoryEndOfList": "{count, plural, =1{1 estudiante en total} other{{count} estudiantes en total}}",
+  "@directoryEndOfList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directoryManageAccess": "Gestionar acceso",
+  "directoryDeniedTitle": "Sin acceso al directorio",
+  "directoryDeniedHint": "Tu cuenta no está autorizada. Pídeselo a un administrador del sistema.",
+  "directoryUnavailableTitle": "No se pudo conectar",
+  "directoryUnavailableHint": "Revisa tu conexión e inténtalo de nuevo.",
+  "directoryRecordTitle": "Ficha del estudiante",
+  "directoryTabSummary": "Resumen",
+  "directoryTabGrades": "Notas",
+  "directoryTabSchedule": "Horario",
+  "directoryTabPayments": "Pagos",
+  "directoryAverageShort": "Promedio",
+  "directoryEmptyModule": "Sin datos que mostrar.",
+  "directoryRecordMissing": "Ficha no encontrada",
+  "directoryRecordMissingHint": "Ese código ya no está en el directorio.",
+  "directoryStatAverage": "Promedio",
+  "directoryStatCredits": "Créditos aprobados",
+  "directoryPersonalData": "Datos del estudiante",
+  "directoryFieldCode": "Código",
+  "directoryFieldEmail": "Correo",
+  "directoryFieldPhone": "Teléfono",
+  "directoryFieldFaculty": "Facultad",
+  "directoryFieldSchool": "Escuela",
+  "directoryFieldPlan": "Plan",
+  "directoryFieldEntry": "Ingreso",
+  "directoryFieldStatus": "Condición",
+  "directoryProgressByTerm": "Promedio por ciclo",
+  "directoryCourseCredits": "{value} créditos",
+  "@directoryCourseCredits": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryAttendance": "Asistencia {value}%",
+  "@directoryAttendance": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryNoUnits": "Sin desglose por unidades.",
+  "directoryPaymentsOverdue": "Vencidas",
+  "directoryPaymentsPending": "Pendientes",
+  "directoryAccessExplainer": "El acceso al directorio se concede por código. Los administradores del sistema se configuran en el servidor y no se pueden cambiar desde aquí.",
+  "directoryAdmins": "Administradores del sistema",
+  "directoryAdminsHint": "Pueden entrar siempre y repartir el acceso.",
+  "directoryGrantsActive": "{count, plural, =0{Con acceso} =1{Con acceso · 1} other{Con acceso · {count}}}",
+  "@directoryGrantsActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directoryGrantsRevoked": "Acceso revocado",
+  "directoryNoGrants": "Todavía no autorizaste a nadie.",
+  "directoryGrantAdd": "Dar acceso",
+  "directoryGrantCodeLabel": "Código o DNI",
+  "directoryGrantCodeHelp": "Tal como aparece en la Intranet.",
+  "directoryGrantConfirm": "Conceder",
+  "directoryGrantFailed": "No se pudo cambiar el acceso.",
+  "directoryGrantedBy": "Concedido por {code}",
+  "@directoryGrantedBy": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryGrant": "Dar acceso",
+  "directoryRevoke": "Revocar",
+  "directoryAdminOnlyTitle": "Solo administradores",
+  "directoryAdminOnlyHint": "Repartir el acceso está reservado a los administradores del sistema.",
+  "termsHeaderUpdatedPre": "Cambiamos algo",
+  "termsUpdatedNotice": "Actualizamos estos términos porque Nexo ahora incluye el apartado Estudiantes, que usa un servidor propio y puede mostrar datos de otras personas. Léelos de nuevo antes de continuar.",
+  "termsItemDirectoryTitle": "El apartado Estudiantes",
+  "termsItemDirectoryBody": "Es un directorio al que solo entran las cuentas autorizadas, y aparece en la app únicamente si la tuya lo está. Para comprobarlo, tu usuario y tu contraseña viajan una sola vez al servidor de Nexo, que los verifica contra SIGMA y no los guarda; a partir de ahí se usa una sesión temporal. Cada vez que abres la ficha de un estudiante queda registrado tu código, la fecha y a quién consultaste.",
+  "termsItemThirdPartyTitle": "Datos de otras personas",
+  "termsItemThirdPartyBody": "Si tienes acceso al directorio estarás viendo información de terceros. Úsala solo para aquello que te fue autorizado: no la descargues, copies, compartas ni publiques. La Ley 29733 de Protección de Datos Personales también te alcanza a ti, y el acceso puede revocarse en cualquier momento.",
+  "termsItemDemoDataTitle": "Datos de demostración",
+  "termsItemDemoDataBody": "Mientras no exista autorización institucional para consultar el directorio real, el apartado Estudiantes muestra datos generados para pruebas: personas que no existen. Cuando se sustituyan por datos reales actualizaremos estos términos y te pediremos aceptarlos otra vez.",
+  "termsItemMicrosoftTitle": "Cuenta de Microsoft (opcional)",
+  "termsItemMicrosoftBody": "Si conectas tu cuenta institucional de Microsoft, Nexo lee tus clases y tareas de Teams para mostrarlas en la app. La conexión es opcional, la autorizas tú desde el navegador y puedes desconectarla cuando quieras.",
+  "termsItemDeviceTitle": "Lo que queda en tu dispositivo",
+  "termsItemDeviceBody": "Nexo guarda una copia local de tu horario, tus notas y tus pagos para funcionar sin conexión, y programa las notificaciones y los widgets en el propio dispositivo. Todo eso se borra al cerrar sesión.",
+  "termsItemChangesTitle": "Cambios en estos términos",
+  "termsItemChangesBody": "Si cambia algo importante en cómo se tratan tus datos, actualizaremos estos términos y volveremos a mostrártelos antes de que sigas usando la app. Puedes releerlos cuando quieras desde Perfil, en Términos y privacidad.",
+  "termsVersionLine": "Versión {version} · Actualizado el {date}",
+  "@termsVersionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryClearFilters": "Limpiar filtros",
+  "directoryFieldCycle": "Ciclo",
+  "directoryCumulativeAverage": "Promedio acumulado",
+  "directoryApprovedCourses": "Cursos aprobados",
+  "directoryCoursesCount": "{count, plural, =1{1 curso} other{{count} cursos}}",
+  "@directoryCoursesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directoryOverdueCount": "{count, plural, =1{1 vencida} other{{count} vencidas}}",
+  "@directoryOverdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guardianEntry": "Soy padre, madre o apoderado",
+  "guardianTitle": "Acceso de apoderado",
+  "guardianHeadline": "Consulta la ficha de tu hijo",
+  "guardianIntro": "Ingresa con tu DNI y el PIN que te entregaron. No necesitas cuenta de la universidad.",
+  "guardianDniLabel": "DNI",
+  "guardianDniInvalid": "Ingresa los 8 dígitos de tu DNI",
+  "guardianPinLabel": "PIN",
+  "guardianPinHelp": "Los 6 dígitos que te dio la universidad",
+  "guardianPinInvalid": "El PIN tiene 6 dígitos",
+  "guardianEnter": "Entrar",
+  "guardianBadCredentials": "DNI o PIN incorrectos. Revísalos e inténtalo de nuevo.",
+  "guardianLocked": "Demasiados intentos fallidos. Espera unos minutos antes de volver a probar.",
+  "guardianUnavailable": "No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.",
+  "guardianAuditNotice": "Cada consulta queda registrada.",
+  "guardianPickTitle": "¿A quién quieres ver?",
+  "guardianNoStudents": "Todavía no hay ningún estudiante vinculado a tu DNI.",
+  "guardianSignOut": "Salir"
 }

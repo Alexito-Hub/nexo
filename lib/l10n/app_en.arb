@@ -247,19 +247,19 @@
   "docenteGradeRange": "Between 0 and 20",
   "termsHeaderPre": "Before you start",
   "termsHeaderTitle": "Terms of use and privacy",
-  "termsHeaderSubtitle": "Read and accept to continue.",
+  "termsHeaderSubtitle": "Read them carefully and accept to continue.",
   "termsAcceptNote": "By continuing you accept these terms.",
   "termsAcceptButton": "Accept and continue",
   "termsBrandTitle": "Welcome to Nexo",
-  "termsBrandBody": "Privacy first. Your data stays only on your device.",
+  "termsBrandBody": "Privacy first. Here we tell you what stays on your device and what leaves it.",
   "termsItemWhatTitle": "What is Nexo",
   "termsItemWhatBody": "An independent, unofficial app created by and for students that reorganizes your UPLA academic information more clearly. It is not affiliated with or endorsed by UPLA.",
   "termsItemPrivacyTitle": "Your data and privacy",
-  "termsItemPrivacyBody": "Your credentials and academic data are stored only on your device. Nexo does not send your information to its own servers or to third parties: requests go straight to UPLA services, just like the official portal.",
+  "termsItemPrivacyBody": "Your credentials and academic data are stored only on your device, and requests go straight to UPLA services, just like the official portal. The only exception is the Students section, which does go through a Nexo server: we explain it right below.",
   "termsItemSecurityTitle": "Security",
-  "termsItemSecurityBody": "Local storage is not encrypted at the system level. Use it only on devices you trust. You can sign out to clear credentials and cache at any time.",
+  "termsItemSecurityBody": "Local storage is not encrypted at the system level, so use Nexo only on devices you trust. The session with the Nexo server lives in memory and is lost when you close the app. You can sign out to wipe credentials and cache at any time.",
   "termsItemResponsibleTitle": "Responsible use",
-  "termsItemResponsibleBody": "Access only your own information with your own credentials. This is an educational / reverse-engineering hackathon project for personal use. Use it according to your university's regulations.",
+  "termsItemResponsibleBody": "Use your own credentials and access only the information that belongs to you or that you have been authorized to see. This is an educational, personal-use project: use it in line with your university's rules.",
   "termsItemDisclaimerTitle": "No guarantees",
   "termsItemDisclaimerBody": "The service is provided \"as is\", without warranties. For official procedures, always consult the institutional portal.",
   "aboutFeatureAllInOneTitle": "Your university in one place",
@@ -805,5 +805,185 @@
     }
   },
   "termsItemRightsTitle": "Your rights",
-  "termsItemRightsBody": "You can review, correct or delete whatever you shared, and withdraw your permission anytime from Settings. Write to us from the support section to exercise these rights or ask anything about how your data is handled."
+  "termsItemRightsBody": "You can ask what information about you is on the Nexo server, correct or delete it, and request the log of who looked at your record. You can also give up your directory access whenever you want. Write to us from the support section to exercise these rights or ask anything about how your data is handled.",
+  "tabDirectory": "Students",
+  "directoryTitle": "Students",
+  "directorySubtitle": "Institutional directory",
+  "directoryCount": "{count, plural, =0{No students} =1{1 student} other{{count} students}}",
+  "@directoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directorySearchHint": "Search by name or code",
+  "directoryFilterSchool": "Program",
+  "directoryAllSchools": "All programs",
+  "directoryCycle": "Term {n}",
+  "@directoryCycle": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryCredits": "{aprobados}/{total} credits",
+  "@directoryCredits": {
+    "placeholders": {
+      "aprobados": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryNoResults": "No results",
+  "directoryNoResultsHint": "Try another name, code or filter.",
+  "directoryEndOfList": "{count, plural, =1{1 student in total} other{{count} students in total}}",
+  "@directoryEndOfList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directoryManageAccess": "Manage access",
+  "directoryDeniedTitle": "No directory access",
+  "directoryDeniedHint": "Your account is not authorized. Ask a system administrator.",
+  "directoryUnavailableTitle": "Could not connect",
+  "directoryUnavailableHint": "Check your connection and try again.",
+  "directoryRecordTitle": "Student record",
+  "directoryTabSummary": "Overview",
+  "directoryTabGrades": "Grades",
+  "directoryTabSchedule": "Schedule",
+  "directoryTabPayments": "Payments",
+  "directoryAverageShort": "Average",
+  "directoryEmptyModule": "Nothing to show.",
+  "directoryRecordMissing": "Record not found",
+  "directoryRecordMissingHint": "That code is no longer in the directory.",
+  "directoryStatAverage": "Average",
+  "directoryStatCredits": "Credits passed",
+  "directoryPersonalData": "Student details",
+  "directoryFieldCode": "Code",
+  "directoryFieldEmail": "Email",
+  "directoryFieldPhone": "Phone",
+  "directoryFieldFaculty": "Faculty",
+  "directoryFieldSchool": "Program",
+  "directoryFieldPlan": "Curriculum",
+  "directoryFieldEntry": "Enrolled",
+  "directoryFieldStatus": "Standing",
+  "directoryProgressByTerm": "Average per term",
+  "directoryCourseCredits": "{value} credits",
+  "@directoryCourseCredits": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryAttendance": "Attendance {value}%",
+  "@directoryAttendance": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryNoUnits": "No breakdown by unit.",
+  "directoryPaymentsOverdue": "Overdue",
+  "directoryPaymentsPending": "Pending",
+  "directoryAccessExplainer": "Directory access is granted per code. System administrators are configured on the server and cannot be changed from here.",
+  "directoryAdmins": "System administrators",
+  "directoryAdminsHint": "They always have access and can grant it.",
+  "directoryGrantsActive": "{count, plural, =0{With access} =1{With access · 1} other{With access · {count}}}",
+  "@directoryGrantsActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directoryGrantsRevoked": "Access revoked",
+  "directoryNoGrants": "You have not authorized anyone yet.",
+  "directoryGrantAdd": "Grant access",
+  "directoryGrantCodeLabel": "Code or ID",
+  "directoryGrantCodeHelp": "As it appears on the intranet.",
+  "directoryGrantConfirm": "Grant",
+  "directoryGrantFailed": "Could not change the access.",
+  "directoryGrantedBy": "Granted by {code}",
+  "@directoryGrantedBy": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryGrant": "Grant",
+  "directoryRevoke": "Revoke",
+  "directoryAdminOnlyTitle": "Administrators only",
+  "directoryAdminOnlyHint": "Granting access is reserved for system administrators.",
+  "termsHeaderUpdatedPre": "Something changed",
+  "termsUpdatedNotice": "We updated these terms because Nexo now includes the Students section, which uses its own server and may show other people's data. Please read them again before continuing.",
+  "termsItemDirectoryTitle": "The Students section",
+  "termsItemDirectoryBody": "It is a directory only authorized accounts can enter, and it shows up in the app only if yours is one of them. To check that, your username and password travel once to the Nexo server, which verifies them against SIGMA and does not store them; from then on a temporary session is used. Every time you open a student record, your code, the date and whose record you opened are logged.",
+  "termsItemThirdPartyTitle": "Other people's data",
+  "termsItemThirdPartyBody": "If you have directory access you will be seeing other people's information. Use it only for what you were authorized to: do not download, copy, share or publish it. Peru's Personal Data Protection Act (Law 29733) applies to you too, and access can be revoked at any time.",
+  "termsItemDemoDataTitle": "Demo data",
+  "termsItemDemoDataBody": "Until there is institutional authorization to query the real directory, the Students section shows generated test data: people who do not exist. When it is replaced with real data we will update these terms and ask you to accept them again.",
+  "termsItemMicrosoftTitle": "Microsoft account (optional)",
+  "termsItemMicrosoftBody": "If you connect your institutional Microsoft account, Nexo reads your Teams classes and assignments to show them in the app. The connection is optional, you authorize it yourself in the browser, and you can disconnect it whenever you want.",
+  "termsItemDeviceTitle": "What stays on your device",
+  "termsItemDeviceBody": "Nexo keeps a local copy of your schedule, grades and payments so it works offline, and schedules notifications and widgets on the device itself. All of it is wiped when you sign out.",
+  "termsItemChangesTitle": "Changes to these terms",
+  "termsItemChangesBody": "If something important changes in how your data is handled, we will update these terms and show them to you again before you keep using the app. You can reread them any time from Profile, under Terms & Privacy.",
+  "termsVersionLine": "Version {version} · Updated on {date}",
+  "@termsVersionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryClearFilters": "Clear filters",
+  "directoryFieldCycle": "Term",
+  "directoryCumulativeAverage": "Cumulative average",
+  "directoryApprovedCourses": "Courses passed",
+  "directoryCoursesCount": "{count, plural, =1{1 course} other{{count} courses}}",
+  "@directoryCoursesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "directoryOverdueCount": "{count, plural, =1{1 overdue} other{{count} overdue}}",
+  "@directoryOverdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guardianEntry": "I'm a parent or guardian",
+  "guardianTitle": "Guardian access",
+  "guardianHeadline": "Check your child's record",
+  "guardianIntro": "Sign in with your ID number and the PIN you were given. No university account needed.",
+  "guardianDniLabel": "ID number",
+  "guardianDniInvalid": "Enter the 8 digits of your ID",
+  "guardianPinLabel": "PIN",
+  "guardianPinHelp": "The 6 digits the university gave you",
+  "guardianPinInvalid": "The PIN has 6 digits",
+  "guardianEnter": "Enter",
+  "guardianBadCredentials": "Wrong ID or PIN. Check them and try again.",
+  "guardianLocked": "Too many failed attempts. Wait a few minutes before trying again.",
+  "guardianUnavailable": "Could not connect. Check your connection and try again.",
+  "guardianAuditNotice": "Every lookup is logged.",
+  "guardianPickTitle": "Who do you want to see?",
+  "guardianNoStudents": "No student is linked to your ID yet.",
+  "guardianSignOut": "Sign out"
 }

@@ -639,7 +639,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get termsHeaderTitle => 'Términos de uso y privacidad';
 
   @override
-  String get termsHeaderSubtitle => 'Lee y acepta para continuar.';
+  String get termsHeaderSubtitle =>
+      'Léelos con calma y acéptalos para continuar.';
 
   @override
   String get termsAcceptNote => 'Al continuar aceptas estos términos.';
@@ -652,7 +653,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsBrandBody =>
-      'Privacidad primero. Tus datos viven solo en tu dispositivo.';
+      'Privacidad primero. Aquí te decimos qué se queda en tu dispositivo y qué sale de él.';
 
   @override
   String get termsItemWhatTitle => 'Qué es Nexo';
@@ -666,21 +667,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Tus credenciales y datos académicos se guardan únicamente en tu dispositivo. Nexo no envía tu información a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.';
+      'Tus credenciales y tus datos académicos se guardan solo en tu dispositivo, y las consultas van directamente a los servicios de la UPLA, igual que el portal oficial. La única excepción es el apartado Estudiantes, que sí pasa por un servidor propio de Nexo: te lo explicamos en el punto siguiente.';
 
   @override
   String get termsItemSecurityTitle => 'Seguridad';
 
   @override
   String get termsItemSecurityBody =>
-      'El almacenamiento local no está cifrado a nivel de sistema. Úsala solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.';
+      'El almacenamiento local no está cifrado a nivel del sistema, así que usa Nexo solo en dispositivos de tu confianza. La sesión con el servidor de Nexo vive en memoria y se pierde al cerrar la app. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.';
 
   @override
   String get termsItemResponsibleTitle => 'Uso responsable';
 
   @override
   String get termsItemResponsibleBody =>
-      'Accede solo a tu propia información con tus propias credenciales. Es un proyecto educativo / de hackathon de ingeniería inversa para uso personal. Úsala conforme a los reglamentos de tu universidad.';
+      'Usa tus propias credenciales y accede únicamente a la información que te corresponde o que te haya sido autorizada. Es un proyecto educativo y de uso personal: úsalo conforme a los reglamentos de tu universidad.';
 
   @override
   String get termsItemDisclaimerTitle => 'Sin garantías';
@@ -1686,5 +1687,369 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsItemRightsBody =>
-      'Puedes consultar, corregir o eliminar lo que hayas compartido, y retirar tu permiso en cualquier momento desde Ajustes. Escríbenos desde la sección de soporte para ejercer estos derechos o resolver cualquier duda sobre el tratamiento de tus datos.';
+      'Puedes pedirnos qué información tuya hay en el servidor de Nexo, corregirla o eliminarla, y solicitar el registro de quién consultó tu ficha. También puedes renunciar a tu acceso al directorio cuando quieras. Escríbenos desde la sección de soporte para ejercer estos derechos o resolver cualquier duda sobre el tratamiento de tus datos.';
+
+  @override
+  String get tabDirectory => 'Estudiantes';
+
+  @override
+  String get directoryTitle => 'Estudiantes';
+
+  @override
+  String get directorySubtitle => 'Directorio institucional';
+
+  @override
+  String directoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count estudiantes',
+      one: '1 estudiante',
+      zero: 'Sin estudiantes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get directorySearchHint => 'Buscar por nombre o código';
+
+  @override
+  String get directoryFilterSchool => 'Escuela';
+
+  @override
+  String get directoryAllSchools => 'Todas las escuelas';
+
+  @override
+  String directoryCycle(String n) {
+    return 'Ciclo $n';
+  }
+
+  @override
+  String directoryCredits(String aprobados, String total) {
+    return '$aprobados/$total créditos';
+  }
+
+  @override
+  String get directoryNoResults => 'Sin resultados';
+
+  @override
+  String get directoryNoResultsHint =>
+      'Prueba con otro nombre, código o filtro.';
+
+  @override
+  String directoryEndOfList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count estudiantes en total',
+      one: '1 estudiante en total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get directoryManageAccess => 'Gestionar acceso';
+
+  @override
+  String get directoryDeniedTitle => 'Sin acceso al directorio';
+
+  @override
+  String get directoryDeniedHint =>
+      'Tu cuenta no está autorizada. Pídeselo a un administrador del sistema.';
+
+  @override
+  String get directoryUnavailableTitle => 'No se pudo conectar';
+
+  @override
+  String get directoryUnavailableHint =>
+      'Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get directoryRecordTitle => 'Ficha del estudiante';
+
+  @override
+  String get directoryTabSummary => 'Resumen';
+
+  @override
+  String get directoryTabGrades => 'Notas';
+
+  @override
+  String get directoryTabSchedule => 'Horario';
+
+  @override
+  String get directoryTabPayments => 'Pagos';
+
+  @override
+  String get directoryAverageShort => 'Promedio';
+
+  @override
+  String get directoryEmptyModule => 'Sin datos que mostrar.';
+
+  @override
+  String get directoryRecordMissing => 'Ficha no encontrada';
+
+  @override
+  String get directoryRecordMissingHint =>
+      'Ese código ya no está en el directorio.';
+
+  @override
+  String get directoryStatAverage => 'Promedio';
+
+  @override
+  String get directoryStatCredits => 'Créditos aprobados';
+
+  @override
+  String get directoryPersonalData => 'Datos del estudiante';
+
+  @override
+  String get directoryFieldCode => 'Código';
+
+  @override
+  String get directoryFieldEmail => 'Correo';
+
+  @override
+  String get directoryFieldPhone => 'Teléfono';
+
+  @override
+  String get directoryFieldFaculty => 'Facultad';
+
+  @override
+  String get directoryFieldSchool => 'Escuela';
+
+  @override
+  String get directoryFieldPlan => 'Plan';
+
+  @override
+  String get directoryFieldEntry => 'Ingreso';
+
+  @override
+  String get directoryFieldStatus => 'Condición';
+
+  @override
+  String get directoryProgressByTerm => 'Promedio por ciclo';
+
+  @override
+  String directoryCourseCredits(String value) {
+    return '$value créditos';
+  }
+
+  @override
+  String directoryAttendance(String value) {
+    return 'Asistencia $value%';
+  }
+
+  @override
+  String get directoryNoUnits => 'Sin desglose por unidades.';
+
+  @override
+  String get directoryPaymentsOverdue => 'Vencidas';
+
+  @override
+  String get directoryPaymentsPending => 'Pendientes';
+
+  @override
+  String get directoryAccessExplainer =>
+      'El acceso al directorio se concede por código. Los administradores del sistema se configuran en el servidor y no se pueden cambiar desde aquí.';
+
+  @override
+  String get directoryAdmins => 'Administradores del sistema';
+
+  @override
+  String get directoryAdminsHint =>
+      'Pueden entrar siempre y repartir el acceso.';
+
+  @override
+  String directoryGrantsActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Con acceso · $count',
+      one: 'Con acceso · 1',
+      zero: 'Con acceso',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get directoryGrantsRevoked => 'Acceso revocado';
+
+  @override
+  String get directoryNoGrants => 'Todavía no autorizaste a nadie.';
+
+  @override
+  String get directoryGrantAdd => 'Dar acceso';
+
+  @override
+  String get directoryGrantCodeLabel => 'Código o DNI';
+
+  @override
+  String get directoryGrantCodeHelp => 'Tal como aparece en la Intranet.';
+
+  @override
+  String get directoryGrantConfirm => 'Conceder';
+
+  @override
+  String get directoryGrantFailed => 'No se pudo cambiar el acceso.';
+
+  @override
+  String directoryGrantedBy(String code) {
+    return 'Concedido por $code';
+  }
+
+  @override
+  String get directoryGrant => 'Dar acceso';
+
+  @override
+  String get directoryRevoke => 'Revocar';
+
+  @override
+  String get directoryAdminOnlyTitle => 'Solo administradores';
+
+  @override
+  String get directoryAdminOnlyHint =>
+      'Repartir el acceso está reservado a los administradores del sistema.';
+
+  @override
+  String get termsHeaderUpdatedPre => 'Cambiamos algo';
+
+  @override
+  String get termsUpdatedNotice =>
+      'Actualizamos estos términos porque Nexo ahora incluye el apartado Estudiantes, que usa un servidor propio y puede mostrar datos de otras personas. Léelos de nuevo antes de continuar.';
+
+  @override
+  String get termsItemDirectoryTitle => 'El apartado Estudiantes';
+
+  @override
+  String get termsItemDirectoryBody =>
+      'Es un directorio al que solo entran las cuentas autorizadas, y aparece en la app únicamente si la tuya lo está. Para comprobarlo, tu usuario y tu contraseña viajan una sola vez al servidor de Nexo, que los verifica contra SIGMA y no los guarda; a partir de ahí se usa una sesión temporal. Cada vez que abres la ficha de un estudiante queda registrado tu código, la fecha y a quién consultaste.';
+
+  @override
+  String get termsItemThirdPartyTitle => 'Datos de otras personas';
+
+  @override
+  String get termsItemThirdPartyBody =>
+      'Si tienes acceso al directorio estarás viendo información de terceros. Úsala solo para aquello que te fue autorizado: no la descargues, copies, compartas ni publiques. La Ley 29733 de Protección de Datos Personales también te alcanza a ti, y el acceso puede revocarse en cualquier momento.';
+
+  @override
+  String get termsItemDemoDataTitle => 'Datos de demostración';
+
+  @override
+  String get termsItemDemoDataBody =>
+      'Mientras no exista autorización institucional para consultar el directorio real, el apartado Estudiantes muestra datos generados para pruebas: personas que no existen. Cuando se sustituyan por datos reales actualizaremos estos términos y te pediremos aceptarlos otra vez.';
+
+  @override
+  String get termsItemMicrosoftTitle => 'Cuenta de Microsoft (opcional)';
+
+  @override
+  String get termsItemMicrosoftBody =>
+      'Si conectas tu cuenta institucional de Microsoft, Nexo lee tus clases y tareas de Teams para mostrarlas en la app. La conexión es opcional, la autorizas tú desde el navegador y puedes desconectarla cuando quieras.';
+
+  @override
+  String get termsItemDeviceTitle => 'Lo que queda en tu dispositivo';
+
+  @override
+  String get termsItemDeviceBody =>
+      'Nexo guarda una copia local de tu horario, tus notas y tus pagos para funcionar sin conexión, y programa las notificaciones y los widgets en el propio dispositivo. Todo eso se borra al cerrar sesión.';
+
+  @override
+  String get termsItemChangesTitle => 'Cambios en estos términos';
+
+  @override
+  String get termsItemChangesBody =>
+      'Si cambia algo importante en cómo se tratan tus datos, actualizaremos estos términos y volveremos a mostrártelos antes de que sigas usando la app. Puedes releerlos cuando quieras desde Perfil, en Términos y privacidad.';
+
+  @override
+  String termsVersionLine(String version, String date) {
+    return 'Versión $version · Actualizado el $date';
+  }
+
+  @override
+  String get directoryClearFilters => 'Limpiar filtros';
+
+  @override
+  String get directoryFieldCycle => 'Ciclo';
+
+  @override
+  String get directoryCumulativeAverage => 'Promedio acumulado';
+
+  @override
+  String get directoryApprovedCourses => 'Cursos aprobados';
+
+  @override
+  String directoryCoursesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cursos',
+      one: '1 curso',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String directoryOverdueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vencidas',
+      one: '1 vencida',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guardianEntry => 'Soy padre, madre o apoderado';
+
+  @override
+  String get guardianTitle => 'Acceso de apoderado';
+
+  @override
+  String get guardianHeadline => 'Consulta la ficha de tu hijo';
+
+  @override
+  String get guardianIntro =>
+      'Ingresa con tu DNI y el PIN que te entregaron. No necesitas cuenta de la universidad.';
+
+  @override
+  String get guardianDniLabel => 'DNI';
+
+  @override
+  String get guardianDniInvalid => 'Ingresa los 8 dígitos de tu DNI';
+
+  @override
+  String get guardianPinLabel => 'PIN';
+
+  @override
+  String get guardianPinHelp => 'Los 6 dígitos que te dio la universidad';
+
+  @override
+  String get guardianPinInvalid => 'El PIN tiene 6 dígitos';
+
+  @override
+  String get guardianEnter => 'Entrar';
+
+  @override
+  String get guardianBadCredentials =>
+      'DNI o PIN incorrectos. Revísalos e inténtalo de nuevo.';
+
+  @override
+  String get guardianLocked =>
+      'Demasiados intentos fallidos. Espera unos minutos antes de volver a probar.';
+
+  @override
+  String get guardianUnavailable =>
+      'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get guardianAuditNotice => 'Cada consulta queda registrada.';
+
+  @override
+  String get guardianPickTitle => '¿A quién quieres ver?';
+
+  @override
+  String get guardianNoStudents =>
+      'Todavía no hay ningún estudiante vinculado a tu DNI.';
+
+  @override
+  String get guardianSignOut => 'Salir';
 }

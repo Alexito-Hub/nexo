@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexo/core/config.dart';
 import 'package:nexo/core/design/breakpoints.dart';
 import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/design/tokens.dart';
@@ -13,6 +14,8 @@ class _Item {
   const _Item(this.icon, this.title, this.body, this.color);
 }
 
+/// El orden importa: primero qué es Nexo, luego a dónde van tus datos, luego
+/// lo que implica ver los de otras personas, y al final lo formal.
 List<_Item> _items(AppLocalizations l) => <_Item>[
   _Item(
     Icons.info_outline,
@@ -24,6 +27,36 @@ List<_Item> _items(AppLocalizations l) => <_Item>[
     Icons.lock_outline,
     l.termsItemPrivacyTitle,
     l.termsItemPrivacyBody,
+    NexoTheme.accent,
+  ),
+  _Item(
+    Icons.groups_outlined,
+    l.termsItemDirectoryTitle,
+    l.termsItemDirectoryBody,
+    NexoTheme.info,
+  ),
+  _Item(
+    Icons.policy_outlined,
+    l.termsItemThirdPartyTitle,
+    l.termsItemThirdPartyBody,
+    NexoTheme.warning,
+  ),
+  _Item(
+    Icons.science_outlined,
+    l.termsItemDemoDataTitle,
+    l.termsItemDemoDataBody,
+    NexoTheme.warning,
+  ),
+  _Item(
+    Icons.cloud_outlined,
+    l.termsItemMicrosoftTitle,
+    l.termsItemMicrosoftBody,
+    NexoTheme.info,
+  ),
+  _Item(
+    Icons.devices_outlined,
+    l.termsItemDeviceTitle,
+    l.termsItemDeviceBody,
     NexoTheme.accent,
   ),
   _Item(
@@ -50,17 +83,32 @@ List<_Item> _items(AppLocalizations l) => <_Item>[
     l.termsItemDisclaimerBody,
     NexoTheme.warning,
   ),
+  _Item(
+    Icons.update_outlined,
+    l.termsItemChangesTitle,
+    l.termsItemChangesBody,
+    NexoTheme.textMuted,
+  ),
 ];
 
 class TermsScreen extends StatelessWidget {
-  const TermsScreen({super.key, this.onAccept});
+  const TermsScreen({super.key, this.onAccept, this.isUpdate = false});
   final VoidCallback? onAccept;
+
+  /// El usuario ya había aceptado una versión anterior: conviene decírselo en
+  /// vez de darle la bienvenida como si fuera la primera vez.
+  final bool isUpdate;
+
   bool get _isGate => onAccept != null;
   @override
   Widget build(BuildContext context) {
     final isDesktop = context.isDesktop;
     final l = AppLocalizations.of(context);
-    final content = _Content(isGate: _isGate, onAccept: onAccept);
+    final content = _Content(
+      isGate: _isGate,
+      isUpdate: isUpdate,
+      onAccept: onAccept,
+    );
     if (isDesktop && _isGate) {
       return Scaffold(
         body: Row(
@@ -97,8 +145,13 @@ class TermsScreen extends StatelessWidget {
 
 class _Content extends StatelessWidget {
   final bool isGate;
+  final bool isUpdate;
   final VoidCallback? onAccept;
-  const _Content({required this.isGate, required this.onAccept});
+  const _Content({
+    required this.isGate,
+    required this.isUpdate,
+    required this.onAccept,
+  });
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -120,7 +173,7 @@ class _Content extends StatelessWidget {
                 const Gap(AppSpacing.lg),
                 Center(
                   child: Text(
-                    l.termsHeaderPre,
+                    isUpdate ? l.termsHeaderUpdatedPre : l.termsHeaderPre,
                     style: const TextStyle(
                       fontSize: AppFont.h1,
                       fontWeight: FontWeight.w900,
@@ -159,10 +212,30 @@ class _Content extends StatelessWidget {
                 ),
                 const Gap(AppSpacing.xxl),
               ],
+              if (isGate && isUpdate) ...[
+                _UpdatedBanner(text: l.termsUpdatedNotice),
+                const Gap(AppSpacing.lg),
+              ],
               for (final it in _items(l)) ...[
                 _SectionCard(item: it),
                 const Gap(AppSpacing.md),
               ],
+              const Gap(AppSpacing.sm),
+              Center(
+                child: Text(
+                  l.termsVersionLine(
+                    '${LegalTerms.version}',
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatFullDate(LegalTerms.updatedAt),
+                  ),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.small,
+                    color: NexoTheme.textMuted,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -244,6 +317,46 @@ class _Content extends StatelessWidget {
                   ),
           ),
       ],
+    );
+  }
+}
+
+/// Aviso de que los términos cambiaron. Solo se muestra a quien ya había
+/// aceptado una versión anterior.
+class _UpdatedBanner extends StatelessWidget {
+  const _UpdatedBanner({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: NexoTheme.info.withValues(alpha: 0.10),
+        borderRadius: AppRadii.rXl,
+        border: Border.all(color: NexoTheme.info.withValues(alpha: 0.30)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.campaign_outlined,
+            size: AppIcon.lg,
+            color: NexoTheme.info,
+          ),
+          const Gap.h(AppSpacing.md),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: AppFont.small,
+                height: 1.45,
+                color: NexoTheme.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
