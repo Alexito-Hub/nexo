@@ -41,6 +41,14 @@ import 'package:nexo/features/onboarding/onboarding_screen.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Si una pantalla falla al construirse, Flutter la sustituye por un recuadro
+  // gris sin texto en release: es la «pantalla negra» que no dice nada. Se
+  // cambia por algo legible y reportable, con el error a la vista.
+  ErrorWidget.builder = (details) {
+    debugPrint('Pantalla rota: ${details.exception}');
+    return _BrokenScreen(details: details);
+  };
   _startupStepSync('sqlite', () {
     if (!kIsWeb &&
         (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
@@ -515,6 +523,68 @@ class _GateState extends State<_Gate> {
         }
         return child;
       },
+    );
+  }
+}
+
+/// Reemplaza el recuadro vacío de Flutter cuando una pantalla no se puede
+/// construir. No usa `Scaffold` ni localizaciones a propósito: se inserta
+/// justo donde falló el árbol, así que puede quedar fuera de cualquier
+/// contexto de Material.
+class _BrokenScreen extends StatelessWidget {
+  const _BrokenScreen({required this.details});
+  final FlutterErrorDetails details;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ColoredBox(
+        color: NexoTheme.bg,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.report_gmailerrorred_outlined,
+                  size: 44,
+                  color: NexoTheme.warning,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'No se pudo mostrar esta sección',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: NexoTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Vuelve atrás e inténtalo de nuevo. Si se repite, envíanos '
+                  'esta captura desde Soporte:',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: NexoTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '${details.exception}',
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: NexoTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

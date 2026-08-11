@@ -5,6 +5,7 @@ import 'package:nexo/core/storage.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/shared/util/formatters.dart';
+import 'package:nexo/shared/widgets/empty_state.dart';
 import 'package:nexo/shared/widgets/section_card.dart';
 
 class ScheduleDetailScreen extends StatelessWidget {
@@ -35,6 +36,16 @@ class ScheduleDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final h24 = AppStorage.instance.use24h;
+    // Un grupo sin sesiones no debería existir, pero si llega uno (datos raros
+    // de la Intranet) más vale decirlo que romper la pantalla entera.
+    if (grupo.sessions.isEmpty) {
+      return EmptyState(
+        icon: Icons.event_busy_outlined,
+        title: l.scheduleNoClassesTitle,
+        subtitle: l.scheduleNoClassesSubtitle,
+        color: NexoTheme.textMuted,
+      );
+    }
     final first = grupo.sessions.first;
     final isToday = grupo.weekday == DateTime.now().weekday;
     return Center(
