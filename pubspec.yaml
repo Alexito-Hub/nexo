@@ -1,7 +1,7 @@
 ﻿name: nexo
 description: "Cliente UPLA multiplataforma — SIGMA reimaginado."
 publish_to: 'none'
-version: 1.6.4+13
+version: 1.6.5+14
 
 environment:
   sdk: ^3.10.1
