@@ -795,5 +795,37 @@
         "type": "String"
       }
     }
+  },
+  "projectionTitle": "What do you need?",
+  "projectionMinimum": "To pass with {min}",
+  "@projectionMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionNeedSingle": "That's what you need in",
+  "projectionNeedEach": "That's what you need in each one",
+  "projectionExact": "Exactly: {value}",
+  "@projectionExact": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionAlreadyPassed": "Already passed: what you have can't drop below the minimum.",
+  "projectionOutOfReach": "Even with 20 in everything left you can't reach the minimum. Count on the make-up exam.",
+  "projectionAssume": "If you get {value} in {unit}:",
+  "@projectionAssume": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }

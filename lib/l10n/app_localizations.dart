@@ -2841,6 +2841,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Versión {version} · Actualizado el {date}'**
   String termsVersionLine(String version, String date);
+
+  /// No description provided for @projectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuánto necesitas?'**
+  String get projectionTitle;
+
+  /// No description provided for @projectionMinimum.
+  ///
+  /// In es, this message translates to:
+  /// **'Para aprobar con {min}'**
+  String projectionMinimum(String min);
+
+  /// No description provided for @projectionNeedSingle.
+  ///
+  /// In es, this message translates to:
+  /// **'Es lo que necesitas en'**
+  String get projectionNeedSingle;
+
+  /// No description provided for @projectionNeedEach.
+  ///
+  /// In es, this message translates to:
+  /// **'Es lo que necesitas en cada una'**
+  String get projectionNeedEach;
+
+  /// No description provided for @projectionExact.
+  ///
+  /// In es, this message translates to:
+  /// **'Exacto: {value}'**
+  String projectionExact(String value);
+
+  /// No description provided for @projectionAlreadyPassed.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya está aprobado: con lo que llevas no puedes bajar del mínimo.'**
+  String get projectionAlreadyPassed;
+
+  /// No description provided for @projectionOutOfReach.
+  ///
+  /// In es, this message translates to:
+  /// **'Ni con 20 en todo lo que queda se llega al mínimo. Cuenta con el sustitutorio.'**
+  String get projectionOutOfReach;
+
+  /// No description provided for @projectionAssume.
+  ///
+  /// In es, this message translates to:
+  /// **'Si en {unit} sacas {value}:'**
+  String projectionAssume(String unit, String value);
 }
 
 class _AppLocalizationsDelegate

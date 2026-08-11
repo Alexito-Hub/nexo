@@ -883,5 +883,37 @@
         "type": "String"
       }
     }
+  },
+  "projectionTitle": "¿Cuánto necesitas?",
+  "projectionMinimum": "Para aprobar con {min}",
+  "@projectionMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionNeedSingle": "Es lo que necesitas en",
+  "projectionNeedEach": "Es lo que necesitas en cada una",
+  "projectionExact": "Exacto: {value}",
+  "@projectionExact": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionAlreadyPassed": "Ya está aprobado: con lo que llevas no puedes bajar del mínimo.",
+  "projectionOutOfReach": "Ni con 20 en todo lo que queda se llega al mínimo. Cuenta con el sustitutorio.",
+  "projectionAssume": "Si en {unit} sacas {value}:",
+  "@projectionAssume": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }

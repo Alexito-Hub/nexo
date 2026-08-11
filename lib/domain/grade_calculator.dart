@@ -1,9 +1,13 @@
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/unified_models.dart';
+import 'package:nexo/domain/passing_rule.dart';
 
 class GradeCalculator {
   GradeCalculator._();
-  static const double notaAprobatoria = 10.5;
+
+  /// Umbral vigente. Ya no es constante: depende de la cohorte del
+  /// estudiante (ver [PassingRule]).
+  static double get notaAprobatoria => PassingRule.current.threshold;
   static double? promedioPonderado(Iterable<(double?, double)> notas) {
     double sumaPonderada = 0;
     double sumaCreditos = 0;

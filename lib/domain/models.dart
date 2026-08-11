@@ -1,3 +1,5 @@
+import 'package:nexo/domain/passing_rule.dart';
+
 int? _toInt(Object? v) {
   if (v == null) return null;
   if (v is int) return v;
@@ -257,10 +259,7 @@ class CourseGrade {
     return '—';
   }
 
-  bool get isApproved {
-    final n = currentGradeNum;
-    return n != null && n >= 10.5;
-  }
+  bool get isApproved => PassingRule.current.passes(currentGradeNum);
 
   int? get asistenciaPct {
     final a = attendance;
@@ -365,7 +364,7 @@ class RecordCourse {
   }
   double? get grade => parseGrade(rawGrade);
   String get notaText => formatGrade(rawGrade);
-  bool get isApproved => (grade ?? 0) >= 10.5;
+  bool get isApproved => PassingRule.current.passes(grade);
   bool get isFinished => state.toLowerCase().contains('conclu');
 }
 

@@ -1637,4 +1637,36 @@ class AppLocalizationsQu extends AppLocalizations {
   String termsVersionLine(String version, String date) {
     return 'Versión $version · Actualizado el $date';
   }
+
+  @override
+  String get projectionTitle => '¿Cuánto necesitas?';
+
+  @override
+  String projectionMinimum(String min) {
+    return 'Para aprobar con $min';
+  }
+
+  @override
+  String get projectionNeedSingle => 'Es lo que necesitas en';
+
+  @override
+  String get projectionNeedEach => 'Es lo que necesitas en cada una';
+
+  @override
+  String projectionExact(String value) {
+    return 'Exacto: $value';
+  }
+
+  @override
+  String get projectionAlreadyPassed =>
+      'Ya está aprobado: con lo que llevas no puedes bajar del mínimo.';
+
+  @override
+  String get projectionOutOfReach =>
+      'Ni con 20 en todo lo que queda se llega al mínimo. Cuenta con el sustitutorio.';
+
+  @override
+  String projectionAssume(String unit, String value) {
+    return 'Si en $unit sacas $value:';
+  }
 }

@@ -6,6 +6,14 @@
     "termsItemDeviceBody",
     "termsItemChangesTitle",
     "termsItemChangesBody",
-    "termsVersionLine"
+    "termsVersionLine",
+    "projectionTitle",
+    "projectionMinimum",
+    "projectionNeedSingle",
+    "projectionNeedEach",
+    "projectionExact",
+    "projectionAlreadyPassed",
+    "projectionOutOfReach",
+    "projectionAssume"
   ]
 }

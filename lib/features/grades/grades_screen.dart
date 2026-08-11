@@ -7,6 +7,7 @@ import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/features/grades/grade_widgets.dart';
+import 'package:nexo/features/grades/projection_card.dart';
 import 'package:nexo/features/grades/legacy_grades.dart';
 import 'package:nexo/shared/widgets/empty_state.dart';
 import 'package:nexo/shared/widgets/page_scaffold.dart';
@@ -15,11 +16,12 @@ import 'package:nexo/shared/widgets/section_card.dart';
 import 'package:nexo/shared/widgets/skeleton.dart';
 import 'package:nexo/shared/util/clipboard_helper.dart';
 import 'package:nexo/shared/widgets/status_chip.dart';
+import 'package:nexo/domain/passing_rule.dart';
 
 Color _gradeColor(num? n) {
   if (n == null) return NexoTheme.textMuted;
   if (n >= 14) return NexoTheme.success;
-  if (n >= 10.5) return NexoTheme.info;
+  if (n >= PassingRule.current.threshold) return NexoTheme.info;
   return NexoTheme.danger;
 }
 
@@ -477,7 +479,9 @@ class BoletaDetalleBody extends StatelessWidget {
         // servidor (11.60 → 12), así que no se usa: causaba que el número de
         // adentro no coincidiera con el de afuera.
         final avg = store.realAverageOf(course);
-        final notaText = avg == null ? course.promedioText : avg.toStringAsFixed(2);
+        final notaText = avg == null
+            ? course.promedioText
+            : avg.toStringAsFixed(2);
         return ListView(
           controller: controller,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
@@ -506,6 +510,10 @@ class BoletaDetalleBody extends StatelessWidget {
                 color: NexoTheme.danger,
               )
             else if (det != null) ...[
+              if (course.inProgress) ...[
+                ProjectionCard(detail: det),
+                const SizedBox(height: 12),
+              ],
               for (final u in det.units) ...[
                 GradeSectionCard(
                   titulo: u.name,

@@ -1629,4 +1629,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String termsVersionLine(String version, String date) {
     return 'Version $version · Updated on $date';
   }
+
+  @override
+  String get projectionTitle => 'What do you need?';
+
+  @override
+  String projectionMinimum(String min) {
+    return 'To pass with $min';
+  }
+
+  @override
+  String get projectionNeedSingle => 'That\'s what you need in';
+
+  @override
+  String get projectionNeedEach => 'That\'s what you need in each one';
+
+  @override
+  String projectionExact(String value) {
+    return 'Exactly: $value';
+  }
+
+  @override
+  String get projectionAlreadyPassed =>
+      'Already passed: what you have can\'t drop below the minimum.';
+
+  @override
+  String get projectionOutOfReach =>
+      'Even with 20 in everything left you can\'t reach the minimum. Count on the make-up exam.';
+
+  @override
+  String projectionAssume(String unit, String value) {
+    return 'If you get $value in $unit:';
+  }
 }

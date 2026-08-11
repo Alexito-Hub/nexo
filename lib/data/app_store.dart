@@ -12,6 +12,7 @@ import 'package:nexo/data/intranet_repository.dart';
 import 'package:nexo/data/sigma_repository.dart';
 import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/models.dart';
+import 'package:nexo/domain/passing_rule.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/domain/dashboard_widget_config.dart';
 
@@ -551,14 +552,20 @@ class AppStore extends ChangeNotifier {
     persist: _cache.saveStudent,
     operationName: 'loadProfile',
   );
-  Future<List<Term>?> loadPeriodos() => _wrap(
-    () => _resolveOrEmpty(_periodosRes),
-    () => periodos,
-    (v) => periodos = v,
-    cached: () => _cache.getPeriodos(),
-    persist: (v) => _cache.savePeriodos(v),
-    operationName: 'loadPeriodos',
-  );
+  Future<List<Term>?> loadPeriodos() async {
+    final result = await _wrap(
+      () => _resolveOrEmpty(_periodosRes),
+      () => periodos,
+      (v) => periodos = v,
+      cached: () => _cache.getPeriodos(),
+      persist: (v) => _cache.savePeriodos(v),
+      operationName: 'loadPeriodos',
+    );
+    // El periodo más antiguo es la cohorte de ingreso, y de ahí sale qué nota
+    // aprueba para este estudiante.
+    PassingRule.resolveFrom(periodos.value);
+    return result;
+  }
   Future<List<ScheduleClass>?> loadHorarioActual() => _wrap(
     () => _resolveOrEmpty(_horarioRes),
     () => schedule,
@@ -969,6 +976,8 @@ class AppStore extends ChangeNotifier {
     unawaited(_cache.clearAll());
     profile = const AsyncValue.idle();
     periodos = const AsyncValue.idle();
+    // Otro estudiante puede tener otra regla de aprobación: no se hereda.
+    PassingRule.current = PassingRule.standard;
     schedule = const AsyncValue.idle();
     resumen = const AsyncValue.idle();
     promedios = const AsyncValue.idle();
