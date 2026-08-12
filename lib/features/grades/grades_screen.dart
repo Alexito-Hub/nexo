@@ -773,10 +773,21 @@ class _PromediosChart extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: NexoTheme.border),
         ),
-        height: 160,
-        child: EmptyState(
-          icon: Icons.show_chart_rounded,
-          title: l.gradesNoHistoryYet,
+        child: Row(
+          children: [
+            Icon(
+              Icons.show_chart_rounded,
+              size: 20,
+              color: NexoTheme.textMuted,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l.gradesNoHistoryYet,
+                style: TextStyle(fontSize: 13, color: NexoTheme.textMuted),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -843,14 +854,17 @@ class _BarColumn extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            p.average == 0 ? '—' : p.average.toStringAsFixed(1),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: inProgress && p.average != 0
-                  ? NexoTheme.primary
-                  : NexoTheme.textPrimary,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              p.average == 0 ? '—' : p.average.toStringAsFixed(1),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: inProgress && p.average != 0
+                    ? NexoTheme.primary
+                    : NexoTheme.textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -882,12 +896,16 @@ class _BarColumn extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            p.label,
-            style: TextStyle(
-              fontSize: 10,
-              color: inProgress ? NexoTheme.primary : NexoTheme.textMuted,
-              fontWeight: inProgress ? FontWeight.w700 : FontWeight.w600,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              p.label,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 10,
+                color: inProgress ? NexoTheme.primary : NexoTheme.textMuted,
+                fontWeight: inProgress ? FontWeight.w700 : FontWeight.w600,
+              ),
             ),
           ),
         ],

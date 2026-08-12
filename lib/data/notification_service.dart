@@ -194,7 +194,14 @@ class NotificationService extends ChangeNotifier {
     for (var offset = 0; offset < 7; offset++) {
       final day = now.add(Duration(days: offset));
       final weekday = day.weekday;
-      for (final c in clases.where((c) => c.weekday == weekday)) {
+      // Por GRUPO, no por sesión: teoría y práctica de la misma asignatura el
+      // mismo día son dos `ScheduleClass`, y avisar de cada una daba dos
+      // notificaciones casi seguidas del mismo curso. Se avisa una vez, a la
+      // hora en que empieza el bloque.
+      final grupos = ScheduleClassGroup.groupBy(
+        clases.where((c) => c.weekday == weekday).toList(),
+      );
+      for (final c in grupos) {
         final hm = c.startTime.split(':');
         if (hm.length < 2) continue;
         final h = int.tryParse(hm[0]);
@@ -210,7 +217,9 @@ class NotificationService extends ChangeNotifier {
         );
         final when = start.subtract(Duration(minutes: _prefs.classLeadMinutes));
         if (when.isBefore(now)) continue;
-        final l10n = lookupAppLocalizations(Locale(AppStorage.instance.localeCode ?? 'es'));
+        final l10n = lookupAppLocalizations(
+          Locale(AppStorage.instance.localeCode ?? 'es'),
+        );
         await _zoned(
           id++,
           c.subject,
@@ -240,7 +249,9 @@ class NotificationService extends ChangeNotifier {
           0,
         );
         if (when.isBefore(now)) continue;
-        final l10n = lookupAppLocalizations(Locale(AppStorage.instance.localeCode ?? 'es'));
+        final l10n = lookupAppLocalizations(
+          Locale(AppStorage.instance.localeCode ?? 'es'),
+        );
         final cuando = lead == 0
             ? l10n.notifDueToday
             : lead == 1
