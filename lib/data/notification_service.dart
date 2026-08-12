@@ -9,6 +9,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:nexo/core/storage.dart';
+import 'package:nexo/domain/course_status.dart';
 import 'package:nexo/domain/notification_prefs.dart';
 import 'package:nexo/domain/unified_models.dart';
 
@@ -169,6 +170,7 @@ class NotificationService extends ChangeNotifier {
   Future<void> reschedule({
     List<ScheduleClass>? clases,
     List<Payment>? installments,
+    Set<String> finishedSubjects = const {},
   }) async {
     if (!_supported || !_ready) return;
     _rescheduleDebounce?.cancel();
@@ -180,7 +182,7 @@ class NotificationService extends ChangeNotifier {
       if (!_supportsScheduling) return;
       await _ensureExactAlarms();
       if (_prefs.classesEnabled && clases != null) {
-        await _scheduleClasses(clases);
+        await _scheduleClasses(clases, finishedSubjects);
       }
       if (_prefs.paymentsEnabled && installments != null) {
         await _schedulePayments(installments);
@@ -188,7 +190,10 @@ class NotificationService extends ChangeNotifier {
     });
   }
 
-  Future<void> _scheduleClasses(List<ScheduleClass> clases) async {
+  Future<void> _scheduleClasses(
+    List<ScheduleClass> clases,
+    Set<String> finished,
+  ) async {
     final now = tz.TZDateTime.now(tz.local);
     var id = _idClassBase;
     for (var offset = 0; offset < 7; offset++) {
@@ -197,9 +202,11 @@ class NotificationService extends ChangeNotifier {
       // Por GRUPO, no por sesión: teoría y práctica de la misma asignatura el
       // mismo día son dos `ScheduleClass`, y avisar de cada una daba dos
       // notificaciones casi seguidas del mismo curso. Se avisa una vez, a la
-      // hora en que empieza el bloque.
-      final grupos = ScheduleClassGroup.groupBy(
-        clases.where((c) => c.weekday == weekday).toList(),
+      // hora en que empieza el bloque, y no se avisa de talleres ya cerrados.
+      final grupos = remindableGroups(
+        classes: clases,
+        weekday: weekday,
+        finished: finished,
       );
       for (final c in grupos) {
         final hm = c.startTime.split(':');

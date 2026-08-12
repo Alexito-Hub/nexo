@@ -161,6 +161,7 @@ Future<void> main(List<String> args) async {
         NotificationService.instance.reschedule(
           clases: store.schedule.value,
           installments: store.pendingInstallments.value,
+          finishedSubjects: store.finishedSubjectsThisTerm,
         );
       }
     }

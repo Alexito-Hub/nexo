@@ -11,6 +11,7 @@ import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_repository.dart';
 import 'package:nexo/data/sigma_repository.dart';
 import 'package:nexo/domain/grade_calculator.dart';
+import 'package:nexo/domain/course_status.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/passing_rule.dart';
 import 'package:nexo/domain/unified_models.dart';
@@ -208,6 +209,14 @@ class AppStore extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Asignaturas del periodo activo que ya cerraron (talleres de medio ciclo).
+  /// Se usa para no recordar clases de un curso que ya terminó.
+  Set<String> get finishedSubjectsThisTerm {
+    final p = periodoActivo;
+    if (p == null) return const {};
+    return finishedSubjects(boletaOf(p.year, p.number).value);
   }
 
   double? get promedioAcumulado {
