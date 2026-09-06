@@ -12,4 +12,5 @@ output-localization-file: app_localizations.dart
 output-class: AppLocalizations
 nullable-getter: false
 output-dir: lib/l10n
+synthetic-package: false
 untranslated-messages-file: untranslated.json

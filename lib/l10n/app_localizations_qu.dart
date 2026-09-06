@@ -199,7 +199,7 @@ class AppLocalizationsQu extends AppLocalizations {
   String get detailNrc => 'NRC';
 
   @override
-  String get detailSection => 'Sec.';
+  String get detailSection => 'Sección';
 
   @override
   String get detailLevel => 'Nivel';
@@ -979,10 +979,10 @@ class AppLocalizationsQu extends AppLocalizations {
   String get homeMetricPromedio => 'Promedio';
 
   @override
-  String get homeMetricPromedioCiclo => 'Prom. ciclo';
+  String get homeMetricPromedioCiclo => 'Promedio del ciclo';
 
   @override
-  String get homeMetricPromedioAcumulado => 'Prom. acum.';
+  String get homeMetricPromedioAcumulado => 'Promedio acumulado';
 
   @override
   String get homeMetricCreditos => 'Créditos';

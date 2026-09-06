@@ -652,10 +652,10 @@ class _DashboardWidgetWrapper extends StatelessWidget {
 
     switch (config.id) {
       case 'stats_promedio':
-        final promedioAcum = store.promedioAcumulado;
+        final promCiclo = store.promedioCicloActual;
         return _StatTile(data: _StatData(
-          label: l.homeMetricPromedio,
-          value: promedioAcum == null ? '—' : promedioAcum.toStringAsFixed(2),
+          label: l.homeMetricPromedioCiclo,
+          value: promCiclo == null ? '—' : promCiclo.toStringAsFixed(2),
           icon: Icons.trending_up_rounded,
           color: NexoTheme.primary,
           loading: store.promedios.showSkeleton && store.resumen.showSkeleton,

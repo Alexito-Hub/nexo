@@ -100,13 +100,15 @@ abstract final class Fmt {
     final clean = rawAula.trim();
     if (clean.contains(' ')) {
       final idx = clean.indexOf(' ');
-      final pab = clean.substring(0, idx).trim();
-      final aul = clean.substring(idx + 1).trim();
-      final isSingleLetter = RegExp(r'^[a-zA-Z]$').hasMatch(pab);
-      final isRoman = RegExp(r'^[iIvVxX]+$').hasMatch(pab);
-      if (isSingleLetter || isRoman) {
-        if (pab.isNotEmpty && aul.isNotEmpty) {
-          return {'pabellon': pab, 'aula': aul};
+      if (idx > 0 && idx < clean.length - 1) {
+        final pab = clean.substring(0, idx).trim();
+        final aul = clean.substring(idx + 1).trim();
+        final isSingleLetter = RegExp(r'^[a-zA-Z]$').hasMatch(pab);
+        final isRoman = RegExp(r'^[iIvVxX]+$').hasMatch(pab);
+        if (isSingleLetter || isRoman) {
+          if (pab.isNotEmpty && aul.isNotEmpty) {
+            return {'pabellon': pab, 'aula': aul};
+          }
         }
       }
     }
@@ -118,8 +120,20 @@ abstract final class Fmt {
     final pab = parsed['pabellon'];
     final aul = parsed['aula'];
     if (pab != null && aul != null) {
-      return 'Pab. $pab - Aula $aul';
+      return 'Pabellón $pab - Aula $aul';
     }
     return aul ?? '—';
+  }
+
+  static String cleanBuilding(String raw) {
+    var s = raw.replaceAll(RegExp(r'^(PABELLON|PABELLÓN)\s*_?\s*', caseSensitive: false), '').trim();
+    if (s.isEmpty) return raw;
+    return s;
+  }
+
+  static String cleanRoom(String raw) {
+    var s = raw.replaceAll(RegExp(r'^(LAB|LABORATORIO)\s*_?\s*', caseSensitive: false), '').trim();
+    if (s.isEmpty) return raw;
+    return s;
   }
 }

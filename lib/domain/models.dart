@@ -337,6 +337,7 @@ class RecordCourse {
   final String name;
   final String cycle;
   final String rawGrade;
+  final double creditos;
   const RecordCourse({
     required this.faculty,
     required this.career,
@@ -347,9 +348,19 @@ class RecordCourse {
     required this.name,
     required this.cycle,
     required this.rawGrade,
+    this.creditos = 0,
   });
   factory RecordCourse.fromRow(List<dynamic> r) {
     String at(int i) => (i < r.length ? r[i]?.toString() ?? '' : '').trim();
+    double cred = 0;
+    // Buscar créditos en las columnas aledañas. Suelen venir como número entero (1, 2, 3, 4, 5).
+    for (final i in [9, 10, 11]) {
+      final val = double.tryParse(at(i));
+      if (val != null && val > 0 && val <= 20) {
+        cred = val;
+        break;
+      }
+    }
     return RecordCourse(
       faculty: at(0),
       career: at(1),
@@ -360,6 +371,7 @@ class RecordCourse {
       name: at(7),
       cycle: at(8),
       rawGrade: at(12),
+      creditos: cred,
     );
   }
   double? get grade => parseGrade(rawGrade);
@@ -398,7 +410,7 @@ class ReportCardCourse {
     return ReportCardCourse(
       enrollmentSubjectId: at(0),
       plan: at(1),
-      credit: double.tryParse(at(3)) ?? 0,
+      credit: parseGrade(at(3)) ?? parseGrade(at(2)) ?? 0,
       code: at(4),
       name: at(5),
       section: at(6),

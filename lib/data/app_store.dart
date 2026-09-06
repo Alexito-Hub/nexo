@@ -220,11 +220,26 @@ class AppStore extends ChangeNotifier {
   }
 
   double? get promedioAcumulado {
-    // Preferimos el promedio oficial del resumen académico (ponderado por
-    // créditos, calculado por la universidad). El promedio simple de los
-    // promedios por ciclo solo queda como respaldo.
+    // Calculamos el promedio ponderado histórico real usando el récord académico
+    final historial = record.value;
+    if (historial != null && historial.isNotEmpty) {
+      double sumaPonderada = 0;
+      double sumaCreditos = 0;
+      for (final c in historial) {
+        final g = c.grade;
+        // Ignorar cursos sin nota o sin créditos extraídos
+        if (g == null || c.creditos <= 0) continue;
+        sumaPonderada += g * c.creditos;
+        sumaCreditos += c.creditos;
+      }
+      if (sumaCreditos > 0) return sumaPonderada / sumaCreditos;
+    }
+
+    // Fallback 1: Si no hay créditos en el récord, intentamos usar el oficial del resumen
     final oficial = resumen.value?.average;
     if (oficial != null && oficial > 0) return oficial;
+
+    // Fallback 2: Promedio simple de todos los periodos (poco exacto)
     final list = promedios.value;
     if (list == null) return null;
     final activo = periodoActivo;
@@ -250,7 +265,11 @@ class AppStore extends ChangeNotifier {
     }
     final courses = boletaLegacyOf(activo.year, activo.number).value;
     if (courses == null) return null;
-    return GradeCalculator.promedioPonderadoLegacy(courses);
+    return GradeCalculator.promedioPonderadoLegacy(
+      courses,
+      activeYear: activo.year,
+      activeNumber: activo.number,
+    );
   }
 
   /// Promedio a mostrar para un curso de la boleta (modelo nuevo).

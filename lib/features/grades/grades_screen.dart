@@ -365,6 +365,11 @@ class _CursoTile extends StatelessWidget {
                           Icons.tag_rounded,
                           '${l.detailSection} ${course.section}',
                         ),
+                        if (course.credit > 0)
+                          _meta(
+                            Icons.stars_rounded,
+                            '${course.credit % 1 == 0 ? course.credit.toInt() : course.credit} créditos',
+                          ),
                         if (course.attendance != null)
                           _meta(
                             Icons.fact_check_outlined,

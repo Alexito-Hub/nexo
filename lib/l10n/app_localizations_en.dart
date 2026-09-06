@@ -199,7 +199,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailNrc => 'NRC';
 
   @override
-  String get detailSection => 'Sec.';
+  String get detailSection => 'Section';
 
   @override
   String get detailLevel => 'Level';
@@ -974,10 +974,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeMetricPromedio => 'GPA';
 
   @override
-  String get homeMetricPromedioCiclo => 'Term GPA';
+  String get homeMetricPromedioCiclo => 'Term average';
 
   @override
-  String get homeMetricPromedioAcumulado => 'Cumulative';
+  String get homeMetricPromedioAcumulado => 'Cumulative GPA';
 
   @override
   String get homeMetricCreditos => 'Credits';

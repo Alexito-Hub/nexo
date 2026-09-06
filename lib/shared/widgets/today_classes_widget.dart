@@ -178,7 +178,7 @@ class _CourseTile extends StatelessWidget {
                             ],
                           ],
                         ),
-                        if (group.room.isNotEmpty) ...[
+                        if (group.room.isNotEmpty && !group.hasMixedRooms) ...[
                           const Gap(AppSpacing.xs),
                           Row(
                             children: [
@@ -197,6 +197,30 @@ class _CourseTile extends StatelessWidget {
                               ),
                             ],
                           ),
+                        ],
+                        if (group.hasMixedRooms) ...[
+                          const Gap(AppSpacing.xs),
+                          for (final entry in group.roomsByType.entries)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    size: AppIcon.xs,
+                                    color: NexoTheme.textSecondary,
+                                  ),
+                                  const Gap.h(AppSpacing.xs),
+                                  Text(
+                                    '${entry.key}: ${Fmt.formatAula(entry.value)}',
+                                    style: TextStyle(
+                                      fontSize: AppFont.small,
+                                      color: NexoTheme.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ],
                     ),

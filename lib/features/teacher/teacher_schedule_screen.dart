@@ -234,7 +234,7 @@ class _GrupoTile extends StatelessWidget {
                       children: [
                         _meta(
                           Icons.tag_rounded,
-                          'Sec. ${grupo.sessions.first.section}',
+                          'Sección ${grupo.sessions.first.section}',
                         ),
                         if (grupo.room.isNotEmpty)
                           _meta(

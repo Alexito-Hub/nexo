@@ -23,13 +23,32 @@ class GradeCalculator {
   static double? promedioPonderadoBoleta(
     List<ReportCardCourse> courses, {
     double? Function(ReportCardCourse)? gradeOf,
-  }) => promedioPonderado(
-    courses.map((c) => ((gradeOf ?? (c) => c.average)(c), c.credit)),
-  );
+  }) {
+    // La boleta actual asume que todos sus cursos pertenecen al ciclo solicitado,
+    // pero por si acaso, solo sumamos los que tengan nota válida.
+    return promedioPonderado(
+      courses.map((c) => ((gradeOf ?? (c) => c.average)(c), c.credit)),
+    );
+  }
 
-  static double? promedioPonderadoLegacy(List<CourseGrade> courses) =>
-      promedioPonderado(courses.map((c) => (c.currentGradeNum, c.credit)));
+  static double? promedioPonderadoLegacy(
+    List<CourseGrade> courses, {
+    int? activeYear,
+    int? activeNumber,
+  }) {
+    return promedioPonderado(
+      courses.where((c) {
+        if (activeYear != null && activeNumber != null) {
+          return c.year == activeYear && c.periodNum == activeNumber;
+        }
+        return true;
+      }).map((c) => (c.currentGradeNum, c.credit)),
+    );
+  }
 
+  /// Promedio acumulado de respaldo usando un **promedio simple** de todos los
+  /// promedios de ciclo. Matemáticamente esto no pondera por créditos, así
+  /// que solo se usa como último recurso cuando falla la carga del resumen oficial.
   static double? promedioAcumulado(
     List<TermAverage> periodos, {
     int? activeYear,

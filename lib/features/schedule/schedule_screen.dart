@@ -39,8 +39,10 @@ class _HorarioScreenState extends State<ScheduleScreen> {
       listenable: widget.store,
       builder: (context, _) {
         final state = widget.store.schedule;
+        final finished = widget.store.finishedSubjectsThisTerm;
         final agrupadas = ScheduleClassGroup.groupBy(
           state.value ?? const [],
+          finishedSubjects: finished,
         ).length;
         final list = RefreshIndicator(
           onRefresh: () => widget.store.loadHorarioActual(),
@@ -119,7 +121,11 @@ class _HorarioScreenState extends State<ScheduleScreen> {
         ),
       );
     }
-    final clases = state.value ?? const <ScheduleClass>[];
+    final allClases = state.value ?? const <ScheduleClass>[];
+    final clases = allClases.where((c) {
+      if (c.startTime.isEmpty || c.endTime.isEmpty) return false;
+      return true;
+    }).toList();
     if (clases.isEmpty) {
       return SectionCard(
         title: l.scheduleNoClassesTitle,
@@ -250,6 +256,8 @@ class _DayListView extends StatelessWidget {
   const _DayListView({required this.clases});
   @override
   Widget build(BuildContext context) {
+    final store = context.findAncestorWidgetOfExactType<ScheduleScreen>()?.store;
+    final finished = store?.finishedSubjectsThisTerm ?? const {};
     final byDay = <int, List<ScheduleClass>>{};
     for (final c in clases) {
       byDay.putIfAbsent(c.weekday, () => []).add(c);
@@ -257,7 +265,7 @@ class _DayListView extends StatelessWidget {
     final gruposTotales = <ScheduleClassGroup>[];
     final days = byDay.keys.toList()..sort();
     for (final d in days) {
-      gruposTotales.addAll(ScheduleClassGroup.groupBy(byDay[d]!));
+      gruposTotales.addAll(ScheduleClassGroup.groupBy(byDay[d]!, finishedSubjects: finished));
     }
     return Card(
       child: Padding(
@@ -267,7 +275,7 @@ class _DayListView extends StatelessWidget {
             for (var i = 0; i < gruposTotales.length; i++) ...[
               Reveal(
                 index: i,
-                child: _GrupoTile(grupo: gruposTotales[i], showDay: true),
+                child: _GrupoTile(grupo: gruposTotales[i], showDay: true, store: store),
               ),
               if (i < gruposTotales.length - 1) const Divider(height: 12),
             ],
@@ -289,7 +297,9 @@ class _DaySection extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    final grupos = ScheduleClassGroup.groupBy(clases);
+    final store = context.findAncestorWidgetOfExactType<ScheduleScreen>()?.store;
+    final finished = store?.finishedSubjectsThisTerm ?? const {};
+    final grupos = ScheduleClassGroup.groupBy(clases, finishedSubjects: finished);
     final l = AppLocalizations.of(context);
     return Card(
       child: Padding(
@@ -333,7 +343,7 @@ class _DaySection extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             for (var i = 0; i < grupos.length; i++) ...[
-              _GrupoTile(grupo: grupos[i]),
+              _GrupoTile(grupo: grupos[i], store: store),
               if (i < grupos.length - 1) const SizedBox(height: 10),
             ],
           ],
@@ -346,7 +356,8 @@ class _DaySection extends StatelessWidget {
 class _GrupoTile extends StatefulWidget {
   final ScheduleClassGroup grupo;
   final bool showDay;
-  const _GrupoTile({required this.grupo, this.showDay = false});
+  final AppStore? store;
+  const _GrupoTile({required this.grupo, this.showDay = false, this.store});
   @override
   State<_GrupoTile> createState() => _GrupoTileState();
 }
@@ -382,7 +393,7 @@ class _GrupoTileState extends State<_GrupoTile> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => ScheduleDetailScreen.open(context, widget.grupo),
+            onTap: () => ScheduleDetailScreen.open(context, widget.grupo, store: widget.store),
             borderRadius: BorderRadius.circular(14),
             child: Padding(
               padding: const EdgeInsets.all(14),
@@ -463,6 +474,19 @@ class _GrupoTileState extends State<_GrupoTile> {
                             height: 1.2,
                           ),
                         ),
+                        if (widget.grupo.isSequentialWorkshop) ...[
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 6,
+                            children: [
+                              StatusChip(
+                                text: 'Bloque Secuencial',
+                                color: NexoTheme.primary,
+                                icon: Icons.sync_alt_rounded,
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 6),
                         Wrap(
                           spacing: 10,
@@ -473,15 +497,23 @@ class _GrupoTileState extends State<_GrupoTile> {
                                 Icons.calendar_today_outlined,
                                 Fmt.dayLabel(widget.grupo.weekday),
                               ),
+
                             if (widget.grupo.room.isNotEmpty)
                               _meta(
                                 Icons.location_on_outlined,
                                 Fmt.formatAula(widget.grupo.room),
                               ),
-                            _meta(
-                              Icons.tag_rounded,
-                              widget.grupo.sessions.first.section,
-                            ),
+                            if (widget.grupo.sessions.isNotEmpty)
+                              Builder(builder: (_) {
+                                var s = widget.grupo.sessions.first.section.trim();
+                                if (s.toLowerCase().startsWith('sec')) {
+                                  s = s.replaceFirst(RegExp(r'sec\.?\s*', caseSensitive: false), '');
+                                }
+                                return _meta(
+                                  Icons.tag_rounded,
+                                  'Sección $s',
+                                );
+                              }),
                           ],
                         ),
                         if (widget.grupo.teacher.isNotEmpty) ...[
@@ -550,10 +582,10 @@ class _GrupoTileState extends State<_GrupoTile> {
     );
   }
 
-  Widget _meta(IconData icon, String text) => Row(
+  Widget _meta(IconData icon, String text, {Color? color}) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 13, color: NexoTheme.textSecondary),
+      Icon(icon, size: 13, color: color ?? NexoTheme.textSecondary),
       const SizedBox(width: 4),
       Flexible(
         child: Text(
@@ -563,7 +595,7 @@ class _GrupoTileState extends State<_GrupoTile> {
           softWrap: false,
           style: TextStyle(
             fontSize: 12,
-            color: NexoTheme.textSecondary,
+            color: color ?? NexoTheme.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),

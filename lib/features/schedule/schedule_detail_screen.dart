@@ -2,36 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/design/tokens.dart';
 import 'package:nexo/core/storage.dart';
+import 'package:nexo/data/app_store.dart';
 import 'package:nexo/domain/unified_models.dart';
+import 'package:nexo/domain/course_status.dart';
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/shared/util/formatters.dart';
 import 'package:nexo/shared/widgets/empty_state.dart';
 import 'package:nexo/shared/widgets/section_card.dart';
 
 class ScheduleDetailScreen extends StatelessWidget {
-  const ScheduleDetailScreen({super.key, required this.grupo});
+  static void open(BuildContext context, ScheduleClassGroup grupo, {AppStore? store}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ScheduleDetailScreen(grupo: grupo, store: store)),
+    );
+  }
+
   final ScheduleClassGroup grupo;
-  static Future<void> open(BuildContext context, ScheduleClassGroup grupo) =>
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ScheduleDetailScreen(grupo: grupo),
-          settings: RouteSettings(name: grupo.subject),
-        ),
-      );
+  final AppStore? store;
+  const ScheduleDetailScreen({super.key, required this.grupo, this.store});
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: NexoTheme.bg,
       appBar: AppBar(title: Text(l.scheduleDetailTitle)),
-      body: SafeArea(child: ScheduleDetailBody(grupo: grupo)),
+      body: SafeArea(child: ScheduleDetailBody(grupo: grupo, store: store)),
     );
   }
 }
 
 class ScheduleDetailBody extends StatelessWidget {
-  const ScheduleDetailBody({super.key, required this.grupo});
+  const ScheduleDetailBody({super.key, required this.grupo, this.store});
   final ScheduleClassGroup grupo;
+  final AppStore? store;
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -54,14 +58,14 @@ class ScheduleDetailBody extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.xl),
           children: [
-            _Hero(grupo: grupo, isToday: isToday),
+            _Hero(grupo: grupo, isToday: isToday, store: store),
             const Gap(AppSpacing.lg),
             _TimeCard(grupo: grupo, h24: h24, label: l),
             const Gap(AppSpacing.lg),
             if (grupo.room.isNotEmpty ||
                 first.building.isNotEmpty ||
                 first.campus.isNotEmpty)
-              _LocationCard(first: first, aula: grupo.room, label: l),
+              _LocationCard(grupo: grupo, first: first, label: l),
             if (grupo.room.isNotEmpty ||
                 first.building.isNotEmpty ||
                 first.campus.isNotEmpty)
@@ -84,7 +88,8 @@ class ScheduleDetailBody extends StatelessWidget {
 class _Hero extends StatelessWidget {
   final ScheduleClassGroup grupo;
   final bool isToday;
-  const _Hero({required this.grupo, required this.isToday});
+  final AppStore? store;
+  const _Hero({required this.grupo, required this.isToday, this.store});
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -148,17 +153,52 @@ class _Hero extends StatelessWidget {
           ),
           if (first.section.isNotEmpty) ...[
             const Gap(AppSpacing.xs),
-            Text(
-              '${l.detailSection} ${first.section}'
-              '${first.level.isNotEmpty ? ' · ${l.detailLevel} ${first.level}' : ''}'
-              '${first.modality.isNotEmpty ? ' · ${first.modality}' : ''}',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
-                fontSize: AppFont.body,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Builder(builder: (_) {
+              var s = first.section.trim();
+              if (s.toLowerCase().startsWith('sec')) {
+                s = s.replaceFirst(RegExp(r'sec\.?\s*', caseSensitive: false), '');
+              }
+              return Text(
+                'Sección $s'
+                '${first.level.isNotEmpty ? ' · Nivel ${first.level}' : ''}'
+                '${first.modality.isNotEmpty ? ' · ${first.modality}' : ''}',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: AppFont.body,
+                  fontWeight: FontWeight.w500,
+                ),
+              );
+            }),
           ],
+          if (store != null)
+            Builder(builder: (_) {
+              final p = store!.periodoActivo;
+              if (p == null) return const SizedBox.shrink();
+              final b = store!.boletaOf(p.year, p.number).value;
+              if (b == null) return const SizedBox.shrink();
+              final target = grupo.activeWorkshopName ?? grupo.subject;
+              final match = b.where((c) => normalizeSubject(c.name) == normalizeSubject(target)).toList();
+              if (match.isNotEmpty && match.first.credit > 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Row(
+                    children: [
+                      Icon(Icons.military_tech_outlined, size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                      const Gap(4),
+                      Text(
+                        '${match.first.credit.toInt()} Créditos',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
         ],
       ),
     );
@@ -251,19 +291,27 @@ class _TimeCard extends StatelessWidget {
 }
 
 class _LocationCard extends StatelessWidget {
+  final ScheduleClassGroup grupo;
   final ScheduleClass first;
-  final String aula;
   final AppLocalizations label;
   const _LocationCard({
+    required this.grupo,
     required this.first,
-    required this.aula,
     required this.label,
   });
+
   @override
   Widget build(BuildContext context) {
-    final parsed = Fmt.parseAula(aula);
-    final pabellon = parsed['pabellon'];
-    final aulaOnly = parsed['aula'];
+    final hasMixed = grupo.hasMixedRooms;
+    
+    // Obtener las sesiones únicas por tipo
+    final Map<String, ScheduleClass> uniqueSessions = {};
+    for (final s in grupo.sessions) {
+      if (s.room.isNotEmpty) {
+        uniqueSessions.putIfAbsent(s.typeCode, () => s);
+      }
+    }
+
     return SectionCard(
       title: label.detailLocation,
       icon: Icons.location_on_outlined,
@@ -271,11 +319,31 @@ class _LocationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (pabellon != null) _kv(label.detailPavilion, pabellon),
-          if (aulaOnly != null) _kv(label.detailRoom, aulaOnly),
-          if (first.building.isNotEmpty)
-            _kv(label.detailBuilding, first.building),
-          if (first.campus.isNotEmpty) _kv(label.detailCampus, first.campus),
+          if (!hasMixed && grupo.room.isNotEmpty) ...[
+            if (first.building.isNotEmpty) _kv(label.detailPavilion, Fmt.cleanBuilding(first.building)),
+            _kv('Aula', Fmt.cleanRoom(grupo.room)),
+          ],
+          if (hasMixed)
+            for (final entry in uniqueSessions.entries) ...[
+              if (entry.key != uniqueSessions.keys.first) const Gap(12),
+              Text(
+                entry.key.toUpperCase() == 'T' ? 'Teoría' : 'Práctica',
+                style: TextStyle(
+                  fontSize: AppFont.small,
+                  fontWeight: FontWeight.w800,
+                  color: entry.key.toUpperCase() == 'T' ? Colors.blue.shade400 : Colors.green.shade400,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const Gap(4),
+              if (entry.value.building.isNotEmpty)
+                _kv(label.detailPavilion, Fmt.cleanBuilding(entry.value.building)),
+              _kv(entry.key.toUpperCase() == 'T' ? 'Aula' : 'Laboratorio', Fmt.cleanRoom(entry.value.room)),
+            ],
+          if (first.campus.isNotEmpty) ...[
+            const Gap(12),
+            _kv(label.detailCampus, first.campus),
+          ]
         ],
       ),
     );
