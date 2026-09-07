@@ -24,8 +24,12 @@ class SigmaRepository {
         fromJson: LoginResult.fromJson,
       ),
     );
+    // El servidor procesó el login y lo rechazó (success:false). Es una señal
+    // POSITIVA de credenciales inválidas — distinta de un fallo de red/servidor,
+    // que _send() ya habría lanzado como Network/Timeout/ServerException. Esta
+    // distinción es la que permite NO cerrar sesión ante caídas transitorias.
     if (!res.success || res.data == null) {
-      throw Exception(res.mensaje ?? 'No se pudo iniciar sesión.');
+      throw InvalidCredentialsException(res.mensaje ?? 'No se pudo iniciar sesión.');
     }
     _api.setToken(res.data!.token);
     return res.data!;

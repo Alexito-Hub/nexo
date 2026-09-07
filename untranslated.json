@@ -1,1 +1,19 @@
-{}
+{
+  "qu": [
+    "termsHeaderUpdatedPre",
+    "termsUpdatedNotice",
+    "termsItemDeviceTitle",
+    "termsItemDeviceBody",
+    "termsItemChangesTitle",
+    "termsItemChangesBody",
+    "termsVersionLine",
+    "projectionTitle",
+    "projectionMinimum",
+    "projectionNeedSingle",
+    "projectionNeedEach",
+    "projectionExact",
+    "projectionAlreadyPassed",
+    "projectionOutOfReach",
+    "projectionAssume"
+  ]
+}

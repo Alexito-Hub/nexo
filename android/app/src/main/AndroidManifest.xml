@@ -2,14 +2,17 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Notificaciones locales programadas -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- SCHEDULE_EXACT_ALARM se pide, pero si el sistema o el usuario lo niega
+         el servicio de notificaciones cae solo a alarmas inexactas. NO se
+         declara USE_EXACT_ALARM: Google Play lo reserva para despertadores y
+         calendarios, y una app académica no califica. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Autoupdater: necesario para lanzar el instalador del sistema con el
-         APK descargado (Android 8+). El usuario debe aprobar el prompt una
-         vez por "fuente desconocida" — no se puede sortear sin firma de OEM. -->
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Sin REQUEST_INSTALL_PACKAGES: Google Play prohíbe que una app instale
+         APKs (Uso indebido de dispositivos y redes). En Android las
+         actualizaciones las entrega la tienda. -->
+
     <application
         android:label="Nexo"
         android:name="${applicationName}"
@@ -118,13 +121,6 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
-        </intent>
-        <!-- Autoupdater: para lanzar el instalador del APK descargado.
-             Android 11+ exige declarar package visibility para resolver
-             el ACTION_VIEW de application/vnd.android.package-archive. -->
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:mimeType="application/vnd.android.package-archive" />
         </intent>
     </queries>
 </manifest>

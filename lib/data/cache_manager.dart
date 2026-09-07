@@ -27,7 +27,7 @@ class CacheManager {
           'docente_cursos',
           'docente_alumnos',
           'unified_student',
-          'unified_teacher'
+          'unified_teacher',
         ];
         for (final t in tables) {
           await db.execute('DROP TABLE IF EXISTS $t');
@@ -135,6 +135,10 @@ class CacheManager {
     }
     return d;
   }
+
+  /// ¿Hay base con la que trabajar? Durante el arranque puede que todavía no,
+  /// y borrar un caché que no existe no es un error: ya está vacío.
+  bool get isReady => _db != null;
 
   Future<void> saveBoleta(
     String year,
@@ -545,6 +549,9 @@ class CacheManager {
       'unified_student',
       'unified_teacher',
     ];
+    // Cerrar sesión antes de que el caché termine de abrirse no debe reventar:
+    // si no hay base, no hay nada que borrar.
+    if (!isReady) return;
     for (final table in tables) {
       await db.delete(table);
     }

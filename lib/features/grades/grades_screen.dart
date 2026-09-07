@@ -3,9 +3,11 @@ import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/errors.dart';
 import 'package:nexo/data/app_store.dart';
 import 'package:nexo/l10n/app_localizations.dart';
+import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/features/grades/grade_widgets.dart';
+import 'package:nexo/features/grades/projection_card.dart';
 import 'package:nexo/features/grades/legacy_grades.dart';
 import 'package:nexo/shared/widgets/empty_state.dart';
 import 'package:nexo/shared/widgets/page_scaffold.dart';
@@ -14,11 +16,12 @@ import 'package:nexo/shared/widgets/section_card.dart';
 import 'package:nexo/shared/widgets/skeleton.dart';
 import 'package:nexo/shared/util/clipboard_helper.dart';
 import 'package:nexo/shared/widgets/status_chip.dart';
+import 'package:nexo/domain/passing_rule.dart';
 
 Color _gradeColor(num? n) {
   if (n == null) return NexoTheme.textMuted;
   if (n >= 14) return NexoTheme.success;
-  if (n >= 10.5) return NexoTheme.info;
+  if (n >= PassingRule.current.threshold) return NexoTheme.info;
   return NexoTheme.danger;
 }
 
@@ -204,7 +207,7 @@ class _BoletaList extends StatelessWidget {
         ),
       );
     }
-    if (state.loading && !state.hasValue) {
+    if (state.showSkeleton) {
       return const Card(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -285,7 +288,11 @@ class _CursoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final color = _gradeColor(course.average);
+    // Promedio real con decimales (desde las unidades) cuando el curso está
+    // en proceso; el servidor entrega el promedio redondeado.
+    final avg = store.realAverageOf(course);
+    final avgText = avg == null ? '—' : avg.toStringAsFixed(2);
+    final color = _gradeColor(avg);
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(14),
@@ -323,7 +330,7 @@ class _CursoTile extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    course.promedioText,
+                    avgText,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w900,
@@ -358,6 +365,11 @@ class _CursoTile extends StatelessWidget {
                           Icons.tag_rounded,
                           '${l.detailSection} ${course.section}',
                         ),
+                        if (course.credit > 0)
+                          _meta(
+                            Icons.stars_rounded,
+                            '${course.credit % 1 == 0 ? course.credit.toInt() : course.credit} créditos',
+                          ),
                         if (course.attendance != null)
                           _meta(
                             Icons.fact_check_outlined,
@@ -367,6 +379,15 @@ class _CursoTile extends StatelessWidget {
                           StatusChip(
                             text: l.statusInProcess,
                             color: NexoTheme.warning,
+                          )
+                        else if (avg != null)
+                          StatusChip(
+                            text: avg >= GradeCalculator.notaAprobatoria
+                                ? l.statusApproved
+                                : l.statusFailed,
+                            color: avg >= GradeCalculator.notaAprobatoria
+                                ? NexoTheme.success
+                                : NexoTheme.danger,
                           ),
                       ],
                     ),
@@ -458,6 +479,14 @@ class BoletaDetalleBody extends StatelessWidget {
       builder: (context, _) {
         final st = store.detalleOf(course.enrollmentSubjectId);
         final det = st.value;
+        // Fuente única de verdad: el MISMO promedio que muestra la lista.
+        // El promedio final del detalle (tbl4/tbl6) viene redondeado por el
+        // servidor (11.60 → 12), así que no se usa: causaba que el número de
+        // adentro no coincidiera con el de afuera.
+        final avg = store.realAverageOf(course);
+        final notaText = avg == null
+            ? course.promedioText
+            : avg.toStringAsFixed(2);
         return ListView(
           controller: controller,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
@@ -466,7 +495,7 @@ class BoletaDetalleBody extends StatelessWidget {
               titulo: course.name,
               subtitulo:
                   '${course.code} · ${l.detailSection} ${course.section}',
-              notaFinalText: det?.finalAverageText ?? course.promedioText,
+              notaFinalText: notaText,
               inProgress: course.inProgress,
             ),
             const SizedBox(height: 16),
@@ -486,13 +515,17 @@ class BoletaDetalleBody extends StatelessWidget {
                 color: NexoTheme.danger,
               )
             else if (det != null) ...[
+              if (course.inProgress) ...[
+                ProjectionCard(detail: det),
+                const SizedBox(height: 12),
+              ],
               for (final u in det.units) ...[
                 GradeSectionCard(
                   titulo: u.name,
                   pesoText: u.weight != null
                       ? '${u.weight!.toStringAsFixed(0)}%'
                       : null,
-                  rawAverage: u.rawAverage,
+                  rawAverage: u.average?.toStringAsFixed(2) ?? u.rawAverage,
                   rows: [
                     for (var i = 0; i < u.evidences.length; i++)
                       GradeRow(
@@ -729,7 +762,10 @@ class _PromediosChart extends StatelessWidget {
       );
       final idx = data.indexWhere(_esActivo);
       if (idx >= 0) {
-        data[idx] = entry;
+        // Solo sustituimos el promedio oficial del servidor por el cálculo
+        // local cuando el servidor todavía no publicó el promedio del ciclo
+        // activo (average 0). Si ya lo tiene, ese es el valor correcto.
+        if (data[idx].average == 0) data[idx] = entry;
       } else {
         data.add(entry);
       }
@@ -742,10 +778,21 @@ class _PromediosChart extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: NexoTheme.border),
         ),
-        height: 160,
-        child: EmptyState(
-          icon: Icons.show_chart_rounded,
-          title: l.gradesNoHistoryYet,
+        child: Row(
+          children: [
+            Icon(
+              Icons.show_chart_rounded,
+              size: 20,
+              color: NexoTheme.textMuted,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l.gradesNoHistoryYet,
+                style: TextStyle(fontSize: 13, color: NexoTheme.textMuted),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -799,7 +846,7 @@ class _BarColumn extends StatelessWidget {
   const _BarColumn({required this.p, this.inProgress = false});
   @override
   Widget build(BuildContext context) {
-    final ok = p.average >= 11;
+    final ok = p.average >= GradeCalculator.notaAprobatoria;
     final List<Color> barColors = p.average == 0
         ? [NexoTheme.border, NexoTheme.border]
         : inProgress
@@ -812,14 +859,17 @@ class _BarColumn extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            p.average == 0 ? '—' : p.average.toStringAsFixed(1),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: inProgress && p.average != 0
-                  ? NexoTheme.primary
-                  : NexoTheme.textPrimary,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              p.average == 0 ? '—' : p.average.toStringAsFixed(1),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: inProgress && p.average != 0
+                    ? NexoTheme.primary
+                    : NexoTheme.textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -851,12 +901,16 @@ class _BarColumn extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            p.label,
-            style: TextStyle(
-              fontSize: 10,
-              color: inProgress ? NexoTheme.primary : NexoTheme.textMuted,
-              fontWeight: inProgress ? FontWeight.w700 : FontWeight.w600,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              p.label,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 10,
+                color: inProgress ? NexoTheme.primary : NexoTheme.textMuted,
+                fontWeight: inProgress ? FontWeight.w700 : FontWeight.w600,
+              ),
             ),
           ),
         ],

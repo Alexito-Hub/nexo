@@ -1,0 +1,4 @@
+storeFile=../nexo-release.jks
+storePassword=CAMBIA_ESTO
+keyAlias=nexo
+keyPassword=CAMBIA_ESTO

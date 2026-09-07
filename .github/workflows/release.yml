@@ -60,17 +60,12 @@ jobs:
           flutter build windows --release
           mkdir -p dist
           Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "dist\nexo-${{ github.ref_name }}-windows-x64.zip" -Force
-          # Setup warp-packer
-          Invoke-WebRequest -Uri 'https://github.com/dgiagio/warp/releases/download/v0.3.0/windows-x64.warp-packer.exe' -OutFile 'warp-packer.exe'
-          & .\warp-packer.exe --arch windows-x64 --input_dir "build\windows\x64\runner\Release" --exec nexo.exe --output "dist\nexo-${{ github.ref_name }}-setup-x64.exe"
-          # Patch PE Header
-          $bytes = [System.IO.File]::ReadAllBytes("dist\nexo-${{ github.ref_name }}-setup-x64.exe")
-          $peHeaderOffset = [BitConverter]::ToInt32($bytes, 0x3C)
-          $subsystemOffset = $peHeaderOffset + 0x5C
-          if ($bytes[$subsystemOffset] -eq 3) {
-            $bytes[$subsystemOffset] = 2
-            [System.IO.File]::WriteAllBytes("dist\nexo-${{ github.ref_name }}-setup-x64.exe", $bytes)
-          }
+          # El instalador de Windows es el asistente interno de la app (SetupWizard):
+          # el usuario extrae el ZIP y ejecuta nexo.exe, que muestra el asistente
+          # Instalar / Modo portable en el primer arranque. Ya NO se genera un .exe
+          # auto-contenido con warp-packer: ese binario sin firmar y con el header PE
+          # parcheado era puesto en cuarentena por Windows Defender/antivirus en otros
+          # equipos (el "bloqueo" que impedía instalar Nexo fuera de la máquina de dev).
 
       - name: Build Linux
         if: matrix.target == 'linux'

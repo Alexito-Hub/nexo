@@ -10,9 +10,10 @@ import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_repository.dart';
 import 'package:nexo/data/sigma_repository.dart';
-import 'package:nexo/data/teams_repository.dart';
 import 'package:nexo/domain/grade_calculator.dart';
+import 'package:nexo/domain/course_status.dart';
 import 'package:nexo/domain/models.dart';
+import 'package:nexo/domain/passing_rule.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/domain/dashboard_widget_config.dart';
 
@@ -31,6 +32,13 @@ class AsyncValue<T> {
       loading = false,
       error = e;
   bool get hasValue => value != null;
+
+  /// Aún no se inició ninguna carga: sin valor, sin error y sin loading.
+  /// La UI debe tratarlo como "cargando" (esqueleto), no como vacío.
+  bool get isIdle => !loading && value == null && error == null;
+
+  /// La UI debe mostrar esqueleto: cargando o todavía sin iniciar.
+  bool get showSkeleton => (loading || isIdle) && value == null;
 }
 
 class AppStore extends ChangeNotifier {
@@ -39,13 +47,16 @@ class AppStore extends ChangeNotifier {
     required CacheManager cache,
     required ErrorHandler errorHandler,
     IntranetRepository? intranet,
-    TeamsRepository? teams,
     TeacherRepository? teacher,
   }) : _cache = cache,
        _errorHandler = errorHandler,
        _intranet = intranet,
-       _teams = teams,
-       _teacher = teacher;
+       _teacher = teacher {
+    // El layout del dashboard debe cargarse SIEMPRE (no solo al hidratar):
+    // tras un login fresco `hydrateFromCache` no corre y el Home quedaba con
+    // spans por defecto rotos (tarjetas aplastadas en móvil).
+    _loadDashboardLayout();
+  }
   DataSource<T> _sigma<T>(SourceId id, Future<T> Function() fn) =>
       DataSource(id: id, fetch: fn);
   List<DataSource<T>> _intra<T>(Future<T> Function(IntranetRepository) fn) {
@@ -141,7 +152,6 @@ class AppStore extends ChangeNotifier {
   final CacheManager _cache;
   final ErrorHandler _errorHandler;
   final IntranetRepository? _intranet;
-  final TeamsRepository? _teams;
   final TeacherRepository? _teacher;
   void Function(String course, String grade)? onGradeChange;
   void _checkGrades(Iterable<(String, String)> items) {
@@ -177,8 +187,6 @@ class AppStore extends ChangeNotifier {
   AsyncValue<List<Payment>> intranetInstallments = const AsyncValue.idle();
   AsyncValue<List<Fee>> tasas = const AsyncValue.idle();
   AsyncValue<List<PaymentRecord>> historico = const AsyncValue.idle();
-  AsyncValue<List<TeamsClass>> teamsClasses = const AsyncValue.idle();
-  AsyncValue<List<TeamsAssignment>> teamsAssignments = const AsyncValue.idle();
   AsyncValue<EnrollmentCertificate> certificate = const AsyncValue.idle();
   AsyncValue<PaymentSchedule> paymentSchedule = const AsyncValue.idle();
   AsyncValue<List<Publication>> publications = const AsyncValue.idle();
@@ -203,7 +211,35 @@ class AppStore extends ChangeNotifier {
     }
   }
 
+  /// Asignaturas del periodo activo que ya cerraron (talleres de medio ciclo).
+  /// Se usa para no recordar clases de un curso que ya terminó.
+  Set<String> get finishedSubjectsThisTerm {
+    final p = periodoActivo;
+    if (p == null) return const {};
+    return finishedSubjects(boletaOf(p.year, p.number).value);
+  }
+
   double? get promedioAcumulado {
+    // Calculamos el promedio ponderado histórico real usando el récord académico
+    final historial = record.value;
+    if (historial != null && historial.isNotEmpty) {
+      double sumaPonderada = 0;
+      double sumaCreditos = 0;
+      for (final c in historial) {
+        final g = c.grade;
+        // Ignorar cursos sin nota o sin créditos extraídos
+        if (g == null || c.creditos <= 0) continue;
+        sumaPonderada += g * c.creditos;
+        sumaCreditos += c.creditos;
+      }
+      if (sumaCreditos > 0) return sumaPonderada / sumaCreditos;
+    }
+
+    // Fallback 1: Si no hay créditos en el récord, intentamos usar el oficial del resumen
+    final oficial = resumen.value?.average;
+    if (oficial != null && oficial > 0) return oficial;
+
+    // Fallback 2: Promedio simple de todos los periodos (poco exacto)
     final list = promedios.value;
     if (list == null) return null;
     final activo = periodoActivo;
@@ -220,11 +256,38 @@ class AppStore extends ChangeNotifier {
     if (isNewModel(activo.year, activo.number)) {
       final courses = boletaOf(activo.year, activo.number).value;
       if (courses == null) return null;
-      return GradeCalculator.promedioPonderadoBoleta(courses);
+      // `realAverageOf` ya devuelve nota vigesimal (los talleres 0-100 caen a
+      // su nota vigesimal oficial), así que se pueden promediar directamente.
+      return GradeCalculator.promedioPonderadoBoleta(
+        courses,
+        gradeOf: realAverageOf,
+      );
     }
     final courses = boletaLegacyOf(activo.year, activo.number).value;
     if (courses == null) return null;
-    return GradeCalculator.promedioPonderadoLegacy(courses);
+    return GradeCalculator.promedioPonderadoLegacy(
+      courses,
+      activeYear: activo.year,
+      activeNumber: activo.number,
+    );
+  }
+
+  /// Promedio a mostrar para un curso de la boleta (modelo nuevo).
+  /// El servidor redondea el promedio del curso (11.60 → 12); para cursos en
+  /// proceso usamos el promedio real calculado desde sus unidades (si el
+  /// detalle ya está cargado) para que lista y detalle muestren lo mismo.
+  /// Los cursos cerrados conservan la nota oficial.
+  /// Nota a mostrar (y a promediar) para un curso de la boleta, siempre en
+  /// escala vigesimal. En proceso: promedio real desde las unidades si está en
+  /// rango; cerrado o taller (0-100): la nota vigesimal oficial. Así lista,
+  /// detalle y promedio del ciclo muestran exactamente lo mismo.
+  double? realAverageOf(ReportCardCourse c) {
+    if (c.inProgress) {
+      final computed = _detalle[c.enrollmentSubjectId]?.value?.computedAverage;
+      if (computed != null && computed >= 0 && computed <= 20.5)
+        return computed;
+    }
+    return c.vigesimalAverage;
   }
 
   int? get approvedCredits {
@@ -291,15 +354,16 @@ class AppStore extends ChangeNotifier {
   void _setStorageCache(String key, Object data) =>
       AppStorage.instance.setCache(key, data);
 
-  List<DashboardWidgetConfig> dashboardLayout = [
-    const DashboardWidgetConfig(id: 'stats_promedio', span: 1),
-    const DashboardWidgetConfig(id: 'stats_creditos', span: 1),
-    const DashboardWidgetConfig(id: 'stats_clases_hoy', span: 1),
-    const DashboardWidgetConfig(id: 'stats_pagos', span: 1),
-    const DashboardWidgetConfig(id: 'next_class', span: 2),
-    const DashboardWidgetConfig(id: 'today_classes', span: 2),
-    const DashboardWidgetConfig(id: 'pending_payments', span: 2),
+  static const List<DashboardWidgetConfig> _defaultDashboardLayout = [
+    DashboardWidgetConfig(id: 'stats_promedio', span: 2),
+    DashboardWidgetConfig(id: 'stats_creditos', span: 2),
+    DashboardWidgetConfig(id: 'stats_clases_hoy', span: 2),
+    DashboardWidgetConfig(id: 'stats_pagos', span: 2),
+    DashboardWidgetConfig(id: 'next_class', span: 4),
+    DashboardWidgetConfig(id: 'today_classes', span: 4),
+    DashboardWidgetConfig(id: 'pending_payments', span: 4),
   ];
+  List<DashboardWidgetConfig> dashboardLayout = [..._defaultDashboardLayout];
 
   void _loadDashboardLayout() {
     final s = AppStorage.instance.dashboardConfigJson;
@@ -352,15 +416,7 @@ class AppStore extends ChangeNotifier {
         }
       } catch (_) {}
     }
-    dashboardLayout = [
-      const DashboardWidgetConfig(id: 'stats_promedio', span: 2),
-      const DashboardWidgetConfig(id: 'stats_creditos', span: 2),
-      const DashboardWidgetConfig(id: 'stats_clases_hoy', span: 2),
-      const DashboardWidgetConfig(id: 'stats_pagos', span: 2),
-      const DashboardWidgetConfig(id: 'next_class', span: 4),
-      const DashboardWidgetConfig(id: 'today_classes', span: 4),
-      const DashboardWidgetConfig(id: 'pending_payments', span: 4),
-    ];
+    dashboardLayout = [..._defaultDashboardLayout];
   }
 
   void saveDashboardLayout() {
@@ -464,15 +520,43 @@ class AppStore extends ChangeNotifier {
   }
 
   Future<void> loadHomeEssentials() async {
+    // Los periodos van primero: `periodoActivo` alimenta al perfil, horario y
+    // boleta. Cargarlos en paralelo provocaba que esas fuentes consultaran un
+    // periodo adivinado por fecha y a veces volvieran vacías ("no aparecen
+    // los datos hasta recargar").
+    await loadPeriodos();
     await Future.wait([
       loadProfile(),
       loadHorarioActual(),
       loadCuotasPendientes(),
-      loadPeriodos(),
       loadPromedios(),
     ]);
     final p = profile.value;
     if (p != null && p.studyPlan.isNotEmpty && p.level.isNotEmpty) {
+      await loadResumen(p.studyPlan, p.level);
+    }
+    unawaited(checkActiveBoleta());
+  }
+
+  /// Reintenta solo lo que falló (o nunca llegó a cargar) en el Home.
+  /// Se invoca al recuperar conectividad para no obligar al usuario a
+  /// refrescar manualmente.
+  Future<void> retryFailedEssentials() async {
+    bool needs(AsyncValue s) => !s.loading && !s.hasValue;
+    if (needs(periodos)) await loadPeriodos();
+    final tasks = <Future<void>>[
+      if (needs(profile)) loadProfile(),
+      if (needs(schedule)) loadHorarioActual(),
+      if (needs(pendingInstallments)) loadCuotasPendientes(),
+      if (needs(promedios)) loadPromedios(),
+    ];
+    if (tasks.isEmpty) return;
+    await Future.wait(tasks);
+    final p = profile.value;
+    if (needs(resumen) &&
+        p != null &&
+        p.studyPlan.isNotEmpty &&
+        p.level.isNotEmpty) {
       await loadResumen(p.studyPlan, p.level);
     }
     unawaited(checkActiveBoleta());
@@ -496,14 +580,20 @@ class AppStore extends ChangeNotifier {
     persist: _cache.saveStudent,
     operationName: 'loadProfile',
   );
-  Future<List<Term>?> loadPeriodos() => _wrap(
-    () => _resolveOrEmpty(_periodosRes),
-    () => periodos,
-    (v) => periodos = v,
-    cached: () => _cache.getPeriodos(),
-    persist: (v) => _cache.savePeriodos(v),
-    operationName: 'loadPeriodos',
-  );
+  Future<List<Term>?> loadPeriodos() async {
+    final result = await _wrap(
+      () => _resolveOrEmpty(_periodosRes),
+      () => periodos,
+      (v) => periodos = v,
+      cached: () => _cache.getPeriodos(),
+      persist: (v) => _cache.savePeriodos(v),
+      operationName: 'loadPeriodos',
+    );
+    // El periodo más antiguo es la cohorte de ingreso, y de ahí sale qué nota
+    // aprueba para este estudiante.
+    PassingRule.resolveFrom(periodos.value);
+    return result;
+  }
   Future<List<ScheduleClass>?> loadHorarioActual() => _wrap(
     () => _resolveOrEmpty(_horarioRes),
     () => schedule,
@@ -597,10 +687,24 @@ class AppStore extends ChangeNotifier {
       _boleta[key] = AsyncValue.data(data);
       _checkGrades(data.map((c) => (c.name, c.promedioText)));
       await _cache.saveBoleta(year.toString(), periodo.toString(), data);
+      // Trae el detalle de los cursos en proceso para poder mostrar el
+      // promedio real (con decimales) en la lista, no el redondeado.
+      unawaited(_prefetchDetalles(year, periodo, data));
     } catch (e) {
       _boleta[key] = AsyncValue.failure(e, _boleta[key]?.value);
     }
     _notify();
+  }
+
+  Future<void> _prefetchDetalles(
+    int year,
+    int periodo,
+    List<ReportCardCourse> courses,
+  ) async {
+    for (final c in courses.where((c) => c.inProgress)) {
+      if (_detalle[c.enrollmentSubjectId]?.hasValue ?? false) continue;
+      await loadDetalle(year, periodo, c.enrollmentSubjectId);
+    }
   }
 
   Future<void> loadDetalle(
@@ -674,36 +778,6 @@ class AppStore extends ChangeNotifier {
     (v) => historico = v,
     operationName: 'loadHistorico',
   );
-  TeamsRepository _teamsReady() {
-    final teams = _teams;
-    if (teams == null) {
-      throw Exception('Teams integration is not available.');
-    }
-    return teams;
-  }
-
-  Future<void> loadTeams() async {
-    await Future.wait([loadTeamsClasses(), loadTeamsAssignments()]);
-  }
-
-  Future<List<TeamsClass>?> loadTeamsClasses() => _wrap(
-    () => _teamsReady().classes(),
-    () => teamsClasses,
-    (v) => teamsClasses = v,
-    operationName: 'loadTeamsClasses',
-  );
-  Future<List<TeamsAssignment>?> loadTeamsAssignments() => _wrap(
-    () => _teamsReady().assignments(),
-    () => teamsAssignments,
-    (v) => teamsAssignments = v,
-    operationName: 'loadTeamsAssignments',
-  );
-  void clearTeams() {
-    teamsClasses = const AsyncValue.idle();
-    teamsAssignments = const AsyncValue.idle();
-    _notify();
-  }
-
   Future<EnrollmentCertificate?> loadCertificate({int? year, int? periodo}) {
     final p = periodoActivo;
     final a = year ?? p?.year ?? 0;
@@ -930,6 +1004,8 @@ class AppStore extends ChangeNotifier {
     unawaited(_cache.clearAll());
     profile = const AsyncValue.idle();
     periodos = const AsyncValue.idle();
+    // Otro estudiante puede tener otra regla de aprobación: no se hereda.
+    PassingRule.current = PassingRule.standard;
     schedule = const AsyncValue.idle();
     resumen = const AsyncValue.idle();
     promedios = const AsyncValue.idle();
@@ -942,8 +1018,6 @@ class AppStore extends ChangeNotifier {
     _boletaLegacy.clear();
     _detalle.clear();
     record = const AsyncValue.idle();
-    teamsClasses = const AsyncValue.idle();
-    teamsAssignments = const AsyncValue.idle();
     certificate = const AsyncValue.idle();
     schedule = const AsyncValue.idle();
     publications = const AsyncValue.idle();

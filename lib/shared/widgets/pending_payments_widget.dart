@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/features/payments/payment_detail_screen.dart';
+import 'package:nexo/shared/util/formatters.dart';
 import 'package:nexo/shared/widgets/section_card.dart';
 import 'package:nexo/l10n/app_localizations.dart';
 
@@ -38,7 +39,11 @@ class PendingPaymentsWidget extends StatelessWidget {
       title: l10n.homePendingPaymentsTitle,
       subtitle: vencidas > 0
           ? l10n.homePendingPaymentsOverdueCount(vencidas)
-          : (next == null ? l10n.widgetNoPendingDebts : '${l10n.paymentDaysLeft('0').split(' ')[0]} ${next.dueDateRaw}'),
+          : next == null
+          ? l10n.widgetNoPendingDebts
+          : next.dueDateRaw.trim().isEmpty
+          ? next.description
+          : l10n.paymentVenceEl(next.dueDateRaw),
       icon: Icons.payments_outlined,
       iconColor: vencidas > 0 ? NexoTheme.danger : NexoTheme.warning,
       trailing: Container(
@@ -48,7 +53,7 @@ class PendingPaymentsWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
-          'S/ ${total.toStringAsFixed(2)}',
+          Fmt.currency(total),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
@@ -118,7 +123,10 @@ class _CuotaRow extends StatelessWidget {
         ? NexoTheme.warning
         : NexoTheme.textSecondary;
     final l10n = AppLocalizations.of(context);
-    final tagText = isOverdue
+    // Sin fecha de vencimiento no hay etiqueta relativa ("En null días").
+    final String? tagText = days == null
+        ? null
+        : isOverdue
         ? l10n.paymentDaysOverdue((-days).toString())
         : days == 0
         ? l10n.paymentVenceHoy
@@ -183,25 +191,26 @@ class _CuotaRow extends StatelessWidget {
                             ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: tagColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            tagText,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: tagColor,
-                              letterSpacing: 0.2,
+                        if (tagText != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: tagColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              tagText,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: tagColor,
+                                letterSpacing: 0.2,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ],

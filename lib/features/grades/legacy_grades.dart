@@ -10,11 +10,12 @@ import 'package:nexo/shared/widgets/empty_state.dart';
 import 'package:nexo/shared/widgets/section_card.dart';
 import 'package:nexo/shared/widgets/skeleton.dart';
 import 'package:nexo/shared/widgets/status_chip.dart';
+import 'package:nexo/domain/passing_rule.dart';
 
 Color _grade(num? n) {
   if (n == null) return NexoTheme.textMuted;
   if (n >= 14) return NexoTheme.success;
-  if (n >= 10.5) return NexoTheme.info;
+  if (n >= PassingRule.current.threshold) return NexoTheme.info;
   return NexoTheme.danger;
 }
 
@@ -31,7 +32,7 @@ class LegacyGradesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    if (state.loading && !state.hasValue) {
+    if (state.showSkeleton) {
       return const Card(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -184,6 +185,15 @@ class _Tile extends StatelessWidget {
                               StatusChip(
                                 text: l.statusInProcess,
                                 color: NexoTheme.warning,
+                              )
+                            else
+                              StatusChip(
+                                text: grade.isApproved
+                                    ? l.statusApproved
+                                    : l.statusFailed,
+                                color: grade.isApproved
+                                    ? NexoTheme.success
+                                    : NexoTheme.danger,
                               ),
                           ],
                         ),

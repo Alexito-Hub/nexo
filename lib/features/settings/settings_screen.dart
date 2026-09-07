@@ -524,6 +524,8 @@ class UpdateCard extends StatelessWidget {
   const UpdateCard({super.key});
   @override
   Widget build(BuildContext context) {
+    // En la Store, Windows gestiona las actualizaciones: sin tarjeta propia.
+    if (StoreBuild.isStore) return const SizedBox.shrink();
     final updater = UpdateService.instance;
     if (updater == null || !updater.isSupported) {
       return const SizedBox.shrink();

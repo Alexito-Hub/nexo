@@ -117,6 +117,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailRoom => 'Room';
 
   @override
+  String get detailPavilion => 'Building';
+
+  @override
+  String weekdayFull(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Monday',
+      'tue': 'Tuesday',
+      'wed': 'Wednesday',
+      'thu': 'Thursday',
+      'fri': 'Friday',
+      'sat': 'Saturday',
+      'sun': 'Sunday',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Mon',
+      'tue': 'Tue',
+      'wed': 'Wed',
+      'thu': 'Thu',
+      'fri': 'Fri',
+      'sat': 'Sat',
+      'sun': 'Sun',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String monthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      'jan': 'Jan',
+      'feb': 'Feb',
+      'mar': 'Mar',
+      'apr': 'Apr',
+      'may': 'May',
+      'jun': 'Jun',
+      'jul': 'Jul',
+      'aug': 'Aug',
+      'sep': 'Sep',
+      'oct': 'Oct',
+      'nov': 'Nov',
+      'dec': 'Dec',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String timeGreeting(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'morning': 'Good morning',
+      'afternoon': 'Good afternoon',
+      'evening': 'Good evening',
+      'other': 'Hello',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get detailBuilding => 'Building';
 
   @override
@@ -135,7 +199,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailNrc => 'NRC';
 
   @override
-  String get detailSection => 'Sec.';
+  String get detailSection => 'Section';
 
   @override
   String get detailLevel => 'Level';
@@ -147,9 +211,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String detailDuration(int minutes) {
     return 'Total duration: $minutes minutes';
   }
-
-  @override
-  String get tabTeams => 'Teams';
 
   @override
   String get settingsTitle => 'Settings';
@@ -316,64 +377,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get teamsSubtitle => 'Your classes and assignments from Microsoft 365';
-
-  @override
-  String get teamsDisconnect => 'Disconnect';
-
-  @override
-  String get teamsMySubjects => 'My subjects';
-
-  @override
-  String get teamsAssignments => 'Assignments';
-
-  @override
-  String get teamsLoadError => 'Couldn\'t load';
-
-  @override
-  String get teamsConnectTitle => 'Connect your Microsoft account';
-
-  @override
-  String get teamsConnectSubtitle =>
-      'To see your Teams classes and assignments';
-
-  @override
-  String get teamsConnectBody =>
-      'Sign in with your institutional Microsoft 365 account. We\'ll give you a code to confirm in the browser.';
-
-  @override
-  String get teamsConnectButton => 'Connect with Microsoft';
-
-  @override
-  String get teamsDeviceCodeGenerating => 'Generating code…';
-
-  @override
-  String get teamsDeviceCodeConfirmTitle => 'Confirm in the browser';
-
-  @override
-  String get teamsDeviceCodeConfirmSubtitle =>
-      'Waiting for you to authorize the app…';
-
-  @override
-  String get teamsDeviceCodeStep1Prefix => 'Open ';
-
-  @override
-  String get teamsCopyLink => 'Copy link';
-
-  @override
-  String get teamsLinkCopied => 'Link copied';
-
-  @override
-  String get teamsDeviceCodeStep2Label => 'Enter this code:';
-
-  @override
-  String get teamsDeviceCodeAutoRefresh =>
-      'This will update automatically when you\'re done.';
-
-  @override
-  String get teamsCodeCopied => 'Code copied';
 
   @override
   String get actionShow => 'Show';
@@ -575,7 +578,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsHeaderTitle => 'Terms of use and privacy';
 
   @override
-  String get termsHeaderSubtitle => 'Read and accept to continue.';
+  String get termsHeaderSubtitle =>
+      'Read them carefully and accept to continue.';
 
   @override
   String get termsAcceptNote => 'By continuing you accept these terms.';
@@ -588,7 +592,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsBrandBody =>
-      'Privacy first. Your data stays only on your device.';
+      'Privacy first. Here we tell you what stays on your device and what leaves it.';
 
   @override
   String get termsItemWhatTitle => 'What is Nexo';
@@ -602,21 +606,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Your credentials and data are stored only on your device. Nexo does not send anything to its own servers or third parties: requests go directly to UPLA services, just like the official portal.';
+      'Your credentials and academic data are stored only on your device. Nexo does not send your information to its own servers or to third parties: requests go straight to UPLA services, just like the official portal.';
 
   @override
   String get termsItemSecurityTitle => 'Security';
 
   @override
   String get termsItemSecurityBody =>
-      'Local storage is not encrypted at the system level. Use it only on devices you trust. You can sign out to clear credentials and cache at any time.';
+      'Local storage is not encrypted at the system level, so use Nexo only on devices you trust. You can sign out to wipe credentials and cache at any time.';
 
   @override
   String get termsItemResponsibleTitle => 'Responsible use';
 
   @override
   String get termsItemResponsibleBody =>
-      'Access only your own information with your own credentials. This is an educational / reverse-engineering hackathon project for personal use. Use it according to your university\'s regulations.';
+      'Access only your own information, with your own credentials. This is an educational, personal-use project: use it in line with your university\'s rules.';
 
   @override
   String get termsItemDisclaimerTitle => 'No guarantees';
@@ -970,10 +974,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeMetricPromedio => 'GPA';
 
   @override
-  String get homeMetricPromedioCiclo => 'Term GPA';
+  String get homeMetricPromedioCiclo => 'Term average';
 
   @override
-  String get homeMetricPromedioAcumulado => 'Cumulative';
+  String get homeMetricPromedioAcumulado => 'Cumulative GPA';
 
   @override
   String get homeMetricCreditos => 'Credits';
@@ -1019,6 +1023,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusInProcess => 'IN PROGRESS';
+
+  @override
+  String get paymentsFilterAll => 'All';
+
+  @override
+  String get paymentsNoneInPeriod => 'No payments in this period';
+
+  @override
+  String homeMoreClassesToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count more classes today',
+      one: '+ 1 more class today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusApproved => 'PASSED';
+
+  @override
+  String get statusFailed => 'FAILED';
 
   @override
   String get gradesPromedioLabel => 'Average';
@@ -1172,21 +1199,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileAcademicInfo => 'Academic info';
-
-  @override
-  String get teamsCopyCode => 'Copy code';
-
-  @override
-  String get teamsUnderConstruction => 'Under construction';
-
-  @override
-  String get teamsSoonAvailable => 'Soon available';
-
-  @override
-  String get teamsWorkingOnSection => 'We are working on this section';
-
-  @override
-  String get teamsComeBackLater => 'Come back later.';
 
   @override
   String get pdfExportLoadConstanciaError => 'Could not load certificate.';
@@ -1562,15 +1574,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get widgetTeamsTitle => 'My subjects';
-
-  @override
-  String get widgetTeamsSubtitle => 'Teams groups';
-
-  @override
-  String get widgetTeamsEmpty => 'No subjects in Teams';
-
-  @override
   String get widgetAssignmentsTitle => 'Assignments';
 
   @override
@@ -1592,5 +1595,70 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String homePendingPaymentsMore(int count) {
     return '+ $count more fees';
+  }
+
+  @override
+  String get termsItemRightsTitle => 'Your rights';
+
+  @override
+  String get termsItemRightsBody =>
+      'Your data lives on your device, so you are in control: you can review it, update it from the intranet, or delete it by signing out. Write to us from the support section with any question about how your data is handled.';
+
+  @override
+  String get termsHeaderUpdatedPre => 'Something changed';
+
+  @override
+  String get termsUpdatedNotice =>
+      'We updated these terms to explain better what stays on your device and how we will tell you about future changes. Please read them again before continuing.';
+
+  @override
+  String get termsItemDeviceTitle => 'What stays on your device';
+
+  @override
+  String get termsItemDeviceBody =>
+      'Nexo keeps a local copy of your schedule, grades and payments so it works offline, and schedules notifications and widgets on the device itself. All of it is wiped when you sign out.';
+
+  @override
+  String get termsItemChangesTitle => 'Changes to these terms';
+
+  @override
+  String get termsItemChangesBody =>
+      'If something important changes in how your data is handled, we will update these terms and show them to you again before you keep using the app. You can reread them any time from Profile, under Terms & Privacy.';
+
+  @override
+  String termsVersionLine(String version, String date) {
+    return 'Version $version · Updated on $date';
+  }
+
+  @override
+  String get projectionTitle => 'What do you need?';
+
+  @override
+  String projectionMinimum(String min) {
+    return 'To pass with $min';
+  }
+
+  @override
+  String get projectionNeedSingle => 'That\'s what you need in';
+
+  @override
+  String get projectionNeedEach => 'That\'s what you need in each one';
+
+  @override
+  String projectionExact(String value) {
+    return 'Exactly: $value';
+  }
+
+  @override
+  String get projectionAlreadyPassed =>
+      'Already passed: what you have can\'t drop below the minimum.';
+
+  @override
+  String get projectionOutOfReach =>
+      'Even with 20 in everything left you can\'t reach the minimum. Count on the make-up exam.';
+
+  @override
+  String projectionAssume(String unit, String value) {
+    return 'If you get $value in $unit:';
   }
 }

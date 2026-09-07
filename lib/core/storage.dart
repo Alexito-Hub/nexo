@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nexo/core/config.dart';
 
 class AppStorage {
   AppStorage._(this._prefs);
@@ -25,10 +26,10 @@ class AppStorage {
   static const _kCredPass = 'nexo.cred.pass';
   static const _kCachePrefix = 'nexo.cache.';
   static const _kTerms = 'nexo.acceptedTerms';
+  static const _kTermsVersion = 'nexo.acceptedTermsVersion';
   static const _kOnboard = 'nexo.seenOnboarding';
   static const _kNotifPrefs = 'nexo.notifPrefs';
   static const _kGradeSnap = 'nexo.gradeSnapshot';
-  static const _kMsSession = 'nexo.ms.session';
   static const _kLocale = 'nexo.locale';
   static const _kUse24h = 'nexo.use24h';
   static const _kRunPortable = 'nexo.runPortable';
@@ -52,17 +53,25 @@ class AppStorage {
   String? get dashboardConfigJson => _prefs.getString(_kDashboardConfig);
   Future<void> setDashboardConfigJson(String value) =>
       _prefs.setString(_kDashboardConfig, value);
-  String? get msSessionJson => _prefs.getString(_kMsSession);
-  Future<void> setMsSessionJson(String? value) async {
-    if (value == null) {
-      await _prefs.remove(_kMsSession);
-    } else {
-      await _prefs.setString(_kMsSession, value);
-    }
+
+  /// Aceptados **estos** términos, no unos cualesquiera: si sube
+  /// `LegalTerms.version` la aceptación anterior deja de valer y se vuelven a
+  /// mostrar.
+  bool get acceptedTerms => acceptedTermsVersion >= LegalTerms.version;
+
+  int get acceptedTermsVersion {
+    final stored = _prefs.getInt(_kTermsVersion);
+    if (stored != null) return stored;
+    // Antes solo se guardaba un booleano: quien ya había aceptado cuenta como
+    // que aceptó la primera versión.
+    return (_prefs.getBool(_kTerms) ?? false) ? 1 : 0;
   }
 
-  bool get acceptedTerms => _prefs.getBool(_kTerms) ?? false;
-  Future<void> setAcceptedTerms(bool v) => _prefs.setBool(_kTerms, v);
+  Future<void> setAcceptedTerms(bool v) async {
+    await _prefs.setBool(_kTerms, v);
+    await _prefs.setInt(_kTermsVersion, v ? LegalTerms.version : 0);
+  }
+
   bool get seenOnboarding => _prefs.getBool(_kOnboard) ?? false;
   Future<void> setSeenOnboarding(bool v) => _prefs.setBool(_kOnboard, v);
   bool get runPortable => _prefs.getBool(_kRunPortable) ?? false;

@@ -1,8 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Claves de firma para Play Store. Viven en android/key.properties, que NO se
+// versiona: es un secreto. Sin ese archivo la release se firma con la clave de
+// depuración, que sirve para probar en local pero Google Play rechaza.
+val keystoreProperties = Properties().apply {
+    val f = rootProject.file("key.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val hasReleaseKeystore = keystoreProperties.getProperty("storeFile") != null
 
 android {
     namespace = "pe.upla.nexo"
@@ -38,12 +49,24 @@ android {
 
 
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // Firmamos con la debug key por ahora (mismo comportamiento que
-            // tenía antes). Cuando salgamos a Play Store o firma oficial,
-            // reemplazar por signingConfigs.create("release") con keystore.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
 
             // R8 minify + resource shrinking. Las reglas para preservar
             // MediaPipe/Protobuf/TFLite viven en proguard-rules.pro.

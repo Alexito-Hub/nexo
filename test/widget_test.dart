@@ -79,7 +79,7 @@ void main() {
       '_2NtaParcial1': '13   ',
     });
     expect(n.currentGradeNum, 11);
-    expect(n.currentGradeText, '11');
+    expect(n.currentGradeText, '11.00');
     expect(n.isApproved, true);
     expect(n.asistenciaPct, 100);
     expect(n.pF1, '09');
@@ -98,21 +98,21 @@ void main() {
   });
 
   test('formatGrade y RecordCourse manejan decimales', () {
-    expect(formatGrade('14.00'), '14');
+    expect(formatGrade('14.00'), '14.00');
     expect(formatGrade('14.50'), '14.50');
-    expect(formatGrade('15'), '15');
+    expect(formatGrade('15'), '15.00');
     expect(formatGrade('  '), '—');
     expect(formatGrade('--'), '—');
     expect(parseGrade('14,5'), 14.5);
 
     final c = RecordCourse.fromRow([
       'INGENIERÍA', 'INGENIERÍA DE SISTEMAS Y COMPUTACIÓN', '2022',
-      'isFinished', 'TN', '1', '33111A', 'METODOLOGÍA', '2', '0',
+      'CONCLUIDO', 'TN', '1', '33111A', 'METODOLOGÍA', '2', '0',
       '33111A', ' ', '14.00', ' ', '1', 'Jul 13 2025', 'ALESSANDRO',
     ]);
     expect(c.name, 'METODOLOGÍA');
     expect(c.grade, 14.0);
-    expect(c.notaText, '14');
+    expect(c.notaText, '14.00');
     expect(c.isApproved, true);
     expect(c.isFinished, true);
   });
@@ -156,11 +156,13 @@ void main() {
     expect(u.weight, 20.0);
     expect(u.evidences.length, 3);
     expect(u.evidences.first.type, 'EVIDENCIA DE CONOCIMIENTO');
-    expect(u.evidences.first.notaText, '15');
+    expect(u.evidences.first.notaText, '15.00');
     expect(u.promedioText, '14.33');
-    expect(det.finalAverageText, '3');
+    expect(det.finalAverageText, '3.00');
     expect(det.state, 'Dsp.');
     expect(det.hasSubstitute, false);
+    // Promedio real del curso desde las unidades (sin el redondeo del server)
+    expect(det.computedAverage, closeTo(14.33, 0.01));
   });
 
   test('Fmt.parseAula y Fmt.formatAula procesan correctamente "I 302" y otros formatos', () {

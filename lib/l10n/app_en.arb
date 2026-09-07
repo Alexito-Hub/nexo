@@ -36,13 +36,18 @@
   "detailSchedule": "Schedule",
   "detailLocation": "Location",
   "detailRoom": "Room",
+  "detailPavilion": "Building",
+  "weekdayFull": "{day, select, mon{Monday} tue{Tuesday} wed{Wednesday} thu{Thursday} fri{Friday} sat{Saturday} sun{Sunday} other{—}}",
+  "weekdayShort": "{day, select, mon{Mon} tue{Tue} wed{Wed} thu{Thu} fri{Fri} sat{Sat} sun{Sun} other{—}}",
+  "monthShort": "{month, select, jan{Jan} feb{Feb} mar{Mar} apr{Apr} may{May} jun{Jun} jul{Jul} aug{Aug} sep{Sep} oct{Oct} nov{Nov} dec{Dec} other{—}}",
+  "timeGreeting": "{period, select, morning{Good morning} afternoon{Good afternoon} evening{Good evening} other{Hello}}",
   "detailBuilding": "Building",
   "detailCampus": "Campus",
   "detailTeacher": "Teacher",
   "detailSessions": "Sessions",
   "detailNotes": "Notes",
   "detailNrc": "NRC",
-  "detailSection": "Sec.",
+  "detailSection": "Section",
   "detailLevel": "Level",
   "detailToday": "TODAY",
   "detailDuration": "Total duration: {minutes} minutes",
@@ -53,7 +58,6 @@
       }
     }
   },
-  "tabTeams": "Teams",
   "settingsTitle": "Settings",
   "settingsAppearance": "Appearance",
   "settingsPalette": "Palette",
@@ -142,24 +146,6 @@
       }
     }
   },
-  "teamsSubtitle": "Your classes and assignments from Microsoft 365",
-  "teamsDisconnect": "Disconnect",
-  "teamsMySubjects": "My subjects",
-  "teamsAssignments": "Assignments",
-  "teamsLoadError": "Couldn't load",
-  "teamsConnectTitle": "Connect your Microsoft account",
-  "teamsConnectSubtitle": "To see your Teams classes and assignments",
-  "teamsConnectBody": "Sign in with your institutional Microsoft 365 account. We'll give you a code to confirm in the browser.",
-  "teamsConnectButton": "Connect with Microsoft",
-  "teamsDeviceCodeGenerating": "Generating code…",
-  "teamsDeviceCodeConfirmTitle": "Confirm in the browser",
-  "teamsDeviceCodeConfirmSubtitle": "Waiting for you to authorize the app…",
-  "teamsDeviceCodeStep1Prefix": "Open ",
-  "teamsCopyLink": "Copy link",
-  "teamsLinkCopied": "Link copied",
-  "teamsDeviceCodeStep2Label": "Enter this code:",
-  "teamsDeviceCodeAutoRefresh": "This will update automatically when you're done.",
-  "teamsCodeCopied": "Code copied",
   "actionShow": "Show",
   "actionHide": "Hide",
   "actionSkip": "Skip",
@@ -242,19 +228,19 @@
   "docenteGradeRange": "Between 0 and 20",
   "termsHeaderPre": "Before you start",
   "termsHeaderTitle": "Terms of use and privacy",
-  "termsHeaderSubtitle": "Read and accept to continue.",
+  "termsHeaderSubtitle": "Read them carefully and accept to continue.",
   "termsAcceptNote": "By continuing you accept these terms.",
   "termsAcceptButton": "Accept and continue",
   "termsBrandTitle": "Welcome to Nexo",
-  "termsBrandBody": "Privacy first. Your data stays only on your device.",
+  "termsBrandBody": "Privacy first. Here we tell you what stays on your device and what leaves it.",
   "termsItemWhatTitle": "What is Nexo",
   "termsItemWhatBody": "An independent, unofficial app created by and for students that reorganizes your UPLA academic information more clearly. It is not affiliated with or endorsed by UPLA.",
   "termsItemPrivacyTitle": "Your data and privacy",
-  "termsItemPrivacyBody": "Your credentials and data are stored only on your device. Nexo does not send anything to its own servers or third parties: requests go directly to UPLA services, just like the official portal.",
+  "termsItemPrivacyBody": "Your credentials and academic data are stored only on your device. Nexo does not send your information to its own servers or to third parties: requests go straight to UPLA services, just like the official portal.",
   "termsItemSecurityTitle": "Security",
-  "termsItemSecurityBody": "Local storage is not encrypted at the system level. Use it only on devices you trust. You can sign out to clear credentials and cache at any time.",
+  "termsItemSecurityBody": "Local storage is not encrypted at the system level, so use Nexo only on devices you trust. You can sign out to wipe credentials and cache at any time.",
   "termsItemResponsibleTitle": "Responsible use",
-  "termsItemResponsibleBody": "Access only your own information with your own credentials. This is an educational / reverse-engineering hackathon project for personal use. Use it according to your university's regulations.",
+  "termsItemResponsibleBody": "Access only your own information, with your own credentials. This is an educational, personal-use project: use it in line with your university's rules.",
   "termsItemDisclaimerTitle": "No guarantees",
   "termsItemDisclaimerBody": "The service is provided \"as is\", without warranties. For official procedures, always consult the institutional portal.",
   "aboutFeatureAllInOneTitle": "Your university in one place",
@@ -437,8 +423,8 @@
   "connectivityDisconnected": "Disconnected",
   "homeVerifyConnectivity": "Verify Connection Status",
   "homeMetricPromedio": "GPA",
-  "homeMetricPromedioCiclo": "Term GPA",
-  "homeMetricPromedioAcumulado": "Cumulative",
+  "homeMetricPromedioCiclo": "Term average",
+  "homeMetricPromedioAcumulado": "Cumulative GPA",
   "homeMetricCreditos": "Credits",
   "homeMetricClasesHoy": "Classes today",
   "homeMetricPorPagar": "To pay",
@@ -454,6 +440,11 @@
   "gradesNoHistoryYet": "No history yet",
   "gradesEvolutionByPeriod": "Evolution by term",
   "statusInProcess": "IN PROGRESS",
+  "paymentsFilterAll": "All",
+  "paymentsNoneInPeriod": "No payments in this period",
+  "homeMoreClassesToday": "{count, plural, =1{+ 1 more class today} other{+ {count} more classes today}}",
+  "statusApproved": "PASSED",
+  "statusFailed": "FAILED",
   "gradesPromedioLabel": "Average",
   "gradesParcial1": "Partial 1",
   "gradesParcial2": "Partial 2",
@@ -505,11 +496,6 @@
   "profileStatusNotEnrolled": "Not enrolled",
   "profileStatusEnrolled": "Enrolled",
   "profileAcademicInfo": "Academic info",
-  "teamsCopyCode": "Copy code",
-  "teamsUnderConstruction": "Under construction",
-  "teamsSoonAvailable": "Soon available",
-  "teamsWorkingOnSection": "We are working on this section",
-  "teamsComeBackLater": "Come back later.",
   "pdfExportLoadConstanciaError": "Could not load certificate.",
   "pdfExportLoadCronogramaError": "Could not load payment schedule.",
   "gradesCreditsSummary": "{aprobados} of {total} credits",
@@ -777,9 +763,6 @@
       }
     }
   },
-  "widgetTeamsTitle": "My subjects",
-  "widgetTeamsSubtitle": "Teams groups",
-  "widgetTeamsEmpty": "No subjects in Teams",
   "widgetAssignmentsTitle": "Assignments",
   "widgetAssignmentsSubtitle": "Nearing deadline",
   "whatsappBannerTitle": "Join Nexo's channel",
@@ -791,6 +774,57 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "termsItemRightsTitle": "Your rights",
+  "termsItemRightsBody": "Your data lives on your device, so you are in control: you can review it, update it from the intranet, or delete it by signing out. Write to us from the support section with any question about how your data is handled.",
+  "termsHeaderUpdatedPre": "Something changed",
+  "termsUpdatedNotice": "We updated these terms to explain better what stays on your device and how we will tell you about future changes. Please read them again before continuing.",
+  "termsItemDeviceTitle": "What stays on your device",
+  "termsItemDeviceBody": "Nexo keeps a local copy of your schedule, grades and payments so it works offline, and schedules notifications and widgets on the device itself. All of it is wiped when you sign out.",
+  "termsItemChangesTitle": "Changes to these terms",
+  "termsItemChangesBody": "If something important changes in how your data is handled, we will update these terms and show them to you again before you keep using the app. You can reread them any time from Profile, under Terms & Privacy.",
+  "termsVersionLine": "Version {version} · Updated on {date}",
+  "@termsVersionLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionTitle": "What do you need?",
+  "projectionMinimum": "To pass with {min}",
+  "@projectionMinimum": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionNeedSingle": "That's what you need in",
+  "projectionNeedEach": "That's what you need in each one",
+  "projectionExact": "Exactly: {value}",
+  "@projectionExact": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "projectionAlreadyPassed": "Already passed: what you have can't drop below the minimum.",
+  "projectionOutOfReach": "Even with 20 in everything left you can't reach the minimum. Count on the make-up exam.",
+  "projectionAssume": "If you get {value} in {unit}:",
+  "@projectionAssume": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
       }
     }
   }
