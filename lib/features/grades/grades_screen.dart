@@ -1068,7 +1068,7 @@ class _IdiomasGradesList extends StatelessWidget {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: NexoTheme.bg,
                       borderRadius: BorderRadius.circular(14),
@@ -1077,23 +1077,23 @@ class _IdiomasGradesList extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 54,
+                          height: 54,
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
+                            color: color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: color.withValues(alpha: 0.3),
                             ),
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            avgText,
-                            style: TextStyle(
-                              color: color,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.2,
+                          child: Center(
+                            child: Text(
+                              avgText,
+                              style: TextStyle(
+                                color: color,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
                         ),
@@ -1104,42 +1104,50 @@ class _IdiomasGradesList extends StatelessWidget {
                             children: [
                               Text(
                                 c.asignatura,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: NexoTheme.textPrimary,
                                   height: 1.2,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${c.anio}-${monthName(c.mes)} · ${c.idiomaNombre}',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: NexoTheme.textSecondary,
-                                ),
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 10,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  _meta(
+                                    Icons.calendar_month_outlined,
+                                    '${c.anio}-${monthName(c.mes)}',
+                                  ),
+                                  _meta(Icons.language_rounded, c.idiomaNombre),
+                                  StatusChip(
+                                    text: c.promedio > 0
+                                        ? (c.promedio >=
+                                                  GradeCalculator
+                                                      .notaAprobatoria
+                                              ? 'Aprobado'
+                                              : 'Desaprobado')
+                                        : 'En proceso',
+                                    color: c.promedio > 0
+                                        ? (c.promedio >=
+                                                  GradeCalculator
+                                                      .notaAprobatoria
+                                              ? NexoTheme.success
+                                              : NexoTheme.danger)
+                                        : NexoTheme.warning,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: NexoTheme.surface,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '—',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: NexoTheme.textMuted,
-                              letterSpacing: -1,
-                            ),
-                          ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: NexoTheme.textMuted,
                         ),
                       ],
                     ),
@@ -1152,6 +1160,22 @@ class _IdiomasGradesList extends StatelessWidget {
       ]),
     );
   }
+
+  Widget _meta(IconData icon, String text) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 13, color: NexoTheme.textMuted),
+      const SizedBox(width: 3),
+      Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: NexoTheme.textSecondary,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
 }
 
 class _IdiomasDetalleSheet extends StatelessWidget {

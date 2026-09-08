@@ -133,7 +133,9 @@ class _Header extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            profile == null ? '...' : Fmt.firstName(profile.fullName),
+                            profile == null
+                                ? '...'
+                                : Fmt.firstName(profile.fullName),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -145,7 +147,10 @@ class _Header extends StatelessWidget {
                           ),
                         ),
                         if (AppStorage.instance.festivityDecor &&
-                            FestivityService.active(DateTime.now())?.festivity.id == 'fiestas_patrias') ...[
+                            FestivityService.active(
+                                  DateTime.now(),
+                                )?.festivity.id ==
+                                'fiestas_patrias') ...[
                           const SizedBox(width: 8),
                           const EscarapelaWidget(),
                         ],
@@ -223,213 +228,220 @@ class _Header extends StatelessWidget {
       barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (context) {
         final l = AppLocalizations.of(context);
-        return Dialog(
-          backgroundColor: NexoTheme.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: BorderSide(color: NexoTheme.border),
-          ),
-          child: ListenableBuilder(
-            listenable: connectivity,
-            builder: (context, _) {
-              final isOnline = connectivity.hasInternet;
-              final sigma = connectivity.sigmaStatus;
-              final intranet = connectivity.intranetStatus;
-              final idiomasAuth = connectivity.idiomasAuthStatus;
-              final idiomasApi = connectivity.idiomasApiStatus;
-              Widget buildStatusTile(
-                String title,
-                bool active,
-                ServerStatus? status,
-              ) {
-                final Color color;
-                final String label;
-                final IconData icon;
-                if (status != null) {
-                  switch (status) {
-                    case ServerStatus.online:
-                      color = NexoTheme.success;
-                      label = l.connectivityOnline;
-                      icon = Icons.check_circle_outline_rounded;
-                      break;
-                    case ServerStatus.degraded:
-                      color = NexoTheme.warning;
-                      label = l.connectivityDegraded;
-                      icon = Icons.error_outline_rounded;
-                      break;
-                    case ServerStatus.offline:
-                      color = NexoTheme.danger;
-                      label = l.connectivityOffline;
-                      icon = Icons.cancel_outlined;
-                      break;
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Dialog(
+            backgroundColor: NexoTheme.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: NexoTheme.border),
+            ),
+            child: ListenableBuilder(
+              listenable: connectivity,
+              builder: (context, _) {
+                final isOnline = connectivity.hasInternet;
+                final sigma = connectivity.sigmaStatus;
+                final intranet = connectivity.intranetStatus;
+                Widget buildStatusTile(
+                  String title,
+                  bool active,
+                  ServerStatus? status,
+                ) {
+                  final Color color;
+                  final String label;
+                  final IconData icon;
+                  if (status != null) {
+                    switch (status) {
+                      case ServerStatus.online:
+                        color = NexoTheme.success;
+                        label = l.connectivityOnline;
+                        icon = Icons.check_circle_outline_rounded;
+                        break;
+                      case ServerStatus.degraded:
+                        color = NexoTheme.warning;
+                        label = l.connectivityDegraded;
+                        icon = Icons.error_outline_rounded;
+                        break;
+                      case ServerStatus.offline:
+                        color = NexoTheme.danger;
+                        label = l.connectivityOffline;
+                        icon = Icons.cancel_outlined;
+                        break;
+                    }
+                  } else {
+                    color = active ? NexoTheme.success : NexoTheme.danger;
+                    label = active
+                        ? l.connectivityConnected
+                        : l.connectivityDisconnected;
+                    icon = active ? Icons.wifi_rounded : Icons.wifi_off_rounded;
                   }
-                } else {
-                  color = active ? NexoTheme.success : NexoTheme.danger;
-                  label = active
-                      ? l.connectivityConnected
-                      : l.connectivityDisconnected;
-                  icon = active ? Icons.wifi_rounded : Icons.wifi_off_rounded;
-                }
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: NexoTheme.bg,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: NexoTheme.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(icon, color: color, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: NexoTheme.textPrimary,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: color,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [NexoTheme.primary, NexoTheme.primaryDark],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: NexoTheme.primary.withValues(alpha: 0.25),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.sensors_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l.connectivityStatusTitle,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: NexoTheme.textPrimary,
-                        letterSpacing: -0.4,
-                      ),
+                    decoration: BoxDecoration(
+                      color: NexoTheme.bg,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: NexoTheme.border),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l.connectivityDiagnosticsSubtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: NexoTheme.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    buildStatusTile(l.connectivityInternet, isOnline, null),
-                    buildStatusTile(l.connectivitySigma, isOnline, sigma),
-                    buildStatusTile(l.connectivityIntranet, isOnline, intranet),
-                    buildStatusTile('Auth Idiomas', isOnline, idiomasAuth),
-                    buildStatusTile('API Idiomas', isOnline, idiomasApi),
-                    const SizedBox(height: 16),
-                    Text(
-                      l.connectivityBackupNote,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: NexoTheme.textMuted,
-                        height: 1.4,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        SupportScreen.open(context);
-                      },
-                      icon: const Icon(
-                        Icons.help_outline_rounded,
-                        size: 16,
-                        color: NexoTheme.success,
-                      ),
-                      label: Text(
-                        l.supportContactButton,
-                        style: const TextStyle(
-                          color: NexoTheme.success,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
+                    child: Row(
                       children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () => connectivity.checkNow(),
-                            icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: Text(l.actionRetry),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              side: BorderSide(color: NexoTheme.border),
-                            ),
-                          ),
-                        ),
+                        Icon(icon, color: color, size: 20),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: NexoTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: NexoTheme.textPrimary,
                             ),
-                            child: Text(l.actionClose),
+                          ),
+                        ),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: color,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              );
-            },
+                  );
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [NexoTheme.primary, NexoTheme.primaryDark],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: NexoTheme.primary.withValues(alpha: 0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.sensors_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l.connectivityStatusTitle,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: NexoTheme.textPrimary,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l.connectivityDiagnosticsSubtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: NexoTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      buildStatusTile(l.connectivityInternet, isOnline, null),
+                      buildStatusTile(l.connectivitySigma, isOnline, sigma),
+                      buildStatusTile(
+                        l.connectivityIntranet,
+                        isOnline,
+                        intranet,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l.connectivityBackupNote,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: NexoTheme.textMuted,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          SupportScreen.open(context);
+                        },
+                        icon: const Icon(
+                          Icons.help_outline_rounded,
+                          size: 16,
+                          color: NexoTheme.success,
+                        ),
+                        label: Text(
+                          l.supportContactButton,
+                          style: const TextStyle(
+                            color: NexoTheme.success,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => connectivity.checkNow(),
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
+                              label: Text(l.actionRetry),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                side: BorderSide(color: NexoTheme.border),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: NexoTheme.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(l.actionClose),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         );
       },
@@ -657,46 +669,62 @@ class _DashboardWidgetWrapper extends StatelessWidget {
     switch (config.id) {
       case 'stats_promedio':
         final promCiclo = store.promedioCicloActual;
-        return _StatTile(data: _StatData(
-          label: l.homeMetricPromedioCiclo,
-          value: promCiclo == null ? '—' : promCiclo.toStringAsFixed(2),
-          icon: Icons.trending_up_rounded,
-          color: NexoTheme.primary,
-          loading: store.promedios.showSkeleton && store.resumen.showSkeleton,
-        ));
+        return _StatTile(
+          data: _StatData(
+            label: l.homeMetricPromedioCiclo,
+            value: promCiclo == null ? '—' : promCiclo.toStringAsFixed(2),
+            icon: Icons.trending_up_rounded,
+            color: NexoTheme.primary,
+            loading: store.promedios.showSkeleton && store.resumen.showSkeleton,
+          ),
+        );
       case 'stats_creditos':
         final p = store.profile.value;
         final creditosAprob = store.approvedCredits ?? p?.creditsApproved;
         final creditosTotal = store.totalCredits;
-        final creditosLabel = creditosAprob == null ? '—' : creditosTotal != null && creditosTotal > 0 ? '$creditosAprob/$creditosTotal' : '$creditosAprob';
-        return _StatTile(data: _StatData(
-          label: l.homeMetricCreditos,
-          value: creditosLabel,
-          icon: Icons.school_rounded,
-          color: NexoTheme.accent,
-          loading: store.profile.showSkeleton,
-        ));
+        final creditosLabel = creditosAprob == null
+            ? '—'
+            : creditosTotal != null && creditosTotal > 0
+            ? '$creditosAprob/$creditosTotal'
+            : '$creditosAprob';
+        return _StatTile(
+          data: _StatData(
+            label: l.homeMetricCreditos,
+            value: creditosLabel,
+            icon: Icons.school_rounded,
+            color: NexoTheme.accent,
+            loading: store.profile.showSkeleton,
+          ),
+        );
       case 'stats_clases_hoy':
         final schedule = store.schedule.value ?? const <ScheduleClass>[];
         final today = DateTime.now().weekday;
         final clasesHoy = schedule.where((c) => c.weekday == today).length;
-        return _StatTile(data: _StatData(
-          label: l.homeMetricClasesHoy,
-          value: '$clasesHoy',
-          icon: Icons.today_rounded,
-          color: NexoTheme.success,
-          loading: store.schedule.showSkeleton,
-        ));
+        return _StatTile(
+          data: _StatData(
+            label: l.homeMetricClasesHoy,
+            value: '$clasesHoy',
+            icon: Icons.today_rounded,
+            color: NexoTheme.success,
+            loading: store.schedule.showSkeleton,
+          ),
+        );
       case 'stats_pagos':
-        final installments = store.pendingInstallments.value ?? const <Payment>[];
-        final montoPendiente = installments.fold<double>(0, (acc, c) => acc + c.total);
-        return _StatTile(data: _StatData(
-          label: l.homeMetricPorPagar,
-          value: Fmt.currency(montoPendiente),
-          icon: Icons.account_balance_wallet_rounded,
-          color: NexoTheme.warning,
-          loading: store.pendingInstallments.showSkeleton,
-        ));
+        final installments =
+            store.pendingInstallments.value ?? const <Payment>[];
+        final montoPendiente = installments.fold<double>(
+          0,
+          (acc, c) => acc + c.total,
+        );
+        return _StatTile(
+          data: _StatData(
+            label: l.homeMetricPorPagar,
+            value: Fmt.currency(montoPendiente),
+            icon: Icons.account_balance_wallet_rounded,
+            color: NexoTheme.warning,
+            loading: store.pendingInstallments.showSkeleton,
+          ),
+        );
       case 'next_class':
         final schedule = store.schedule.value ?? const <ScheduleClass>[];
         if (schedule.isEmpty) return const SizedBox.shrink();
@@ -735,10 +763,11 @@ class _DashboardWidgetWrapper extends StatelessWidget {
     // menos media pantalla en móvil; con span 1 el texto colapsa en vertical.
     final minSpan = config.id.startsWith('stats_') ? config.span : 4;
     final span = minSpan > config.span ? minSpan : config.span;
-    final itemWidth = (span >= 4
-            ? availableWidth
-            : (colWidth * span + totalSpacing * (span - 1)) - 0.5)
-        .clamp(72.0, availableWidth);
+    final itemWidth =
+        (span >= 4
+                ? availableWidth
+                : (colWidth * span + totalSpacing * (span - 1)) - 0.5)
+            .clamp(72.0, availableWidth);
 
     final isEditing = store.editingDashboardWidgetId == config.id;
 
@@ -791,7 +820,9 @@ class _DashboardWidgetWrapper extends StatelessWidget {
                             child: RotatedBox(
                               quarterTurns: 1,
                               child: Icon(
-                                config.span < 4 ? Icons.unfold_more_rounded : Icons.unfold_less_rounded,
+                                config.span < 4
+                                    ? Icons.unfold_more_rounded
+                                    : Icons.unfold_less_rounded,
                                 size: 18,
                                 color: Colors.white,
                               ),
@@ -853,7 +884,7 @@ class _MobileStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final layout = store.dashboardLayout;
-    
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -979,7 +1010,10 @@ class _PagosBlock extends StatelessWidget {
     }
     return Column(
       children: [
-        PendingPaymentsWidget(installments: state.value ?? const [], isCompact: isCompact),
+        PendingPaymentsWidget(
+          installments: state.value ?? const [],
+          isCompact: isCompact,
+        ),
         if (!isCompact) ...[
           const SizedBox(height: 8),
           Align(

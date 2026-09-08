@@ -144,145 +144,148 @@ class _AlumnoSheetState extends State<_AlumnoSheet>
       barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (dctx) {
         final l = AppLocalizations.of(dctx);
-        return Dialog(
-          backgroundColor: NexoTheme.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: BorderSide(color: NexoTheme.border),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: NexoTheme.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.edit_outlined,
-                        color: NexoTheme.primary,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        eval.description,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: NexoTheme.textPrimary,
-                          letterSpacing: -0.4,
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Dialog(
+            backgroundColor: NexoTheme.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: NexoTheme.border),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: NexoTheme.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Form(
-                  key: formKey,
-                  child: TextFormField(
-                    controller: ctrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    autofocus: true,
-                    style: TextStyle(color: NexoTheme.textPrimary),
-                    decoration: InputDecoration(
-                      labelText: l.docenteGradeLabel,
-                      labelStyle: TextStyle(color: NexoTheme.textSecondary),
-                      prefixIcon: Icon(
-                        Icons.grade_rounded,
-                        color: NexoTheme.textSecondary,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: NexoTheme.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
+                        child: Icon(
+                          Icons.edit_outlined,
                           color: NexoTheme.primary,
-                          width: 2,
+                          size: 22,
                         ),
                       ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: NexoTheme.danger),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: NexoTheme.danger,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    validator: (v) {
-                      final t = (v ?? '').trim().replaceAll(',', '.');
-                      if (t.isEmpty) return l.docenteGradeEnter;
-                      final n = double.tryParse(t);
-                      if (n == null) return l.docenteGradeInvalidNumber;
-                      if (n < 0 || n > 20) return l.docenteGradeRange;
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(dctx).pop(),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: BorderSide(color: NexoTheme.border),
-                        ),
+                      const SizedBox(width: 14),
+                      Expanded(
                         child: Text(
-                          l.actionCancel,
+                          eval.description,
                           style: TextStyle(
-                            color: NexoTheme.textSecondary,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: NexoTheme.textPrimary,
+                            letterSpacing: -0.4,
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            Navigator.of(dctx).pop(ctrl.text.trim());
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: NexoTheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Form(
+                    key: formKey,
+                    child: TextFormField(
+                      controller: ctrl,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      autofocus: true,
+                      style: TextStyle(color: NexoTheme.textPrimary),
+                      decoration: InputDecoration(
+                        labelText: l.docenteGradeLabel,
+                        labelStyle: TextStyle(color: NexoTheme.textSecondary),
+                        prefixIcon: Icon(
+                          Icons.grade_rounded,
+                          color: NexoTheme.textSecondary,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: NexoTheme.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: NexoTheme.primary,
+                            width: 2,
                           ),
                         ),
-                        child: Text(
-                          l.actionSave,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: NexoTheme.danger),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: NexoTheme.danger,
+                            width: 2,
+                          ),
                         ),
                       ),
+                      validator: (v) {
+                        final t = (v ?? '').trim().replaceAll(',', '.');
+                        if (t.isEmpty) return l.docenteGradeEnter;
+                        final n = double.tryParse(t);
+                        if (n == null) return l.docenteGradeInvalidNumber;
+                        if (n < 0 || n > 20) return l.docenteGradeRange;
+                        return null;
+                      },
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(dctx).pop(),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: BorderSide(color: NexoTheme.border),
+                          ),
+                          child: Text(
+                            l.actionCancel,
+                            style: TextStyle(
+                              color: NexoTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              Navigator.of(dctx).pop(ctrl.text.trim());
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: NexoTheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            l.actionSave,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );

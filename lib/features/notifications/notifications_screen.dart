@@ -72,12 +72,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               value: _p.classesEnabled,
                               onToggle: (v) =>
                                   _save(_p.copyWith(classesEnabled: v)),
-                              child: _ChipRow(
-                                options: NotificationPrefs.opcionesLeadMinutes,
-                                selected: {_p.classLeadMinutes},
-                                label: (m) => NotificationPrefs.labelLeadMinutes(context, m),
-                                onSelect: (m) =>
-                                    _save(_p.copyWith(classLeadMinutes: m)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _ChipRow(
+                                    options:
+                                        NotificationPrefs.opcionesLeadMinutes,
+                                    selected: {_p.classLeadMinutes},
+                                    label: (m) =>
+                                        NotificationPrefs.labelLeadMinutes(
+                                          context,
+                                          m,
+                                        ),
+                                    onSelect: (m) =>
+                                        _save(_p.copyWith(classLeadMinutes: m)),
+                                  ),
+                                  const Gap(AppSpacing.md),
+                                  const _ExactAlarmsBanner(),
+                                ],
                               ),
                             ),
                             const Gap(AppSpacing.md),
@@ -98,7 +110,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                     multi: true,
                                     options: NotificationPrefs.opcionesLeadDays,
                                     selected: _p.paymentLeadDays.toSet(),
-                                    label: (d) => NotificationPrefs.labelLeadDays(context, d),
+                                    label: (d) =>
+                                        NotificationPrefs.labelLeadDays(
+                                          context,
+                                          d,
+                                        ),
                                     onSelect: (d) {
                                       final set = _p.paymentLeadDays.toSet();
                                       if (set.contains(d)) {
@@ -443,6 +459,101 @@ class _InfoNote extends StatelessWidget {
                 fontSize: AppFont.caption,
                 color: NexoTheme.textSecondary,
                 height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExactAlarmsBanner extends StatefulWidget {
+  const _ExactAlarmsBanner();
+  @override
+  State<_ExactAlarmsBanner> createState() => _ExactAlarmsBannerState();
+}
+
+class _ExactAlarmsBannerState extends State<_ExactAlarmsBanner> {
+  bool _hasPermission = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+    NotificationService.instance.addListener(_check);
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.removeListener(_check);
+    super.dispose();
+  }
+
+  Future<void> _check() async {
+    final has = await NotificationService.instance.hasExactAlarmsPermission();
+    if (mounted && _hasPermission != has) {
+      setState(() => _hasPermission = has);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasPermission) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: NexoTheme.warning.withValues(alpha: 0.1),
+        borderRadius: AppRadii.rMd,
+        border: Border.all(color: NexoTheme.warning.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: NexoTheme.warning,
+                size: 20,
+              ),
+              const Gap.h(AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Permiso de alarmas exactas',
+                  style: TextStyle(
+                    fontSize: AppFont.small,
+                    fontWeight: FontWeight.w700,
+                    color: NexoTheme.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Gap(AppSpacing.sm),
+          Text(
+            'Sin este permiso, los recordatorios pueden llegar con retraso debido al modo de ahorro de energía del sistema.',
+            style: TextStyle(
+              fontSize: AppFont.caption,
+              color: NexoTheme.textSecondary,
+              height: 1.3,
+            ),
+          ),
+          const Gap(AppSpacing.sm),
+          OutlinedButton(
+            onPressed: () =>
+                NotificationService.instance.requestExactAlarmsPermission(),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              side: const BorderSide(color: NexoTheme.warning),
+              shape: RoundedRectangleBorder(borderRadius: AppRadii.rMd),
+            ),
+            child: const Text(
+              'Conceder permiso',
+              style: TextStyle(
+                color: NexoTheme.warning,
+                fontWeight: FontWeight.w600,
+                fontSize: AppFont.small,
               ),
             ),
           ),

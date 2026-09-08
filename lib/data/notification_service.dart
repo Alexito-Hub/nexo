@@ -138,6 +138,28 @@ class NotificationService extends ChangeNotifier {
         : AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
+  Future<bool> hasExactAlarmsPermission() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return true;
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return false;
+    return await android.canScheduleExactNotifications() ?? false;
+  }
+
+  Future<void> requestExactAlarmsPermission() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return;
+    await android.requestExactAlarmsPermission();
+    await _ensureExactAlarms();
+    notifyListeners();
+  }
+
   Future<void> updatePrefs(
     NotificationPrefs prefs, {
     List<ScheduleClass>? clases,

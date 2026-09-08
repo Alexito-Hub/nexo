@@ -12,6 +12,7 @@ import 'package:nexo/features/legal/terms_screen.dart';
 import 'package:nexo/features/legal/support_screen.dart';
 import 'package:nexo/features/settings/settings_screen.dart';
 import 'package:nexo/l10n/app_localizations.dart';
+import 'package:nexo/shared/widgets/logout_dialog.dart';
 import 'package:nexo/shared/widgets/page_scaffold.dart';
 import 'package:nexo/shared/widgets/reveal.dart';
 import 'package:nexo/shared/widgets/section_card.dart';
@@ -411,108 +412,7 @@ class _ActionsCard extends StatelessWidget {
               ),
             ),
             onTap: () async {
-              final ok = await showDialog<bool>(
-                context: context,
-                barrierColor: Colors.black.withValues(alpha: 0.5),
-                builder: (ctx) => Dialog(
-                  backgroundColor: NexoTheme.card,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    side: BorderSide(color: NexoTheme.border),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: NexoTheme.danger.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.logout_rounded,
-                            color: NexoTheme.danger,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          l.logoutConfirmTitle,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: NexoTheme.textPrimary,
-                            letterSpacing: -0.4,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          l.logoutConfirmBody,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: NexoTheme.textSecondary,
-                            height: 1.4,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  side: BorderSide(color: NexoTheme.border),
-                                ),
-                                child: Text(
-                                  l.actionCancel,
-                                  style: TextStyle(
-                                    color: NexoTheme.textSecondary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => Navigator.pop(ctx, true),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: NexoTheme.danger,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(
-                                  l.actionLogout,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
+              final ok = await showLogoutConfirm(context);
               if (ok == true) await onLogout();
             },
           ),
