@@ -16,12 +16,14 @@
 #   nexo-v<version>-armv7.apk
 #   nexo-v<version>-x86_64.apk
 #   nexo-v<version>-windows-x64.zip
+#   nexo-v<version>-setup-x64.exe     ← instalador de un solo archivo (stub propio)
 #   SHA256SUMS.txt
 #
 # Uso:
 #   powershell -ExecutionPolicy Bypass -File scripts\build_release.ps1
 #   ... -Publish          # además crea tag, release en GitHub y sube artefactos
 #   ... -SkipWindows      # omitir build de Windows
+#   ... -SkipSetup        # omitir el instalador .exe de un solo archivo (solo ZIP)
 #   ... -SkipSplit        # omitir APKs por ABI
 #   ... -SkipBuild        # omitir compilación (usar artefactos ya existentes en dist/)
 #   ... -UpdateSite       # actualizar nexo-releases después de publicar
@@ -35,6 +37,7 @@
 param(
   [switch]$Publish,
   [switch]$SkipWindows,
+  [switch]$SkipSetup,
   [switch]$SkipSplit,
   [switch]$SkipBuild,
   [switch]$UpdateSite,
@@ -175,52 +178,41 @@ if (-not $SkipBuild) {
           $zip = Join-Path $dist "nexo-$tag-windows-x64.zip"
           Compress-Archive -Path "$winDir/*" -DestinationPath $zip -Force
           $sizeMB = [math]::Round((Get-Item $zip).Length / 1MB, 1)
-          Write-Host "  + nexo-`$tag-windows-x64.zip (`$sizeMB MB)" -ForegroundColor Green
+          Write-Host "  + nexo-$tag-windows-x64.zip ($sizeMB MB)" -ForegroundColor Green
 
-          # 2. Generar ejecutable auto-contenido (estilo Discord) usando Warp
-          #    Esto empaqueta todo en un solo .exe que extrae en memoria/temp sin NINGUNA UI.
-          $warpUrl = 'https://github.com/dgiagio/warp/releases/download/v0.3.0/windows-x64.warp-packer.exe'
-          $warpExe = Join-Path $scriptsDir 'warp-packer.exe'
-          if (-not (Test-Path $warpExe)) {
-            Write-Host "  Descargando warp-packer (herramienta de empaquetado invisible)..." -ForegroundColor DarkGray
-            try {
-              Invoke-WebRequest -Uri $warpUrl -OutFile $warpExe -UseBasicParsing
-            } catch {
-              Write-Host "  (Fallo al descargar warp-packer: $_)" -ForegroundColor DarkYellow
-            }
-          }
-
-          if (Test-Path $warpExe) {
-            Write-Host "  Empaquetando app en un solo ejecutable invisible..." -ForegroundColor DarkGray
+          # El ZIP de arriba NO usa nada externo: se extrae y nexo.exe muestra
+          # tu asistente interno (SetupWizard en lib/features/settings/).
+          # Preserva el diseño al 100%.
+          #
+          # Además generamos un instalador .exe de UN SOLO ARCHIVO (estilo
+          # Discord) con TU propio stub nativo (installer/). Al doble clic
+          # extrae la app con el tar.exe de Windows a %LOCALAPPDATA%\Nexo\_stage
+          # y lanza nexo.exe → aparece TU mismo SetupWizard. Sin Inno, sin warp.
+          # Usa -SkipSetup para omitirlo.
+          #
+          # (warp se eliminó: su stub sin firmar + el header PE parcheado lo
+          #  ponían en cuarentena el antivirus — ese era el "bloqueo". Este stub
+          #  NO parchea el binario: el payload va como overlay al final del .exe,
+          #  práctica estándar de todo instalador.)
+          if (-not $SkipSetup) {
+            $mkInstaller = Join-Path $root 'installer\build_installer.ps1'
             $setupExe = Join-Path $dist "nexo-$tag-setup-x64.exe"
-            
-            # Ejecutar warp-packer
-            & $warpExe --arch windows-x64 --input_dir $winDir --exec nexo.exe --output $setupExe | Out-Null
-            
-            if ($LASTEXITCODE -eq 0 -and (Test-Path $setupExe)) {
-              # Modificar cabecera PE para cambiar el Subsistema de Consola (3) a Windows GUI (2)
-              # Esto evita que aparezca la ventana negra de CMD al ejecutar el instalador auto-contenido
+            if (Test-Path $mkInstaller) {
+              Write-Host "  Compilando instalador de un solo archivo (stub propio)..." -ForegroundColor DarkGray
               try {
-                $bytes = [System.IO.File]::ReadAllBytes($setupExe)
-                $peHeaderOffset = [BitConverter]::ToInt32($bytes, 0x3C)
-                $subsystemOffset = $peHeaderOffset + 0x5C # 0x5C for PE32+ (64-bit)
-                if ($bytes[$subsystemOffset] -eq 3) {
-                  $bytes[$subsystemOffset] = 2
-                  [System.IO.File]::WriteAllBytes($setupExe, $bytes)
+                & $mkInstaller -ReleaseDir ($winDir -replace '/', '\') -OutFile $setupExe
+                if (Test-Path $setupExe) {
+                  $setupMB = [math]::Round((Get-Item $setupExe).Length / 1MB, 1)
+                  Write-Host "  + nexo-$tag-setup-x64.exe ($setupMB MB) - Instalador de un solo archivo" -ForegroundColor Green
+                } else {
+                  Write-Host "  (No se generó el instalador .exe)" -ForegroundColor DarkYellow
                 }
               } catch {
-                Write-Host "  (Advertencia: No se pudo parchear el subsistema PE)" -ForegroundColor DarkYellow
+                  Write-Host "  (Fallo al compilar el instalador .exe: $_)" -ForegroundColor DarkYellow
               }
-
-              $setupMB = [math]::Round((Get-Item $setupExe).Length / 1MB, 1)
-              Write-Host "  + nexo-$tag-setup-x64.exe ($setupMB MB) - Instalador silencioso" -ForegroundColor Green
             } else {
-              Write-Host "  (Fallo al empaquetar con warp-packer)" -ForegroundColor DarkYellow
+              Write-Host "  (installer/build_installer.ps1 no encontrado - omitido el .exe)" -ForegroundColor DarkYellow
             }
-            # Limpiar warp-packer para no dejar basura
-            Remove-Item $warpExe -Force -ErrorAction SilentlyContinue
-          } else {
-            Write-Host "  (warp-packer no encontrado - omitido instalador de un solo archivo)" -ForegroundColor DarkYellow
           }
         } else {
           Write-Host '  (no se encontró el build de Windows)' -ForegroundColor DarkGray
@@ -290,11 +282,15 @@ if ($Publish) {
     # Commit de los cambios de sync (config.dart) si los hay
     Push-Location $root
     try {
+      $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
       $syncChanges = git diff --name-only 2>$null
+      $ErrorActionPreference = $prevEAP
       if ($syncChanges) {
         Write-Host "  Commiteando cambios de sync..." -ForegroundColor DarkGray
-        git add -A
-        git commit -m "chore: release $tag — sync version"
+        $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
+        git add -A 2>$null
+        git commit -m "chore: release $tag — sync version" 2>$null
+        $ErrorActionPreference = $prevEAP
       }
 
       # Crear tag
@@ -303,8 +299,10 @@ if ($Publish) {
 
       # Push commits + tag
       Write-Host "  Pushing..." -ForegroundColor DarkGray
-      git push
-      git push origin $tag
+      $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
+      git push 2>$null
+      git push origin $tag 2>$null
+      $ErrorActionPreference = $prevEAP
     } finally {
       Pop-Location
     }

@@ -5,6 +5,7 @@ import 'package:nexo/core/design/theme_controller.dart';
 import 'package:nexo/data/app_store.dart';
 import 'package:nexo/data/session.dart';
 import 'package:nexo/domain/unified_models.dart';
+import 'package:nexo/domain/idiomas_models.dart';
 import 'package:nexo/features/auth/change_password_screen.dart';
 import 'package:nexo/features/legal/about_screen.dart';
 import 'package:nexo/features/legal/developer_screen.dart';
@@ -76,9 +77,20 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 14),
                       Reveal(index: 1, child: _AcademicCard(profile: p)),
+                      if (store.idiomasMatricula.hasValue &&
+                          (store.idiomasMatricula.value?.isNotEmpty ??
+                              false)) ...[
+                        const SizedBox(height: 14),
+                        Reveal(
+                          index: 2,
+                          child: _IdiomasCard(
+                            courses: store.idiomasMatricula.value!,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 14),
                       Reveal(
-                        index: 2,
+                        index: 3,
                         child: _ActionsCard(
                           onLogout: session.logout,
                           store: store,
@@ -390,6 +402,73 @@ class _AcademicCard extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _IdiomasCard extends StatelessWidget {
+  final List<IdiomasCourse> courses;
+  const _IdiomasCard({required this.courses});
+
+  @override
+  Widget build(BuildContext context) {
+    String monthName(int mes) {
+      const meses = [
+        'ENERO',
+        'FEBRERO',
+        'MARZO',
+        'ABRIL',
+        'MAYO',
+        'JUNIO',
+        'JULIO',
+        'AGOSTO',
+        'SETIEMBRE',
+        'OCTUBRE',
+        'NOVIEMBRE',
+        'DICIEMBRE',
+      ];
+      if (mes >= 1 && mes <= 12) return meses[mes - 1];
+      return mes.toString();
+    }
+
+    return SectionCard(
+      title: 'Centro de Idiomas',
+      icon: Icons.translate_rounded,
+      iconColor: Colors.orange.shade400,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < courses.length; i++) ...[
+            if (i > 0) const SizedBox(height: 12),
+            _InfoTile(
+              item: _InfoItem(
+                icon: Icons.language_rounded,
+                label: 'Idioma',
+                value: courses[i].idiomaNombre,
+                wide: true,
+                color: Colors.orange.shade400,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _InfoTile(
+              item: _InfoItem(
+                icon: Icons.calendar_month_outlined,
+                label: 'Periodo',
+                value: '${courses[i].anio}-${monthName(courses[i].mes)}',
+              ),
+            ),
+            const SizedBox(height: 8),
+            _InfoTile(
+              item: _InfoItem(
+                icon: Icons.school_outlined,
+                label: 'Modalidad',
+                value: '${courses[i].modalidad} ${courses[i].tipoEstudio}',
+                wide: true,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

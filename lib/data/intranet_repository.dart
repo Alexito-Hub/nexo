@@ -126,16 +126,27 @@ class IntranetRepository {
       referer: 'reportesDelEstudiante',
     );
     final docentesByCurso = <String, String>{};
+    final observacionByCurso = <String, String>{};
     try {
       final det = await _memoPostList('verhorarioseleccion-detalleEstudiante', {
         'periodo': '$year-$periodo',
       }, referer: 'reportesDelEstudiante');
       for (final r in det.whereType<List<dynamic>>()) {
-        if (r.length < 10) continue;
+        if (r.isEmpty) continue;
         final name = r[0]?.toString().trim() ?? '';
-        final teacher = r[9]?.toString().trim() ?? '';
-        if (name.isNotEmpty && teacher.isNotEmpty) {
-          docentesByCurso[name] = teacher;
+        if (name.isEmpty) continue;
+        
+        if (r.length >= 10) {
+          final teacher = r[9]?.toString().trim() ?? '';
+          if (teacher.isNotEmpty) docentesByCurso[name] = teacher;
+        }
+        
+        // Buscar en todas las columnas alguna que parezca una observación de laboratorio o aula
+        for (var i = 0; i < r.length; i++) {
+          final s = r[i]?.toString().trim() ?? '';
+          if (s.toUpperCase().contains('LAB_') || s.toUpperCase().contains('LABORATORIO')) {
+            observacionByCurso[name] = s;
+          }
         }
       }
     } catch (_) {}
@@ -162,7 +173,16 @@ class IntranetRepository {
           seenIds.add(id);
           final type = at(13).toLowerCase();
           final subject = at(2);
-          final loc = ScheduleClass.parseLocation(at(12));
+          
+          var rawLocation = at(12);
+          if (type.startsWith('p') && observacionByCurso.containsKey(subject)) {
+            final obs = observacionByCurso[subject]!;
+            if (obs.isNotEmpty) {
+              rawLocation = obs;
+            }
+          }
+          
+          final loc = ScheduleClass.parseLocation(rawLocation);
           result.add(
             ScheduleClass(
               id: id,

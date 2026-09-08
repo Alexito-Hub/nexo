@@ -38,10 +38,18 @@ class UpdateService extends ChangeNotifier {
   }
 
   bool get isSupported => _isSupported;
+
+  /// Solo en Windows fuera de tienda.
+  ///
+  /// En Android **nunca**: Google Play prohíbe que una app descargue e instale
+  /// APKs, y la actualización la entrega la propia tienda. En la build de
+  /// Microsoft Store la gestiona Windows (ver `StoreBuild.isStore`). Queda,
+  /// pues, la distribución propia en ZIP para escritorio, que es justo para
+  /// la que se escribió este servicio.
   bool get _isSupported =>
       !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.windows);
+      !StoreBuild.isStore &&
+      defaultTargetPlatform == TargetPlatform.windows;
   Future<void> bootstrap() async {
     if (!_isSupported) return;
     await _cleanupIfAlreadyInstalled();
@@ -284,7 +292,9 @@ class UpdateService extends ChangeNotifier {
     final isWindows = defaultTargetPlatform == TargetPlatform.windows;
     _GhAsset? chosen;
     for (final a in assets.whereType<Map<String, dynamic>>()) {
-      final name = a['nombre'] as String? ?? '';
+      // La API de GitHub nombra este campo "name" (no "nombre"): con la clave
+      // equivocada ningún asset coincidía y el updater nunca veía versiones.
+      final name = a['name'] as String? ?? '';
       final matches = isWindows
           ? UpdateConfig.isWindowsAsset(name)
           : UpdateConfig.isApkAsset(name);

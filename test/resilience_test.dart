@@ -1,9 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nexo/core/error_handler.dart';
 import 'package:nexo/core/errors.dart';
+import 'package:nexo/data/api_client.dart';
+import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/connectivity_service.dart';
 import 'package:nexo/domain/unified_models.dart';
 import 'package:nexo/data/session.dart';
+import 'package:nexo/data/sigma_repository.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,7 +20,8 @@ class MockConnectivity implements Connectivity {
   Future<List<ConnectivityResult>> checkConnectivity() async => result;
 
   @override
-  Stream<List<ConnectivityResult>> get onConnectivityChanged => Stream.value(result);
+  Stream<List<ConnectivityResult>> get onConnectivityChanged =>
+      Stream.value(result);
 }
 
 class MockHttpClient extends http.BaseClient {
@@ -151,30 +155,183 @@ void main() {
       expect(cacheCalled, true);
     });
 
-    test('withFallback handles session expired and logs out', () async {
+    test(
+      'session expired serves cache and does NOT log out (logout is ApiClient\'s job)',
+      () async {
+        final conn = ConnectivityService(
+          connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
+          httpClient: MockHttpClient((req) async => http.Response('', 200)),
+        );
+        await conn.checkNow();
+
+        final session = MockSessionService();
+        final handler = ErrorHandler(connectivity: conn, session: session);
+
+        // Con caché disponible: se sirve el caché, sin lanzar.
+        final res = await handler.withFallback<String>(
+          remote: () async => throw const SessionExpiredException(),
+          cached: () async => 'cached',
+          operationName: 'test_op',
+        );
+
+        expect(res, 'cached');
+        // El logout lo dispara ApiClient.onUnauthorized (fuente única). El
+        // ErrorHandler NUNCA debe cerrar sesión: eso causaba el doble-logout.
+        expect(session.loggedOut, false);
+      },
+    );
+
+    test('session expired rethrows when there is no cache', () async {
       final conn = ConnectivityService(
         connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
         httpClient: MockHttpClient((req) async => http.Response('', 200)),
       );
       await conn.checkNow();
-
       final session = MockSessionService();
+      final handler = ErrorHandler(connectivity: conn, session: session);
+
+      await expectLater(
+        handler.withFallback<String>(
+          remote: () async => throw const SessionExpiredException(),
+          cached: () async => null,
+          operationName: 'test_op',
+        ),
+        throwsA(isA<SessionExpiredException>()),
+      );
+      expect(session.loggedOut, false);
+    });
+
+    test(
+      'AuthUnavailable is transient: serves cache and keeps the session',
+      () async {
+        final conn = ConnectivityService(
+          connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
+          httpClient: MockHttpClient((req) async => http.Response('', 200)),
+        );
+        await conn.checkNow();
+        final session = MockSessionService();
+        final handler = ErrorHandler(connectivity: conn, session: session);
+
+        final res = await handler.withFallback<String>(
+          remote: () async => throw const AuthUnavailableException(),
+          cached: () async => 'cached',
+          operationName: 'test_op',
+        );
+
+        expect(res, 'cached');
+        expect(session.loggedOut, false);
+      },
+    );
+
+    test('retries once on a transient failure, then succeeds', () async {
+      final conn = ConnectivityService(
+        connectivity: MockConnectivity(result: [ConnectivityResult.wifi]),
+        httpClient: MockHttpClient((req) async => http.Response('', 200)),
+      );
+      await conn.checkNow();
       final handler = ErrorHandler(
         connectivity: conn,
-        session: session,
+        session: MockSessionService(),
       );
 
-      final future = handler.withFallback<String>(
+      var attempts = 0;
+      final res = await handler.withFallback<String>(
         remote: () async {
-          throw const SessionExpiredException();
+          attempts++;
+          // Primer hit falla (servidor "frío" tras inactividad); el reintento
+          // recupera. Este es justo el caso que rompía antes.
+          if (attempts == 1) throw const NetworkException('cold start');
+          return 'success';
         },
-        cached: () async => 'cached',
+        cached: () async => null,
         operationName: 'test_op',
       );
 
-      await expectLater(future, throwsA(isA<SessionExpiredException>()));
+      expect(res, 'success');
+      expect(attempts, 2);
+    });
+  });
 
-      expect(session.loggedOut, true);
+  group('ApiClient auth challenge (regresión rebote-al-login)', () {
+    test('401 persistente tras un refresh exitoso NO cierra sesión', () async {
+      // Simula el caso real: el token vencido se refresca bien, pero el
+      // endpoint sigue respondiendo 401/HTML. Antes esto hacía logout y
+      // rebotaba al usuario al login justo tras entrar.
+      final api = ApiClient(
+        transport: MockHttpClient(
+          (req) async => http.Response('{"mensaje":"no"}', 401),
+        ),
+      );
+      var loggedOut = false;
+      api.onUnauthorized = () => loggedOut = true;
+      api.reauthenticate = () async => ReauthOutcome.refreshed; // creds válidas
+      api.setToken('tok');
+
+      await expectLater(
+        api.get<String>('X', decode: (_) => 'x'),
+        throwsA(isA<AuthUnavailableException>()),
+      );
+      expect(
+        loggedOut,
+        false,
+        reason:
+            'un 401 persistente con credenciales válidas no debe cerrar sesión',
+      );
+    });
+
+    test('credenciales rechazadas al reautenticar SÍ cierra sesión', () async {
+      final api = ApiClient(
+        transport: MockHttpClient(
+          (req) async => http.Response('{"mensaje":"no"}', 401),
+        ),
+      );
+      var loggedOut = false;
+      api.onUnauthorized = () => loggedOut = true;
+      api.reauthenticate = () async => ReauthOutcome.invalidCredentials;
+      api.setToken('tok');
+
+      await expectLater(
+        api.get<String>('X', decode: (_) => 'x'),
+        throwsA(isA<SessionExpiredException>()),
+      );
+      expect(loggedOut, true);
+    });
+  });
+
+  group('Arranque (regresión ventana en blanco de la Store)', () {
+    SessionService build() {
+      final api = ApiClient(
+        transport: MockHttpClient((_) async => http.Response('{}', 200)),
+      );
+      return SessionService(apiClient: api, repo: SigmaRepository(api));
+    }
+
+    test('un arranque que no decide acaba en login, no en el splash', () {
+      final session = build();
+      expect(session.status, SessionStatus.unknown);
+
+      // Es lo que hace `main` si `bootstrap` falla o tarda demasiado.
+      session.resolveUnknownAsUnauthenticated();
+
+      expect(session.status, SessionStatus.unauthenticated);
+    });
+
+    test('limpiar un caché sin abrir no revienta', () async {
+      // Al arrancar, la sesión puede resolverse antes de que el caché exista y
+      // el store intenta limpiarlo. Eso pasaba y tumbaba el arranque.
+      final cache = CacheManager();
+      expect(cache.isReady, isFalse);
+      await expectLater(cache.clearAll(), completes);
+    });
+
+    test('no pisa una sesión ya resuelta', () async {
+      final session = build();
+      session.resolveUnknownAsUnauthenticated();
+      expect(session.status, SessionStatus.unauthenticated);
+
+      // Segunda llamada: sigue igual, no reabre nada.
+      session.resolveUnknownAsUnauthenticated();
+      expect(session.status, SessionStatus.unauthenticated);
     });
   });
 }

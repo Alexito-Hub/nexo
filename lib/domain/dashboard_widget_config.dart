@@ -9,11 +9,7 @@ class DashboardWidgetConfig {
     this.span = 2,
   });
 
-  DashboardWidgetConfig copyWith({
-    String? id,
-    String? size,
-    int? span,
-  }) {
+  DashboardWidgetConfig copyWith({String? id, String? size, int? span}) {
     return DashboardWidgetConfig(
       id: id ?? this.id,
       size: size ?? this.size,
@@ -25,16 +21,14 @@ class DashboardWidgetConfig {
     return DashboardWidgetConfig(
       id: json['id'] as String,
       size: json['size'] as String? ?? 'normal',
-      span: json['span'] as int? ?? (json['id'].toString().startsWith('stats_') ? 1 : 2),
+      span:
+          json['span'] as int? ??
+          (json['id'].toString().startsWith('stats_') ? 1 : 2),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'size': size,
-      'span': span,
-    };
+    return {'id': id, 'size': size, 'span': span};
   }
 
   @override

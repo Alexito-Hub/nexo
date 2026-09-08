@@ -377,7 +377,7 @@ class _CuotaListTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    if (state.loading && !state.hasValue) return const _LoadingList();
+    if (state.showSkeleton) return const _LoadingList();
     if (state.error != null && !state.hasValue) {
       return EmptyState(
         icon: Icons.cloud_off_outlined,
@@ -557,7 +557,7 @@ class _TasasTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    if (state.loading && !state.hasValue) return const _LoadingList();
+    if (state.showSkeleton) return const _LoadingList();
     if (state.error != null && !state.hasValue) {
       return EmptyState(
         icon: Icons.cloud_off_outlined,
@@ -664,7 +664,7 @@ class _HistorialTabState extends State<_HistorialTab> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final state = widget.state;
-    if (state.loading && !state.hasValue) return const _LoadingList();
+    if (state.showSkeleton) return const _LoadingList();
     if (state.error != null && !state.hasValue) {
       return EmptyState(
         icon: Icons.cloud_off_outlined,
@@ -710,7 +710,7 @@ class _HistorialTabState extends State<_HistorialTab> {
               child: Row(
                 children: [
                   _TermChip(
-                    label: 'Todos',
+                    label: l.paymentsFilterAll,
                     selected: _termFilter == null,
                     onTap: () => setState(() => _termFilter = null),
                   ),
@@ -729,9 +729,9 @@ class _HistorialTabState extends State<_HistorialTab> {
           ),
         Expanded(
           child: byDate.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.filter_alt_off_outlined,
-                  title: 'Sin pagos en este periodo',
+                  title: l.paymentsNoneInPeriod,
                 )
               : ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8),

@@ -14,22 +14,35 @@ class ErrorHandler {
   }) async {
     try {
       if (!connectivity.hasInternet) {
-        debugPrint(
-          'ErrorHandler: No internet for $operationName, falling back to cache',
-        );
+        // Preferimos caché si existe, pero NO bloqueamos el intento remoto:
+        // connectivity_plus da falsos negativos en desktop, y un token vencido
+        // no implica falta de red. Si no hay caché, igual intentamos la red.
         final cachedResult = await cached();
-        if (cachedResult != null) return cachedResult;
-        throw const NetworkException(
-          'Sin conexión a internet y no hay datos locales de respaldo.',
+        if (cachedResult != null) {
+          debugPrint('ErrorHandler: offline flag for $operationName → cache');
+          return cachedResult;
+        }
+        debugPrint(
+          'ErrorHandler: offline flag for $operationName but no cache → intento remoto igualmente',
         );
       }
-      final result = await remote();
-      return result;
+      return await _remoteWithRetry(remote, operationName);
     } on SessionExpiredException {
+      // El logout ya lo disparó ApiClient (onUnauthorized) como fuente única.
+      // Aquí NO cerramos sesión otra vez: solo intentamos mostrar el caché
+      // durante la transición a la pantalla de login.
+      debugPrint('ErrorHandler: session expired in $operationName.');
+      final cachedResult = await cached();
+      if (cachedResult != null) return cachedResult;
+      rethrow;
+    } on AuthUnavailableException catch (e) {
+      // Transitorio: no se pudo verificar la sesión (servidor de auth caído).
+      // Conservamos la sesión y caemos al caché.
       debugPrint(
-        'ErrorHandler: Session expired in $operationName. Logging out.',
+        'ErrorHandler: auth unavailable in $operationName: $e. Trying cache.',
       );
-      await session.logout();
+      final cachedResult = await cached();
+      if (cachedResult != null) return cachedResult;
       rethrow;
     } on UnauthorizedException catch (e) {
       debugPrint(
@@ -77,6 +90,40 @@ class ErrorHandler {
         );
       }
       rethrow;
+    }
+  }
+
+  /// Ejecuta la operación remota con 1 reintento y backoff corto ante fallos
+  /// TRANSITORIOS (red, timeout, 5xx, auth no disponible). Los servidores de
+  /// UPLA suelen fallar el primer hit tras inactividad ("arranque en frío");
+  /// un único reintento recupera la mayoría de esos casos sin molestar al
+  /// usuario. Los errores no transitorios (4xx, credenciales inválidas, parseo)
+  /// se propagan de inmediato.
+  Future<T> _remoteWithRetry<T>(
+    Future<T> Function() remote,
+    String operationName,
+  ) async {
+    const maxAttempts = 2;
+    var attempt = 0;
+    while (true) {
+      attempt++;
+      try {
+        return await remote();
+      } on NetworkException {
+        if (attempt >= maxAttempts) rethrow;
+      } on TimeoutException {
+        if (attempt >= maxAttempts) rethrow;
+      } on AuthUnavailableException {
+        if (attempt >= maxAttempts) rethrow;
+      } on ServerException catch (e) {
+        // Solo 5xx es transitorio; el resto (p.ej. respuesta no-JSON 200) no.
+        if (attempt >= maxAttempts || e.status < 500) rethrow;
+      }
+      final backoff = Duration(milliseconds: 500 * attempt);
+      debugPrint(
+        'ErrorHandler: retry $attempt for $operationName in ${backoff.inMilliseconds}ms',
+      );
+      await Future<void>.delayed(backoff);
     }
   }
 }

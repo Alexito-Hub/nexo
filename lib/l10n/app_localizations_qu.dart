@@ -117,6 +117,70 @@ class AppLocalizationsQu extends AppLocalizations {
   String get detailRoom => 'Wasi';
 
   @override
+  String get detailPavilion => 'Pabellón';
+
+  @override
+  String weekdayFull(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Killachaw',
+      'tue': 'Atipachaw',
+      'wed': 'Quyllurchaw',
+      'thu': 'Chaskachaw',
+      'fri': 'Illapachaw',
+      'sat': 'Kuychichaw',
+      'sun': 'Intichaw',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Kil',
+      'tue': 'Ati',
+      'wed': 'Quy',
+      'thu': 'Cha',
+      'fri': 'Illa',
+      'sat': 'Kuy',
+      'sun': 'Inti',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String monthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      'jan': 'Ene',
+      'feb': 'Feb',
+      'mar': 'Mar',
+      'apr': 'Abr',
+      'may': 'May',
+      'jun': 'Jun',
+      'jul': 'Jul',
+      'aug': 'Ago',
+      'sep': 'Sep',
+      'oct': 'Oct',
+      'nov': 'Nov',
+      'dec': 'Dic',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String timeGreeting(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'morning': 'Allin punchaw',
+      'afternoon': 'Allin sukha',
+      'evening': 'Allin tuta',
+      'other': 'Rimaykullayki',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get detailBuilding => 'Wasi';
 
   @override
@@ -135,7 +199,7 @@ class AppLocalizationsQu extends AppLocalizations {
   String get detailNrc => 'NRC';
 
   @override
-  String get detailSection => 'Sec.';
+  String get detailSection => 'Sección';
 
   @override
   String get detailLevel => 'Nivel';
@@ -147,9 +211,6 @@ class AppLocalizationsQu extends AppLocalizations {
   String detailDuration(int minutes) {
     return 'Unaynin';
   }
-
-  @override
-  String get tabTeams => 'Teams';
 
   @override
   String get settingsTitle => 'Configuración';
@@ -318,63 +379,6 @@ class AppLocalizationsQu extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get teamsSubtitle => 'Tus asignaturas y tareas de Microsoft 365';
-
-  @override
-  String get teamsDisconnect => 'Desconectar';
-
-  @override
-  String get teamsMySubjects => 'Mis asignaturas';
-
-  @override
-  String get teamsAssignments => 'Tareas';
-
-  @override
-  String get teamsLoadError => 'No se pudo cargar';
-
-  @override
-  String get teamsConnectTitle => 'Conecta tu cuenta de Microsoft';
-
-  @override
-  String get teamsConnectSubtitle => 'Para ver tus clases y tareas de Teams';
-
-  @override
-  String get teamsConnectBody =>
-      'Inicia sesión con tu cuenta institucional de Microsoft 365. Te daremos un código para confirmarlo en el navegador.';
-
-  @override
-  String get teamsConnectButton => 'Conectar con Microsoft';
-
-  @override
-  String get teamsDeviceCodeGenerating => 'Generando código…';
-
-  @override
-  String get teamsDeviceCodeConfirmTitle => 'Confirma en el navegador';
-
-  @override
-  String get teamsDeviceCodeConfirmSubtitle =>
-      'Esperando que autorices la app…';
-
-  @override
-  String get teamsDeviceCodeStep1Prefix => 'Abre ';
-
-  @override
-  String get teamsCopyLink => 'Copiar enlace';
-
-  @override
-  String get teamsLinkCopied => 'Enlace copiado';
-
-  @override
-  String get teamsDeviceCodeStep2Label => 'Introduce este código:';
-
-  @override
-  String get teamsDeviceCodeAutoRefresh =>
-      'Esto se actualizará solo cuando termines.';
-
-  @override
-  String get teamsCodeCopied => 'Código copiado';
 
   @override
   String get actionShow => 'Mostrar';
@@ -602,7 +606,7 @@ class AppLocalizationsQu extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.';
+      'Credencialniykikuna hinaspa yachay willakuyniykikunaqa dispositivoykipillam waqaychakun. Nexoqa manam servidorninman nitaq hukkunamanpas apachinchu: UPLA servicionkunamanmi chawpillanpi rin.';
 
   @override
   String get termsItemSecurityTitle => 'Seguridad';
@@ -975,10 +979,10 @@ class AppLocalizationsQu extends AppLocalizations {
   String get homeMetricPromedio => 'Promedio';
 
   @override
-  String get homeMetricPromedioCiclo => 'Prom. ciclo';
+  String get homeMetricPromedioCiclo => 'Promedio del ciclo';
 
   @override
-  String get homeMetricPromedioAcumulado => 'Prom. acum.';
+  String get homeMetricPromedioAcumulado => 'Promedio acumulado';
 
   @override
   String get homeMetricCreditos => 'Créditos';
@@ -1024,6 +1028,29 @@ class AppLocalizationsQu extends AppLocalizations {
 
   @override
   String get statusInProcess => 'LLANKASHKAN';
+
+  @override
+  String get paymentsFilterAll => 'Llapan';
+
+  @override
+  String get paymentsNoneInPeriod => 'Mana pagokuna kay periodopi';
+
+  @override
+  String homeMoreClassesToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count clases astawan kunan',
+      one: '+ 1 clase astawan kunan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusApproved => 'APROBADO';
+
+  @override
+  String get statusFailed => 'MANA APROBADO';
 
   @override
   String get gradesPromedioLabel => 'Promedio';
@@ -1178,21 +1205,6 @@ class AppLocalizationsQu extends AppLocalizations {
 
   @override
   String get profileAcademicInfo => 'Yachay willakuy';
-
-  @override
-  String get teamsCopyCode => 'Códigota copiary';
-
-  @override
-  String get teamsUnderConstruction => 'Llankachkanchikraq';
-
-  @override
-  String get teamsSoonAvailable => 'Chaylla chayamunqa';
-
-  @override
-  String get teamsWorkingOnSection => 'Kaypi llankachkanchikraq';
-
-  @override
-  String get teamsComeBackLater => 'Qayna kutimunki.';
 
   @override
   String get pdfExportLoadConstanciaError =>
@@ -1570,15 +1582,6 @@ class AppLocalizationsQu extends AppLocalizations {
   }
 
   @override
-  String get widgetTeamsTitle => 'Yachayniykuna';
-
-  @override
-  String get widgetTeamsSubtitle => 'Teams huñukuna';
-
-  @override
-  String get widgetTeamsEmpty => 'Mana yachaykuna Teams ukhupi kanchu';
-
-  @override
   String get widgetAssignmentsTitle => 'Ruranakuna';
 
   @override
@@ -1600,5 +1603,70 @@ class AppLocalizationsQu extends AppLocalizations {
   @override
   String homePendingPaymentsMore(int count) {
     return '+ $count tasakuna';
+  }
+
+  @override
+  String get termsItemRightsTitle => 'Derechoykikuna';
+
+  @override
+  String get termsItemRightsBody =>
+      'Willasqaykikunata qawanki, allichanki utaq pichanki, hinaspa mayqin pachapipas Ajustespi permisoykita qichunki. Soporte sectionmanta qillqamuwayku.';
+
+  @override
+  String get termsHeaderUpdatedPre => 'Cambiamos algo';
+
+  @override
+  String get termsUpdatedNotice =>
+      'Actualizamos estos términos para explicar mejor qué se queda en tu dispositivo y cómo te avisaremos de futuros cambios. Léelos de nuevo antes de continuar.';
+
+  @override
+  String get termsItemDeviceTitle => 'Lo que queda en tu dispositivo';
+
+  @override
+  String get termsItemDeviceBody =>
+      'Nexo guarda una copia local de tu horario, tus notas y tus pagos para funcionar sin conexión, y programa las notificaciones y los widgets en el propio dispositivo. Todo eso se borra al cerrar sesión.';
+
+  @override
+  String get termsItemChangesTitle => 'Cambios en estos términos';
+
+  @override
+  String get termsItemChangesBody =>
+      'Si cambia algo importante en cómo se tratan tus datos, actualizaremos estos términos y volveremos a mostrártelos antes de que sigas usando la app. Puedes releerlos cuando quieras desde Perfil, en Términos y privacidad.';
+
+  @override
+  String termsVersionLine(String version, String date) {
+    return 'Versión $version · Actualizado el $date';
+  }
+
+  @override
+  String get projectionTitle => '¿Cuánto necesitas?';
+
+  @override
+  String projectionMinimum(String min) {
+    return 'Para aprobar con $min';
+  }
+
+  @override
+  String get projectionNeedSingle => 'Es lo que necesitas en';
+
+  @override
+  String get projectionNeedEach => 'Es lo que necesitas en cada una';
+
+  @override
+  String projectionExact(String value) {
+    return 'Exacto: $value';
+  }
+
+  @override
+  String get projectionAlreadyPassed =>
+      'Ya está aprobado: con lo que llevas no puedes bajar del mínimo.';
+
+  @override
+  String get projectionOutOfReach =>
+      'Ni con 20 en todo lo que queda se llega al mínimo. Cuenta con el sustitutorio.';
+
+  @override
+  String projectionAssume(String unit, String value) {
+    return 'Si en $unit sacas $value:';
   }
 }

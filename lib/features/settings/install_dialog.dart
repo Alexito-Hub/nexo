@@ -18,6 +18,34 @@ class InstallOptions {
   });
 }
 
+/// Envuelve un subárbol del instalador/desinstalador para que TODOS sus botones
+/// se ajusten a su contenido (mismo alto, sin mínimos forzados). Antes convivían
+/// OutlinedButton (con mínimo por defecto ~64x36) y ElevatedButton (Size.zero),
+/// y se veían "uno grande y otro pequeño". Aquí se uniforman sin tocar cada
+/// botón, y solo dentro de estas pantallas.
+Widget installerButtonScope(BuildContext context, Widget child) {
+  const shrink = MaterialTapTargetSize.shrinkWrap;
+  final base = Theme.of(context);
+  return Theme(
+    data: base.copyWith(
+      materialTapTargetSize: shrink,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size.zero,
+          tapTargetSize: shrink,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size.zero,
+          tapTargetSize: shrink,
+        ),
+      ),
+    ),
+    child: child,
+  );
+}
+
 class SetupWizard extends StatefulWidget {
   final void Function(InstallOptions options) onInstall;
   final VoidCallback onRunPortable;
@@ -112,7 +140,9 @@ class _SetupWizardState extends State<SetupWizard> {
     return ListenableBuilder(
       listenable: widget.theme,
       builder: (context, _) {
-        return Scaffold(
+        return installerButtonScope(
+          context,
+          Scaffold(
           backgroundColor: NexoTheme.bg,
           body: SingleChildScrollView(
             child: Padding(
@@ -151,6 +181,7 @@ class _SetupWizardState extends State<SetupWizard> {
                 ],
               ),
             ),
+          ),
           ),
         );
       },

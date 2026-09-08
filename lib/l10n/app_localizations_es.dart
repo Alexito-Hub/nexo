@@ -117,6 +117,70 @@ class AppLocalizationsEs extends AppLocalizations {
   String get detailRoom => 'Aula';
 
   @override
+  String get detailPavilion => 'Pabellón';
+
+  @override
+  String weekdayFull(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Lunes',
+      'tue': 'Martes',
+      'wed': 'Miércoles',
+      'thu': 'Jueves',
+      'fri': 'Viernes',
+      'sat': 'Sábado',
+      'sun': 'Domingo',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String weekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'Lun',
+      'tue': 'Mar',
+      'wed': 'Mié',
+      'thu': 'Jue',
+      'fri': 'Vie',
+      'sat': 'Sáb',
+      'sun': 'Dom',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String monthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      'jan': 'Ene',
+      'feb': 'Feb',
+      'mar': 'Mar',
+      'apr': 'Abr',
+      'may': 'May',
+      'jun': 'Jun',
+      'jul': 'Jul',
+      'aug': 'Ago',
+      'sep': 'Sep',
+      'oct': 'Oct',
+      'nov': 'Nov',
+      'dec': 'Dic',
+      'other': '—',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String timeGreeting(String period) {
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'morning': 'Buenos días',
+      'afternoon': 'Buenas tardes',
+      'evening': 'Buenas noches',
+      'other': 'Hola',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get detailBuilding => 'Local';
 
   @override
@@ -147,9 +211,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String detailDuration(int minutes) {
     return 'Duración total: $minutes minutos';
   }
-
-  @override
-  String get tabTeams => 'Teams';
 
   @override
   String get settingsTitle => 'Configuración';
@@ -318,63 +379,6 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get teamsSubtitle => 'Tus asignaturas y tareas de Microsoft 365';
-
-  @override
-  String get teamsDisconnect => 'Desconectar';
-
-  @override
-  String get teamsMySubjects => 'Mis asignaturas';
-
-  @override
-  String get teamsAssignments => 'Tareas';
-
-  @override
-  String get teamsLoadError => 'No se pudo cargar';
-
-  @override
-  String get teamsConnectTitle => 'Conecta tu cuenta de Microsoft';
-
-  @override
-  String get teamsConnectSubtitle => 'Para ver tus clases y tareas de Teams';
-
-  @override
-  String get teamsConnectBody =>
-      'Inicia sesión con tu cuenta institucional de Microsoft 365. Te daremos un código para confirmarlo en el navegador.';
-
-  @override
-  String get teamsConnectButton => 'Conectar con Microsoft';
-
-  @override
-  String get teamsDeviceCodeGenerating => 'Generando código…';
-
-  @override
-  String get teamsDeviceCodeConfirmTitle => 'Confirma en el navegador';
-
-  @override
-  String get teamsDeviceCodeConfirmSubtitle =>
-      'Esperando que autorices la app…';
-
-  @override
-  String get teamsDeviceCodeStep1Prefix => 'Abre ';
-
-  @override
-  String get teamsCopyLink => 'Copiar enlace';
-
-  @override
-  String get teamsLinkCopied => 'Enlace copiado';
-
-  @override
-  String get teamsDeviceCodeStep2Label => 'Introduce este código:';
-
-  @override
-  String get teamsDeviceCodeAutoRefresh =>
-      'Esto se actualizará solo cuando termines.';
-
-  @override
-  String get teamsCodeCopied => 'Código copiado';
 
   @override
   String get actionShow => 'Mostrar';
@@ -575,7 +579,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get termsHeaderTitle => 'Términos de uso y privacidad';
 
   @override
-  String get termsHeaderSubtitle => 'Lee y acepta para continuar.';
+  String get termsHeaderSubtitle =>
+      'Léelos con calma y acéptalos para continuar.';
 
   @override
   String get termsAcceptNote => 'Al continuar aceptas estos términos.';
@@ -588,7 +593,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsBrandBody =>
-      'Privacidad primero. Tus datos viven solo en tu dispositivo.';
+      'Privacidad primero. Aquí te decimos qué se queda en tu dispositivo y qué sale de él.';
 
   @override
   String get termsItemWhatTitle => 'Qué es Nexo';
@@ -602,21 +607,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsItemPrivacyBody =>
-      'Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.';
+      'Tus credenciales y tus datos académicos se guardan únicamente en tu dispositivo. Nexo no envía tu información a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.';
 
   @override
   String get termsItemSecurityTitle => 'Seguridad';
 
   @override
   String get termsItemSecurityBody =>
-      'El almacenamiento local no está cifrado a nivel de sistema. Úsala solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.';
+      'El almacenamiento local no está cifrado a nivel del sistema, así que usa Nexo solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.';
 
   @override
   String get termsItemResponsibleTitle => 'Uso responsable';
 
   @override
   String get termsItemResponsibleBody =>
-      'Accede solo a tu propia información con tus propias credenciales. Es un proyecto educativo / de hackathon de ingeniería inversa para uso personal. Úsala conforme a los reglamentos de tu universidad.';
+      'Accede solo a tu propia información y con tus propias credenciales. Es un proyecto educativo y de uso personal: úsalo conforme a los reglamentos de tu universidad.';
 
   @override
   String get termsItemDisclaimerTitle => 'Sin garantías';
@@ -1021,6 +1026,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get statusInProcess => 'EN PROCESO';
 
   @override
+  String get paymentsFilterAll => 'Todos';
+
+  @override
+  String get paymentsNoneInPeriod => 'Sin pagos en este periodo';
+
+  @override
+  String homeMoreClassesToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count clases más hoy',
+      one: '+ 1 clase más hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusApproved => 'APROBADO';
+
+  @override
+  String get statusFailed => 'DESAPROBADO';
+
+  @override
   String get gradesPromedioLabel => 'Promedio';
 
   @override
@@ -1173,21 +1201,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileAcademicInfo => 'Información académica';
-
-  @override
-  String get teamsCopyCode => 'Copiar código';
-
-  @override
-  String get teamsUnderConstruction => 'En construcción';
-
-  @override
-  String get teamsSoonAvailable => 'Pronto disponible';
-
-  @override
-  String get teamsWorkingOnSection => 'Estamos trabajando en esta sección';
-
-  @override
-  String get teamsComeBackLater => 'Vuelve más adelante.';
 
   @override
   String get pdfExportLoadConstanciaError => 'No se pudo cargar la constancia.';
@@ -1562,15 +1575,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get widgetTeamsTitle => 'Mis asignaturas';
-
-  @override
-  String get widgetTeamsSubtitle => 'Grupos de Teams';
-
-  @override
-  String get widgetTeamsEmpty => 'No hay asignaturas en Teams';
-
-  @override
   String get widgetAssignmentsTitle => 'Tareas';
 
   @override
@@ -1592,5 +1596,70 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String homePendingPaymentsMore(int count) {
     return '+ $count cuotas más';
+  }
+
+  @override
+  String get termsItemRightsTitle => 'Tus derechos';
+
+  @override
+  String get termsItemRightsBody =>
+      'Tus datos están en tu dispositivo, así que los controlas tú: puedes revisarlos, actualizarlos desde la Intranet o borrarlos cerrando sesión. Escríbenos desde la sección de soporte para cualquier duda sobre el tratamiento de tus datos.';
+
+  @override
+  String get termsHeaderUpdatedPre => 'Cambiamos algo';
+
+  @override
+  String get termsUpdatedNotice =>
+      'Actualizamos estos términos para explicar mejor qué se queda en tu dispositivo y cómo te avisaremos de futuros cambios. Léelos de nuevo antes de continuar.';
+
+  @override
+  String get termsItemDeviceTitle => 'Lo que queda en tu dispositivo';
+
+  @override
+  String get termsItemDeviceBody =>
+      'Nexo guarda una copia local de tu horario, tus notas y tus pagos para funcionar sin conexión, y programa las notificaciones y los widgets en el propio dispositivo. Todo eso se borra al cerrar sesión.';
+
+  @override
+  String get termsItemChangesTitle => 'Cambios en estos términos';
+
+  @override
+  String get termsItemChangesBody =>
+      'Si cambia algo importante en cómo se tratan tus datos, actualizaremos estos términos y volveremos a mostrártelos antes de que sigas usando la app. Puedes releerlos cuando quieras desde Perfil, en Términos y privacidad.';
+
+  @override
+  String termsVersionLine(String version, String date) {
+    return 'Versión $version · Actualizado el $date';
+  }
+
+  @override
+  String get projectionTitle => '¿Cuánto necesitas?';
+
+  @override
+  String projectionMinimum(String min) {
+    return 'Para aprobar con $min';
+  }
+
+  @override
+  String get projectionNeedSingle => 'Es lo que necesitas en';
+
+  @override
+  String get projectionNeedEach => 'Es lo que necesitas en cada una';
+
+  @override
+  String projectionExact(String value) {
+    return 'Exacto: $value';
+  }
+
+  @override
+  String get projectionAlreadyPassed =>
+      'Ya está aprobado: con lo que llevas no puedes bajar del mínimo.';
+
+  @override
+  String get projectionOutOfReach =>
+      'Ni con 20 en todo lo que queda se llega al mínimo. Cuenta con el sustitutorio.';
+
+  @override
+  String projectionAssume(String unit, String value) {
+    return 'Si en $unit sacas $value:';
   }
 }

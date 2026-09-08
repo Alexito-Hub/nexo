@@ -8,6 +8,7 @@ import 'package:nexo/features/teacher/teacher_student_sheet.dart';
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/shared/widgets/empty_state.dart';
 import 'package:nexo/shared/widgets/skeleton.dart';
+import 'package:nexo/domain/passing_rule.dart';
 
 class TeacherCourseDetailScreen extends StatefulWidget {
   const TeacherCourseDetailScreen({
@@ -562,7 +563,7 @@ class _NotasTab extends StatelessWidget {
     }
     final approved = alumnos.where((a) {
       final n = double.tryParse((a.grade ?? '').replaceAll(',', '.'));
-      return n != null && n >= 10.5;
+      return PassingRule.standard.passes(n);
     }).length;
     return Column(
       children: [
@@ -636,6 +637,6 @@ Color gradeColor(String? raw) {
   final n = double.tryParse((raw ?? '').trim().replaceAll(',', '.'));
   if (n == null) return NexoTheme.textMuted;
   if (n >= 14) return NexoTheme.success;
-  if (n >= 10.5) return NexoTheme.info;
+  if (n >= PassingRule.standard.threshold) return NexoTheme.info;
   return NexoTheme.danger;
 }

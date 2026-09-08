@@ -5,6 +5,7 @@ import 'package:nexo/core/design/tokens.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/shared/util/clipboard_helper.dart';
 import 'package:nexo/l10n/app_localizations.dart';
+import 'package:nexo/domain/passing_rule.dart';
 
 Widget gradeTileGrid(BuildContext context, List<Widget> tiles) {
   if (!context.isDesktop) {
@@ -33,7 +34,7 @@ Widget gradeTileGrid(BuildContext context, List<Widget> tiles) {
 Color gradeColor(num? n) {
   if (n == null) return NexoTheme.textMuted;
   if (n >= 14) return NexoTheme.success;
-  if (n >= 10.5) return NexoTheme.info;
+  if (n >= PassingRule.current.threshold) return NexoTheme.info;
   return NexoTheme.danger;
 }
 

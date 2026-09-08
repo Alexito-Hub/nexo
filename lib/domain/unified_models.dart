@@ -452,7 +452,7 @@ class ScheduleClass {
       }
       if (building.isEmpty &&
           RegExp(
-            r'^(PABELLON|EDIFICIO|TORRE|LABORATORIO)\b',
+            r'^(PABELLON|PABELLÓN|EDIFICIO|TORRE|LABORATORIO)\b',
             caseSensitive: false,
           ).hasMatch(t)) {
         building = t;
@@ -487,6 +487,7 @@ class ScheduleClass {
     'T' => 'Teoría',
     'P' => 'Práctica',
     'L' => 'Laboratorio',
+    'I' => 'Idiomas',
     _ => typeCode,
   };
   int get durationMinutes {
@@ -510,33 +511,127 @@ class ScheduleClassGroup {
   final String subject;
   final int weekday;
   final List<ScheduleClass> sessions;
+  final bool isSequentialWorkshop;
+  final String? activeWorkshopName;
   const ScheduleClassGroup({
     required this.subject,
     required this.weekday,
     required this.sessions,
+    this.isSequentialWorkshop = false,
+    this.activeWorkshopName,
   });
-  String get startTime => sessions.first.startTime;
-  String get endTime => sessions.last.endTime;
-  String get room => sessions.first.room;
-  String get teacher => sessions
-      .map((s) => s.teacher)
-      .firstWhere((d) => d.isNotEmpty, orElse: () => '');
+  String get startTime => sessions.isNotEmpty ? sessions.first.startTime : '';
+  String get endTime => sessions.isNotEmpty ? sessions.last.endTime : '';
+
+  /// Devuelve las aulas de las sesiones. Si Teoría y Práctica están en aulas
+  /// distintas, las muestra todas separadas por " / ".
+  String get room {
+    if (sessions.isEmpty) return '';
+    final rooms = sessions
+        .map((s) => s.room)
+        .where((r) => r.isNotEmpty)
+        .toSet();
+    if (rooms.length <= 1) return rooms.firstOrNull ?? '';
+    return rooms.join(' / ');
+  }
+
+  /// Mapa de tipo de sesión → aula, útil para mostrar aulas diferenciadas
+  /// cuando Teoría y Práctica están en salones distintos.
+  Map<String, String> get roomsByType {
+    final map = <String, String>{};
+    for (final s in sessions) {
+      if (s.room.isNotEmpty) {
+        map[s.typeCode] = s.room;
+      }
+    }
+    return map;
+  }
+
+  /// True si las sesiones tienen aulas distintas (salones mixtos).
+  bool get hasMixedRooms {
+    final rooms = sessions
+        .map((s) => s.room)
+        .where((r) => r.isNotEmpty)
+        .toSet();
+    return rooms.length > 1;
+  }
+
+  String get teacher => sessions.isNotEmpty
+      ? sessions
+            .map((s) => s.teacher)
+            .firstWhere((d) => d.isNotEmpty, orElse: () => '')
+      : '';
   bool get hasPractice => sessions.any((s) => s.typeCode.toUpperCase() != 'T');
   bool get hasTheory => sessions.any((s) => s.typeCode.toUpperCase() == 'T');
-  static List<ScheduleClassGroup> groupBy(List<ScheduleClass> classes) {
+  static List<ScheduleClassGroup> groupBy(List<ScheduleClass> classes, {Set<String> finishedSubjects = const {}}) {
     final map = <String, List<ScheduleClass>>{};
     for (final c in classes) {
       map.putIfAbsent('${c.weekday}|${c.subject}', () => []).add(c);
     }
-    return map.entries.map((e) {
-      final list = [...e.value]
-        ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    final initialGroups = map.entries.map((e) {
+      final list = [...e.value]..sort((a, b) => a.startTime.compareTo(b.startTime));
       return ScheduleClassGroup(
         subject: list.first.subject,
         weekday: list.first.weekday,
         sessions: list,
       );
-    }).toList()..sort((a, b) => a.startTime.compareTo(b.startTime));
+    }).toList();
+
+    final mergedGroups = <ScheduleClassGroup>[];
+    final usedIndices = <int>{};
+    
+    String normalize(String raw) {
+      const acentos = {'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U'};
+      var s = raw.toUpperCase();
+      acentos.forEach((con, sin) => s = s.replaceAll(con, sin));
+      return s.replaceAll(RegExp(r'\s+'), ' ').trim();
+    }
+
+    for (int i = 0; i < initialGroups.length; i++) {
+      if (usedIndices.contains(i)) continue;
+      final g1 = initialGroups[i];
+      
+      if (g1.subject.toUpperCase().contains('TALLER')) {
+        int? matchIdx;
+        for (int j = i + 1; j < initialGroups.length; j++) {
+          if (usedIndices.contains(j)) continue;
+          final g2 = initialGroups[j];
+          if (g1.weekday == g2.weekday && g2.subject.toUpperCase().contains('TALLER')) {
+            if (g1.startTime == g2.startTime && g1.endTime == g2.endTime) {
+              matchIdx = j;
+              break;
+            }
+          }
+        }
+        
+        if (matchIdx != null) {
+          final g2 = initialGroups[matchIdx];
+          usedIndices.add(matchIdx);
+          
+          final isG1Finished = finishedSubjects.contains(normalize(g1.subject));
+          final isG2Finished = finishedSubjects.contains(normalize(g2.subject));
+          
+          String activeName = g1.subject;
+          if (isG1Finished && !isG2Finished) activeName = g2.subject;
+          else if (isG2Finished && !isG1Finished) activeName = g1.subject;
+          
+          mergedGroups.add(ScheduleClassGroup(
+            subject: activeName,
+            weekday: g1.weekday,
+            // Solo necesitamos las sesiones de uno de ellos
+            sessions: g1.sessions,
+            isSequentialWorkshop: true,
+            activeWorkshopName: activeName,
+          ));
+          continue;
+        }
+      }
+      mergedGroups.add(g1);
+    }
+    
+    mergedGroups.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return mergedGroups;
   }
 }
 

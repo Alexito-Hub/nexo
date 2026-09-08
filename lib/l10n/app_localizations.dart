@@ -316,6 +316,36 @@ abstract class AppLocalizations {
   /// **'Aula'**
   String get detailRoom;
 
+  /// No description provided for @detailPavilion.
+  ///
+  /// In es, this message translates to:
+  /// **'Pabellón'**
+  String get detailPavilion;
+
+  /// No description provided for @weekdayFull.
+  ///
+  /// In es, this message translates to:
+  /// **'{day, select, mon{Lunes} tue{Martes} wed{Miércoles} thu{Jueves} fri{Viernes} sat{Sábado} sun{Domingo} other{—}}'**
+  String weekdayFull(String day);
+
+  /// No description provided for @weekdayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{day, select, mon{Lun} tue{Mar} wed{Mié} thu{Jue} fri{Vie} sat{Sáb} sun{Dom} other{—}}'**
+  String weekdayShort(String day);
+
+  /// No description provided for @monthShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{month, select, jan{Ene} feb{Feb} mar{Mar} apr{Abr} may{May} jun{Jun} jul{Jul} aug{Ago} sep{Sep} oct{Oct} nov{Nov} dec{Dic} other{—}}'**
+  String monthShort(String month);
+
+  /// No description provided for @timeGreeting.
+  ///
+  /// In es, this message translates to:
+  /// **'{period, select, morning{Buenos días} afternoon{Buenas tardes} evening{Buenas noches} other{Hola}}'**
+  String timeGreeting(String period);
+
   /// No description provided for @detailBuilding.
   ///
   /// In es, this message translates to:
@@ -375,12 +405,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Duración total: {minutes} minutos'**
   String detailDuration(int minutes);
-
-  /// No description provided for @tabTeams.
-  ///
-  /// In es, this message translates to:
-  /// **'Teams'**
-  String get tabTeams;
 
   /// No description provided for @settingsTitle.
   ///
@@ -657,114 +681,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{count, plural, =1{{count} curso} other{{count} cursos}}'**
   String gradesCoursesCount(int count);
-
-  /// No description provided for @teamsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Tus asignaturas y tareas de Microsoft 365'**
-  String get teamsSubtitle;
-
-  /// No description provided for @teamsDisconnect.
-  ///
-  /// In es, this message translates to:
-  /// **'Desconectar'**
-  String get teamsDisconnect;
-
-  /// No description provided for @teamsMySubjects.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis asignaturas'**
-  String get teamsMySubjects;
-
-  /// No description provided for @teamsAssignments.
-  ///
-  /// In es, this message translates to:
-  /// **'Tareas'**
-  String get teamsAssignments;
-
-  /// No description provided for @teamsLoadError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar'**
-  String get teamsLoadError;
-
-  /// No description provided for @teamsConnectTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Conecta tu cuenta de Microsoft'**
-  String get teamsConnectTitle;
-
-  /// No description provided for @teamsConnectSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Para ver tus clases y tareas de Teams'**
-  String get teamsConnectSubtitle;
-
-  /// No description provided for @teamsConnectBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Inicia sesión con tu cuenta institucional de Microsoft 365. Te daremos un código para confirmarlo en el navegador.'**
-  String get teamsConnectBody;
-
-  /// No description provided for @teamsConnectButton.
-  ///
-  /// In es, this message translates to:
-  /// **'Conectar con Microsoft'**
-  String get teamsConnectButton;
-
-  /// No description provided for @teamsDeviceCodeGenerating.
-  ///
-  /// In es, this message translates to:
-  /// **'Generando código…'**
-  String get teamsDeviceCodeGenerating;
-
-  /// No description provided for @teamsDeviceCodeConfirmTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirma en el navegador'**
-  String get teamsDeviceCodeConfirmTitle;
-
-  /// No description provided for @teamsDeviceCodeConfirmSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Esperando que autorices la app…'**
-  String get teamsDeviceCodeConfirmSubtitle;
-
-  /// No description provided for @teamsDeviceCodeStep1Prefix.
-  ///
-  /// In es, this message translates to:
-  /// **'Abre '**
-  String get teamsDeviceCodeStep1Prefix;
-
-  /// No description provided for @teamsCopyLink.
-  ///
-  /// In es, this message translates to:
-  /// **'Copiar enlace'**
-  String get teamsCopyLink;
-
-  /// No description provided for @teamsLinkCopied.
-  ///
-  /// In es, this message translates to:
-  /// **'Enlace copiado'**
-  String get teamsLinkCopied;
-
-  /// No description provided for @teamsDeviceCodeStep2Label.
-  ///
-  /// In es, this message translates to:
-  /// **'Introduce este código:'**
-  String get teamsDeviceCodeStep2Label;
-
-  /// No description provided for @teamsDeviceCodeAutoRefresh.
-  ///
-  /// In es, this message translates to:
-  /// **'Esto se actualizará solo cuando termines.'**
-  String get teamsDeviceCodeAutoRefresh;
-
-  /// No description provided for @teamsCodeCopied.
-  ///
-  /// In es, this message translates to:
-  /// **'Código copiado'**
-  String get teamsCodeCopied;
 
   /// No description provided for @actionShow.
   ///
@@ -1135,7 +1051,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsHeaderSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Lee y acepta para continuar.'**
+  /// **'Léelos con calma y acéptalos para continuar.'**
   String get termsHeaderSubtitle;
 
   /// No description provided for @termsAcceptNote.
@@ -1159,7 +1075,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsBrandBody.
   ///
   /// In es, this message translates to:
-  /// **'Privacidad primero. Tus datos viven solo en tu dispositivo.'**
+  /// **'Privacidad primero. Aquí te decimos qué se queda en tu dispositivo y qué sale de él.'**
   String get termsBrandBody;
 
   /// No description provided for @termsItemWhatTitle.
@@ -1183,7 +1099,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsItemPrivacyBody.
   ///
   /// In es, this message translates to:
-  /// **'Tus credenciales y datos se guardan únicamente en tu dispositivo. Nexo no envía nada a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.'**
+  /// **'Tus credenciales y tus datos académicos se guardan únicamente en tu dispositivo. Nexo no envía tu información a servidores propios ni a terceros: las peticiones van directamente a los servicios de la UPLA, igual que el portal oficial.'**
   String get termsItemPrivacyBody;
 
   /// No description provided for @termsItemSecurityTitle.
@@ -1195,7 +1111,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsItemSecurityBody.
   ///
   /// In es, this message translates to:
-  /// **'El almacenamiento local no está cifrado a nivel de sistema. Úsala solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.'**
+  /// **'El almacenamiento local no está cifrado a nivel del sistema, así que usa Nexo solo en dispositivos de tu confianza. Puedes cerrar sesión para borrar credenciales y caché en cualquier momento.'**
   String get termsItemSecurityBody;
 
   /// No description provided for @termsItemResponsibleTitle.
@@ -1207,7 +1123,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsItemResponsibleBody.
   ///
   /// In es, this message translates to:
-  /// **'Accede solo a tu propia información con tus propias credenciales. Es un proyecto educativo / de hackathon de ingeniería inversa para uso personal. Úsala conforme a los reglamentos de tu universidad.'**
+  /// **'Accede solo a tu propia información y con tus propias credenciales. Es un proyecto educativo y de uso personal: úsalo conforme a los reglamentos de tu universidad.'**
   String get termsItemResponsibleBody;
 
   /// No description provided for @termsItemDisclaimerTitle.
@@ -1888,6 +1804,36 @@ abstract class AppLocalizations {
   /// **'EN PROCESO'**
   String get statusInProcess;
 
+  /// No description provided for @paymentsFilterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get paymentsFilterAll;
+
+  /// No description provided for @paymentsNoneInPeriod.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin pagos en este periodo'**
+  String get paymentsNoneInPeriod;
+
+  /// No description provided for @homeMoreClassesToday.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{+ 1 clase más hoy} other{+ {count} clases más hoy}}'**
+  String homeMoreClassesToday(int count);
+
+  /// No description provided for @statusApproved.
+  ///
+  /// In es, this message translates to:
+  /// **'APROBADO'**
+  String get statusApproved;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'DESAPROBADO'**
+  String get statusFailed;
+
   /// No description provided for @gradesPromedioLabel.
   ///
   /// In es, this message translates to:
@@ -2193,36 +2139,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Información académica'**
   String get profileAcademicInfo;
-
-  /// No description provided for @teamsCopyCode.
-  ///
-  /// In es, this message translates to:
-  /// **'Copiar código'**
-  String get teamsCopyCode;
-
-  /// No description provided for @teamsUnderConstruction.
-  ///
-  /// In es, this message translates to:
-  /// **'En construcción'**
-  String get teamsUnderConstruction;
-
-  /// No description provided for @teamsSoonAvailable.
-  ///
-  /// In es, this message translates to:
-  /// **'Pronto disponible'**
-  String get teamsSoonAvailable;
-
-  /// No description provided for @teamsWorkingOnSection.
-  ///
-  /// In es, this message translates to:
-  /// **'Estamos trabajando en esta sección'**
-  String get teamsWorkingOnSection;
-
-  /// No description provided for @teamsComeBackLater.
-  ///
-  /// In es, this message translates to:
-  /// **'Vuelve más adelante.'**
-  String get teamsComeBackLater;
 
   /// No description provided for @pdfExportLoadConstanciaError.
   ///
@@ -2830,24 +2746,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{{count} vencida} other{{count} vencidas}}'**
   String homePendingPaymentsOverdueCount(int count);
 
-  /// No description provided for @widgetTeamsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis asignaturas'**
-  String get widgetTeamsTitle;
-
-  /// No description provided for @widgetTeamsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupos de Teams'**
-  String get widgetTeamsSubtitle;
-
-  /// No description provided for @widgetTeamsEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay asignaturas en Teams'**
-  String get widgetTeamsEmpty;
-
   /// No description provided for @widgetAssignmentsTitle.
   ///
   /// In es, this message translates to:
@@ -2889,6 +2787,108 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'+ {count} cuotas más'**
   String homePendingPaymentsMore(int count);
+
+  /// No description provided for @termsItemRightsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus derechos'**
+  String get termsItemRightsTitle;
+
+  /// No description provided for @termsItemRightsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus datos están en tu dispositivo, así que los controlas tú: puedes revisarlos, actualizarlos desde la Intranet o borrarlos cerrando sesión. Escríbenos desde la sección de soporte para cualquier duda sobre el tratamiento de tus datos.'**
+  String get termsItemRightsBody;
+
+  /// No description provided for @termsHeaderUpdatedPre.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiamos algo'**
+  String get termsHeaderUpdatedPre;
+
+  /// No description provided for @termsUpdatedNotice.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizamos estos términos para explicar mejor qué se queda en tu dispositivo y cómo te avisaremos de futuros cambios. Léelos de nuevo antes de continuar.'**
+  String get termsUpdatedNotice;
+
+  /// No description provided for @termsItemDeviceTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo que queda en tu dispositivo'**
+  String get termsItemDeviceTitle;
+
+  /// No description provided for @termsItemDeviceBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Nexo guarda una copia local de tu horario, tus notas y tus pagos para funcionar sin conexión, y programa las notificaciones y los widgets en el propio dispositivo. Todo eso se borra al cerrar sesión.'**
+  String get termsItemDeviceBody;
+
+  /// No description provided for @termsItemChangesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios en estos términos'**
+  String get termsItemChangesTitle;
+
+  /// No description provided for @termsItemChangesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Si cambia algo importante en cómo se tratan tus datos, actualizaremos estos términos y volveremos a mostrártelos antes de que sigas usando la app. Puedes releerlos cuando quieras desde Perfil, en Términos y privacidad.'**
+  String get termsItemChangesBody;
+
+  /// No description provided for @termsVersionLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version} · Actualizado el {date}'**
+  String termsVersionLine(String version, String date);
+
+  /// No description provided for @projectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuánto necesitas?'**
+  String get projectionTitle;
+
+  /// No description provided for @projectionMinimum.
+  ///
+  /// In es, this message translates to:
+  /// **'Para aprobar con {min}'**
+  String projectionMinimum(String min);
+
+  /// No description provided for @projectionNeedSingle.
+  ///
+  /// In es, this message translates to:
+  /// **'Es lo que necesitas en'**
+  String get projectionNeedSingle;
+
+  /// No description provided for @projectionNeedEach.
+  ///
+  /// In es, this message translates to:
+  /// **'Es lo que necesitas en cada una'**
+  String get projectionNeedEach;
+
+  /// No description provided for @projectionExact.
+  ///
+  /// In es, this message translates to:
+  /// **'Exacto: {value}'**
+  String projectionExact(String value);
+
+  /// No description provided for @projectionAlreadyPassed.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya está aprobado: con lo que llevas no puedes bajar del mínimo.'**
+  String get projectionAlreadyPassed;
+
+  /// No description provided for @projectionOutOfReach.
+  ///
+  /// In es, this message translates to:
+  /// **'Ni con 20 en todo lo que queda se llega al mínimo. Cuenta con el sustitutorio.'**
+  String get projectionOutOfReach;
+
+  /// No description provided for @projectionAssume.
+  ///
+  /// In es, this message translates to:
+  /// **'Si en {unit} sacas {value}:'**
+  String projectionAssume(String unit, String value);
 }
 
 class _AppLocalizationsDelegate

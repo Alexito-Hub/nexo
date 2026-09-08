@@ -1,3 +1,5 @@
+import 'package:nexo/domain/passing_rule.dart';
+
 int? _toInt(Object? v) {
   if (v == null) return null;
   if (v is int) return v;
@@ -257,10 +259,7 @@ class CourseGrade {
     return '—';
   }
 
-  bool get isApproved {
-    final n = currentGradeNum;
-    return n != null && n >= 10.5;
-  }
+  bool get isApproved => PassingRule.current.passes(currentGradeNum);
 
   int? get asistenciaPct {
     final a = attendance;
@@ -309,11 +308,11 @@ class TermGrades {
         .where((g) => g != null && g > 0)
         .toList();
     if (valid.isEmpty) return parseGrade(practicesAverage);
-    
+
     final sum = valid.fold<double>(0, (a, b) => a + b!);
     return sum / valid.length;
   }
-  
+
   String get displayPracticesAverage {
     final p = predictedPracticesAverage;
     if (p != null) return formatGrade(p.toStringAsFixed(2));
@@ -338,6 +337,7 @@ class RecordCourse {
   final String name;
   final String cycle;
   final String rawGrade;
+  final double creditos;
   const RecordCourse({
     required this.faculty,
     required this.career,
@@ -348,9 +348,19 @@ class RecordCourse {
     required this.name,
     required this.cycle,
     required this.rawGrade,
+    this.creditos = 0,
   });
   factory RecordCourse.fromRow(List<dynamic> r) {
     String at(int i) => (i < r.length ? r[i]?.toString() ?? '' : '').trim();
+    double cred = 0;
+    // Buscar créditos en las columnas aledañas. Suelen venir como número entero (1, 2, 3, 4, 5).
+    for (final i in [9, 10, 11]) {
+      final val = double.tryParse(at(i));
+      if (val != null && val > 0 && val <= 20) {
+        cred = val;
+        break;
+      }
+    }
     return RecordCourse(
       faculty: at(0),
       career: at(1),
@@ -361,11 +371,12 @@ class RecordCourse {
       name: at(7),
       cycle: at(8),
       rawGrade: at(12),
+      creditos: cred,
     );
   }
   double? get grade => parseGrade(rawGrade);
   String get notaText => formatGrade(rawGrade);
-  bool get isApproved => (grade ?? 0) >= 10.5;
+  bool get isApproved => PassingRule.current.passes(grade);
   bool get isFinished => state.toLowerCase().contains('conclu');
 }
 
@@ -378,6 +389,9 @@ class ReportCardCourse {
   final double credit;
   final String rawAttendance;
   final String rawAverage;
+  // Nota vigesimal oficial (col. 9 de la boleta). El promedio crudo de algunos
+  // cursos (talleres) viene en escala 0-100; esta columna siempre es vigesimal.
+  final String rawVigesimal;
   final String state;
   const ReportCardCourse({
     required this.enrollmentSubjectId,
@@ -388,6 +402,7 @@ class ReportCardCourse {
     required this.rawAttendance,
     required this.rawAverage,
     required this.state,
+    this.rawVigesimal = '',
     this.credit = 0,
   });
   factory ReportCardCourse.fromRow(List<dynamic> r) {
@@ -395,12 +410,13 @@ class ReportCardCourse {
     return ReportCardCourse(
       enrollmentSubjectId: at(0),
       plan: at(1),
-      credit: double.tryParse(at(3)) ?? 0,
+      credit: parseGrade(at(3)) ?? parseGrade(at(2)) ?? 0,
       code: at(4),
       name: at(5),
       section: at(6),
       rawAttendance: at(7),
       rawAverage: at(8),
+      rawVigesimal: at(9),
       state: at(10),
     );
   }
@@ -413,6 +429,7 @@ class ReportCardCourse {
     credit: _toDouble(j['credito']) ?? 0,
     rawAttendance: _toStr(j['asistenciaRaw']),
     rawAverage: _toStr(j['promedioRaw']),
+    rawVigesimal: _toStr(j['notaVigesimalRaw']),
     state: _toStr(j['estado']),
   );
   Map<String, dynamic> toJson() => {
@@ -424,10 +441,24 @@ class ReportCardCourse {
     'credito': credit,
     'asistenciaRaw': rawAttendance,
     'promedioRaw': rawAverage,
+    'notaVigesimalRaw': rawVigesimal,
     'estado': state,
   };
+
+  /// Promedio crudo del curso tal como aparece en la boleta (col. 8). Puede
+  /// venir en escala 0-100 para talleres.
   double? get average => parseGrade(rawAverage);
   String get promedioText => formatGrade(rawAverage);
+
+  /// Nota siempre en escala vigesimal: usa el promedio crudo si ya está en
+  /// rango; si no (talleres 0-100), cae a la nota vigesimal oficial (col. 9).
+  /// Es la que debe promediarse para el promedio del ciclo.
+  double? get vigesimalAverage {
+    final raw = parseGrade(rawAverage);
+    if (raw != null && raw >= 0 && raw <= 20.5) return raw;
+    return parseGrade(rawVigesimal);
+  }
+
   int? get attendance => int.tryParse(rawAttendance.trim());
   bool get inProgress => state.toLowerCase().startsWith('dsp');
 }
@@ -457,7 +488,7 @@ class UnitGrades {
     required this.rawAverage,
   });
   double? get weight => parseGrade(rawWeight);
-  
+
   double? get predictedAverage {
     final validGrades = evidences
         .map((e) => e.grade)
@@ -469,7 +500,7 @@ class UnitGrades {
   }
 
   double? get average => predictedAverage ?? parseGrade(rawAverage);
-  
+
   String get promedioText {
     final p = predictedAverage;
     if (p != null) return formatGrade(p.toStringAsFixed(2));
@@ -490,6 +521,32 @@ class CourseGradeDetail {
   });
   double? get promedioFinal => parseGrade(rawFinalAverage);
   String get finalAverageText => formatGrade(rawFinalAverage);
+
+  /// Promedio real del curso calculado desde las unidades (con decimales),
+  /// ponderado por el peso de cada unidad. El servidor entrega el promedio
+  /// del curso redondeado (11.60 → 12); este getter permite mostrar el valor
+  /// real de forma consistente en la lista y en el detalle.
+  double? get computedAverage {
+    double weighted = 0, weights = 0;
+    final plain = <double>[];
+    var allWeighted = true;
+    for (final u in units) {
+      final a = u.average;
+      if (a == null) continue;
+      plain.add(a);
+      final w = u.weight;
+      if (w != null && w > 0) {
+        weighted += a * w;
+        weights += w;
+      } else {
+        allWeighted = false;
+      }
+    }
+    if (plain.isEmpty) return promedioFinal;
+    if (allWeighted && weights > 0) return weighted / weights;
+    return plain.reduce((a, b) => a + b) / plain.length;
+  }
+
   String get sustitutorioText => formatGrade(rawSubstitute);
   bool get hasSubstitute => parseGrade(rawSubstitute) != null;
   factory CourseGradeDetail.fromRows(List<dynamic> rows) {
@@ -548,87 +605,6 @@ class CourseGradeDetail {
       rawFinalAverage: promFinal,
       state: state,
     );
-  }
-}
-
-class TeamsClass {
-  final String id;
-  final String displayName;
-  final String description;
-  final String classCode;
-  const TeamsClass({
-    required this.id,
-    required this.displayName,
-    required this.description,
-    required this.classCode,
-  });
-  factory TeamsClass.fromJson(Map<String, dynamic> j) => TeamsClass(
-    id: _toStr(j['id']),
-    displayName: _toStr(j['displayName']),
-    description: _toStr(j['descripcion']),
-    classCode: _toStr(j['classCode']),
-  );
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'displayName': displayName,
-    'descripcion': description,
-    'classCode': classCode,
-  };
-}
-
-class TeamsAssignment {
-  final String id;
-  final String displayName;
-  final String classId;
-  final String status;
-  final DateTime? dueDateTime;
-  final String? instructions;
-  final String? webUrl;
-  const TeamsAssignment({
-    required this.id,
-    required this.displayName,
-    required this.classId,
-    required this.status,
-    required this.dueDateTime,
-    this.instructions,
-    this.webUrl,
-  });
-  factory TeamsAssignment.fromJson(Map<String, dynamic> j) {
-    final dueRaw = j['dueDateTime'];
-    DateTime? due;
-    if (dueRaw is String && dueRaw.isNotEmpty) {
-      due = DateTime.tryParse(dueRaw)?.toLocal();
-    } else if (dueRaw is Map) {
-      final dt = dueRaw['dateTime'];
-      if (dt is String) due = DateTime.tryParse(dt)?.toLocal();
-    }
-    final instr = j['instructions'];
-    final instrText = instr is Map ? instr['content'] as String? : null;
-    return TeamsAssignment(
-      id: _toStr(j['id']),
-      displayName: _toStr(j['displayName']),
-      classId: _toStr(j['classId']),
-      status: _toStr(j['status']),
-      dueDateTime: due,
-      instructions: (instrText != null && instrText.isNotEmpty)
-          ? instrText
-          : null,
-      webUrl: j['webUrl'] as String?,
-    );
-  }
-  int? daysUntilDue([DateTime? now]) {
-    final due = dueDateTime;
-    if (due == null) return null;
-    final t = now ?? DateTime.now();
-    final hoy = DateTime(t.year, t.month, t.day);
-    final venc = DateTime(due.year, due.month, due.day);
-    return venc.difference(hoy).inDays;
-  }
-
-  bool isOverdue([DateTime? now]) {
-    final due = dueDateTime;
-    if (due == null) return false;
-    return due.isBefore(now ?? DateTime.now());
   }
 }
 
