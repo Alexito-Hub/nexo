@@ -10,6 +10,8 @@ import 'package:nexo/data/cache_manager.dart';
 import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_repository.dart';
 import 'package:nexo/data/sigma_repository.dart';
+import 'package:nexo/domain/idiomas_repository.dart';
+import 'package:nexo/domain/idiomas_models.dart';
 import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/course_status.dart';
 import 'package:nexo/domain/models.dart';
@@ -48,10 +50,12 @@ class AppStore extends ChangeNotifier {
     required ErrorHandler errorHandler,
     IntranetRepository? intranet,
     TeacherRepository? teacher,
+    IdiomasRepository? idiomas,
   }) : _cache = cache,
        _errorHandler = errorHandler,
        _intranet = intranet,
-       _teacher = teacher {
+       _teacher = teacher,
+       _idiomas = idiomas {
     // El layout del dashboard debe cargarse SIEMPRE (no solo al hidratar):
     // tras un login fresco `hydrateFromCache` no corre y el Home quedaba con
     // spans por defecto rotos (tarjetas aplastadas en móvil).
@@ -153,6 +157,7 @@ class AppStore extends ChangeNotifier {
   final ErrorHandler _errorHandler;
   final IntranetRepository? _intranet;
   final TeacherRepository? _teacher;
+  final IdiomasRepository? _idiomas;
   void Function(String course, String grade)? onGradeChange;
   void _checkGrades(Iterable<(String, String)> items) {
     final entries = items.where((e) => e.$2.isNotEmpty && e.$2 != '—');
@@ -179,6 +184,9 @@ class AppStore extends ChangeNotifier {
 
   AsyncValue<Student> profile = const AsyncValue.idle();
   AsyncValue<List<Term>> periodos = const AsyncValue.idle();
+  AsyncValue<List<IdiomasCourse>> idiomasMatricula = const AsyncValue.idle();
+  AsyncValue<List<dynamic>> idiomasNotas = const AsyncValue.idle();
+  AsyncValue<List<Payment>> cuotas = const AsyncValue.idle();
   AsyncValue<List<ScheduleClass>> schedule = const AsyncValue.idle();
   AsyncValue<GradesSummary> resumen = const AsyncValue.idle();
   AsyncValue<List<TermAverage>> promedios = const AsyncValue.idle();
@@ -530,6 +538,7 @@ class AppStore extends ChangeNotifier {
       loadHorarioActual(),
       loadCuotasPendientes(),
       loadPromedios(),
+      loadIdiomasMatricula(),
     ]);
     final p = profile.value;
     if (p != null && p.studyPlan.isNotEmpty && p.level.isNotEmpty) {
@@ -602,6 +611,51 @@ class AppStore extends ChangeNotifier {
     persist: (v) => _cache.saveHorario(v),
     operationName: 'loadHorarioActual',
   );
+
+  /// Carga la matrícula del Centro de Idiomas y fusiona el horario.
+  Future<void> loadIdiomasMatricula() async {
+    final r = _idiomas;
+    if (r == null) return;
+    final s = AppStorage.instance;
+    final user = s.credUser;
+    final pass = s.credPass;
+    if (user == null || pass == null) return;
+    try {
+      idiomasMatricula = const AsyncValue.loading();
+      notifyListeners();
+      final ok = await r.login(user, pass);
+      if (!ok) {
+        idiomasMatricula = const AsyncValue.data([]);
+        notifyListeners();
+        return;
+      }
+      final courses = await r.getMatricula(user);
+      idiomasMatricula = AsyncValue.data(courses);
+      
+      final allNotas = <dynamic>[];
+      for (final c in courses) {
+        final notas = await r.getNotas(c.detMatriculaId);
+        allNotas.addAll(notas);
+      }
+      idiomasNotas = AsyncValue.data(allNotas);
+
+      // Inyectar clases de idiomas en el horario existente
+      if (courses.isNotEmpty) {
+        final now = DateTime.now();
+        final activeCourses = courses.where((c) => c.anio == now.year && c.mes == now.month).toList();
+        final idiomasClasses = activeCourses.expand((c) => c.toScheduleClasses()).toList();
+        final current = schedule.value ?? [];
+        // Remover idiomas previos para no duplicar
+        final filtered = current.where((s) => s.id != 'ING001' && !s.id.startsWith('ING')).toList();
+        schedule = AsyncValue.data([...filtered, ...idiomasClasses]);
+      }
+      notifyListeners();
+    } catch (e) {
+      idiomasMatricula = AsyncValue.failure(e);
+      idiomasNotas = AsyncValue.failure(e);
+      notifyListeners();
+    }
+  }
   Future<GradesSummary?> loadResumen(String pesId, String level) => _wrap(
     () => _repo
         .notasResumen(pesId, level)

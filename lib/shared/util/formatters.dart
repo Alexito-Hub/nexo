@@ -118,11 +118,11 @@ abstract final class Fmt {
   static String formatAula(String rawAula) {
     final parsed = parseAula(rawAula);
     final pab = parsed['pabellon'];
-    final aul = parsed['aula'];
-    if (pab != null && aul != null) {
+    final aul = cleanRoom(rawAula);
+    if (pab != null && aul.isNotEmpty) {
       return 'Pabellón $pab - Aula $aul';
     }
-    return aul ?? '—';
+    return aul.isEmpty ? '—' : aul;
   }
 
   static String cleanBuilding(String raw) {
@@ -132,7 +132,9 @@ abstract final class Fmt {
   }
 
   static String cleanRoom(String raw) {
-    var s = raw.replaceAll(RegExp(r'^(LAB|LABORATORIO)\s*_?\s*', caseSensitive: false), '').trim();
+    final parsed = parseAula(raw);
+    String s = parsed['aula'] ?? raw;
+    s = s.replaceAll(RegExp(r'^(LAB|LABORATORIO)\s*_?\s*', caseSensitive: false), '').trim();
     if (s.isEmpty) return raw;
     return s;
   }
