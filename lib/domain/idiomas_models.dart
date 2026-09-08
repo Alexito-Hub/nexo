@@ -79,7 +79,7 @@ class IdiomasCourse {
   /// Convierte los días "LU-MA-MI-JU-VI" en múltiples instancias de ScheduleClass
   List<ScheduleClass> toScheduleClasses() {
     final classes = <ScheduleClass>[];
-    
+
     // No parse to int needed, ScheduleClass expects strings for startTime and endTime.
 
     final List<String> dayTokens = dias.split('-');
@@ -96,24 +96,30 @@ class IdiomasCourse {
     for (final token in dayTokens) {
       final t = token.trim().toUpperCase();
       if (dayMap.containsKey(t)) {
-        classes.add(ScheduleClass(
-          id: asigId,
-          nrc: '',
-          subject: asignatura,
-          modality: modalidad,
-          section: seccion,
-          level: '',
-          campus: modalidad.toUpperCase() == 'VIRTUAL' ? 'VIRTUAL' : 'PRESENCIAL',
-          building: modalidad.toUpperCase() == 'VIRTUAL' ? '' : 'Centro de Idiomas',
-          room: aula,
-          note: '$tipoEstudio · $turno',
-          teacher: 'Centro de Idiomas',
-          weekday: dayMap[t]!,
-          dayName: token.trim(),
-          startTime: horaInicio,
-          endTime: horaFin,
-          typeCode: 'I',
-        ));
+        classes.add(
+          ScheduleClass(
+            id: asigId,
+            nrc: '',
+            subject: asignatura,
+            modality: modalidad,
+            section: seccion,
+            level: '',
+            campus: modalidad.toUpperCase() == 'VIRTUAL'
+                ? 'VIRTUAL'
+                : 'PRESENCIAL',
+            building: modalidad.toUpperCase() == 'VIRTUAL'
+                ? ''
+                : 'Centro de Idiomas',
+            room: aula,
+            note: '$tipoEstudio · $turno',
+            teacher: 'Centro de Idiomas',
+            weekday: dayMap[t]!,
+            dayName: token.trim(),
+            startTime: horaInicio,
+            endTime: horaFin,
+            typeCode: 'I',
+          ),
+        );
       }
     }
     return classes;

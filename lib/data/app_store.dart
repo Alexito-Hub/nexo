@@ -7,6 +7,7 @@ import 'package:nexo/core/error_handler.dart';
 import 'package:nexo/core/errors.dart';
 import 'package:nexo/core/storage.dart';
 import 'package:nexo/data/cache_manager.dart';
+import 'package:nexo/data/connectivity_service.dart';
 import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_repository.dart';
 import 'package:nexo/data/sigma_repository.dart';
@@ -48,11 +49,13 @@ class AppStore extends ChangeNotifier {
     this._repo, {
     required CacheManager cache,
     required ErrorHandler errorHandler,
+    required ConnectivityService connectivity,
     IntranetRepository? intranet,
     TeacherRepository? teacher,
     IdiomasRepository? idiomas,
   }) : _cache = cache,
        _errorHandler = errorHandler,
+       _connectivity = connectivity,
        _intranet = intranet,
        _teacher = teacher,
        _idiomas = idiomas {
@@ -155,10 +158,16 @@ class AppStore extends ChangeNotifier {
   final SigmaRepository _repo;
   final CacheManager _cache;
   final ErrorHandler _errorHandler;
+  final ConnectivityService _connectivity;
   final IntranetRepository? _intranet;
   final TeacherRepository? _teacher;
   final IdiomasRepository? _idiomas;
   void Function(String course, String grade)? onGradeChange;
+
+  /// Operaciones que resolvieron vía caché mientras el primer chequeo de
+  /// conectividad aún no había terminado. `retryFailedEssentials` las
+  /// reintenta cuando vuelve la conexión.
+  final Set<String> _startupCacheOps = {};
   void _checkGrades(Iterable<(String, String)> items) {
     final entries = items.where((e) => e.$2.isNotEmpty && e.$2 != '—');
     if (entries.isEmpty) return;
@@ -342,6 +351,12 @@ class AppStore extends ChangeNotifier {
         cached: cached ?? () => Future.value(null),
         operationName: operationName,
       );
+      // Si el primer chequeo de conectividad aún no terminó y los datos
+      // vinieron del caché (hasInternet era false prematuramente), marcamos
+      // la operación para que `retryFailedEssentials` la reintente luego.
+      if (!_connectivity.firstCheckCompleted && !_connectivity.hasInternet) {
+        _startupCacheOps.add(operationName);
+      }
       set(AsyncValue.data(v));
       _notify();
       persist?.call(v);
@@ -547,18 +562,29 @@ class AppStore extends ChangeNotifier {
     unawaited(checkActiveBoleta());
   }
 
-  /// Reintenta solo lo que falló (o nunca llegó a cargar) en el Home.
-  /// Se invoca al recuperar conectividad para no obligar al usuario a
-  /// refrescar manualmente.
+  /// Reintenta lo que falló, lo que nunca llegó a cargar, o lo que resolvió
+  /// desde caché porque el primer chequeo de conectividad aún no había
+  /// terminado (falso negativo de offline al arranque).
   Future<void> retryFailedEssentials() async {
-    bool needs(AsyncValue s) => !s.loading && !s.hasValue;
-    if (needs(periodos)) await loadPeriodos();
+    bool needs(AsyncValue s, [String? opName]) {
+      if (s.loading) return false;
+      if (!s.hasValue) return true;
+      // Datos que vinieron de caché por un falso offline al arranque.
+      if (opName != null && _startupCacheOps.contains(opName)) return true;
+      return false;
+    }
+
+    if (needs(periodos, 'loadPeriodos')) await loadPeriodos();
     final tasks = <Future<void>>[
-      if (needs(profile)) loadProfile(),
-      if (needs(schedule)) loadHorarioActual(),
-      if (needs(pendingInstallments)) loadCuotasPendientes(),
-      if (needs(promedios)) loadPromedios(),
+      if (needs(profile, 'loadProfile')) loadProfile(),
+      if (needs(schedule, 'loadHorarioActual')) loadHorarioActual(),
+      if (needs(pendingInstallments, 'loadCuotasPendientes'))
+        loadCuotasPendientes(),
+      if (needs(promedios, 'loadPromedios')) loadPromedios(),
+      if (needs(idiomasMatricula)) loadIdiomasMatricula(),
     ];
+    // Limpiar marcas de caché por arranque: ya se está reintentando todo.
+    _startupCacheOps.clear();
     if (tasks.isEmpty) return;
     await Future.wait(tasks);
     final p = profile.value;
@@ -603,6 +629,7 @@ class AppStore extends ChangeNotifier {
     PassingRule.resolveFrom(periodos.value);
     return result;
   }
+
   Future<List<ScheduleClass>?> loadHorarioActual() => _wrap(
     () => _resolveOrEmpty(_horarioRes),
     () => schedule,
@@ -622,40 +649,54 @@ class AppStore extends ChangeNotifier {
     if (user == null || pass == null) return;
     try {
       idiomasMatricula = const AsyncValue.loading();
-      notifyListeners();
-      final ok = await r.login(user, pass);
-      if (!ok) {
+      _notify();
+      final loginResult = await r.login(user, pass);
+      if (loginResult == IdiomasLoginResult.invalidCredentials) {
+        // Credenciales rechazadas: no es un error de red, simplemente
+        // el estudiante no tiene cuenta de Idiomas o la contraseña difiere.
         idiomasMatricula = const AsyncValue.data([]);
-        notifyListeners();
+        _notify();
         return;
+      }
+      if (loginResult == IdiomasLoginResult.networkError) {
+        throw const NetworkException(
+          'No se pudo conectar al Centro de Idiomas.',
+        );
       }
       final courses = await r.getMatricula(user);
       idiomasMatricula = AsyncValue.data(courses);
-      
-      final allNotas = <dynamic>[];
-      for (final c in courses) {
-        final notas = await r.getNotas(c.detMatriculaId);
-        allNotas.addAll(notas);
-      }
-      idiomasNotas = AsyncValue.data(allNotas);
 
-      // Inyectar clases de idiomas en el horario existente
+      // B8: Paralelizar las llamadas a getNotas por curso.
       if (courses.isNotEmpty) {
-        final now = DateTime.now();
-        final activeCourses = courses.where((c) => c.anio == now.year && c.mes == now.month).toList();
-        final idiomasClasses = activeCourses.expand((c) => c.toScheduleClasses()).toList();
+        final notasResults = await Future.wait(
+          courses.map((c) => r.getNotas(c.detMatriculaId)),
+        );
+        final allNotas = notasResults.expand((n) => n).toList();
+        idiomasNotas = AsyncValue.data(allNotas);
+      } else {
+        idiomasNotas = const AsyncValue.data([]);
+      }
+
+      // Inyectar clases de idiomas en el horario existente.
+      // B6: No filtrar por mes — la API solo retorna cursos activos.
+      if (courses.isNotEmpty) {
+        final idiomasClasses = courses
+            .expand((c) => c.toScheduleClasses())
+            .toList();
         final current = schedule.value ?? [];
-        // Remover idiomas previos para no duplicar
-        final filtered = current.where((s) => s.id != 'ING001' && !s.id.startsWith('ING')).toList();
+        // B5: Usar typeCode == 'I' para identificar clases de idiomas
+        // inyectadas previamente, en vez del frágil startsWith('ING').
+        final filtered = current.where((s) => s.typeCode != 'I').toList();
         schedule = AsyncValue.data([...filtered, ...idiomasClasses]);
       }
-      notifyListeners();
+      _notify();
     } catch (e) {
       idiomasMatricula = AsyncValue.failure(e);
       idiomasNotas = AsyncValue.failure(e);
-      notifyListeners();
+      _notify();
     }
   }
+
   Future<GradesSummary?> loadResumen(String pesId, String level) => _wrap(
     () => _repo
         .notasResumen(pesId, level)

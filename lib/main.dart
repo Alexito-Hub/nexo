@@ -139,11 +139,12 @@ Future<void> main(List<String> args) async {
   );
   final intranet = IntranetRepository(IntranetClient(transport: secureHttp));
   final teacher = TeacherRepository(api);
-  final idiomas = IdiomasRepository();
+  final idiomas = IdiomasRepository(client: secureHttp);
   final store = AppStore(
     repo,
     cache: cache,
     errorHandler: errorHandler,
+    connectivity: connectivity,
     intranet: intranet,
     teacher: teacher,
     idiomas: idiomas,

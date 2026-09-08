@@ -113,17 +113,27 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     super.initState();
     final isTeacher = widget.session.user?.isTeacher ?? false;
     if (!isTeacher) {
-      widget.store.loadHomeEssentials();
+      // Esperar el primer health-check de conectividad antes de cargar datos:
+      // sin esto, `ErrorHandler` ve `hasInternet = false` (valor por defecto) y
+      // cae a caché innecesariamente, produciendo el log repetido
+      // "ErrorHandler: offline flag for X → cache".
+      _awaitConnectivityThenLoad();
     }
     _lastBoletaCheck = DateTime.now();
     WidgetsBinding.instance.addObserver(this);
     ShortcutService.instance.addListener(_handleShortcut);
-    _wasOnline = widget.connectivity.hasInternet;
     widget.connectivity.addListener(_onConnectivityChange);
     _handleShortcut();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) maybeShowWhatsappInvite(context);
     });
+  }
+
+  Future<void> _awaitConnectivityThenLoad() async {
+    await widget.connectivity.firstCheckDone;
+    if (!mounted) return;
+    _wasOnline = widget.connectivity.hasInternet;
+    widget.store.loadHomeEssentials();
   }
 
   @override

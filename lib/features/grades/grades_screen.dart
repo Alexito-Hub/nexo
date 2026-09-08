@@ -173,7 +173,8 @@ class _GradesScreenState extends State<GradesScreen> {
                           ),
                         ),
                       if (widget.store.idiomasMatricula.hasValue &&
-                          (widget.store.idiomasMatricula.value?.isNotEmpty ?? false)) ...[
+                          (widget.store.idiomasMatricula.value?.isNotEmpty ??
+                              false)) ...[
                         const SizedBox(height: 14),
                         Reveal(
                           index: 3,
@@ -1016,13 +1017,23 @@ class _IdiomasGradesList extends StatelessWidget {
   Widget build(BuildContext context) {
     String monthName(int mes) {
       const meses = [
-        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
-        'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+        'ENERO',
+        'FEBRERO',
+        'MARZO',
+        'ABRIL',
+        'MAYO',
+        'JUNIO',
+        'JULIO',
+        'AGOSTO',
+        'SETIEMBRE',
+        'OCTUBRE',
+        'NOVIEMBRE',
+        'DICIEMBRE',
       ];
       if (mes >= 1 && mes <= 12) return meses[mes - 1];
       return mes.toString();
     }
-    
+
     final courses = store.idiomasMatricula.value ?? [];
     if (courses.isEmpty) return const SizedBox.shrink();
     return SectionCard(
@@ -1037,7 +1048,9 @@ class _IdiomasGradesList extends StatelessWidget {
         for (final c in courses) ...[
           Builder(
             builder: (context) {
-              final avgText = c.promedio > 0 ? c.promedio.toStringAsFixed(2) : '—';
+              final avgText = c.promedio > 0
+                  ? c.promedio.toStringAsFixed(2)
+                  : '—';
               final color = c.promedio > 0
                   ? (c.promedio >= 10.5 ? NexoTheme.success : NexoTheme.danger)
                   : Colors.orange.shade400;
@@ -1052,7 +1065,8 @@ class _IdiomasGradesList extends StatelessWidget {
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (_) => _IdiomasDetalleSheet(course: c, store: store),
+                      builder: (_) =>
+                          _IdiomasDetalleSheet(course: c, store: store),
                     );
                   },
                   child: Container(
@@ -1088,55 +1102,55 @@ class _IdiomasGradesList extends StatelessWidget {
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            c.asignatura,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: NexoTheme.textPrimary,
-                              height: 1.2,
-                            ),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                c.asignatura,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: NexoTheme.textPrimary,
+                                  height: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${c.anio}-${monthName(c.mes)} · ${c.idiomaNombre}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: NexoTheme.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${c.anio}-${monthName(c.mes)} · ${c.idiomaNombre}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: NexoTheme.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: NexoTheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '—',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: NexoTheme.textMuted,
-                          letterSpacing: -1,
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: NexoTheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '—',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: NexoTheme.textMuted,
+                              letterSpacing: -1,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              ),
-            );
-          },
-        ),
-      ],
+              );
+            },
+          ),
+        ],
       ]),
     );
   }
@@ -1179,31 +1193,51 @@ class _IdiomasDetalleSheet extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       final allNotas = store.idiomasNotas.value ?? [];
-                      final match = allNotas.where((n) => n['detMatriculaId'] == course.detMatriculaId).toList();
-                      
+                      final match = allNotas
+                          .where(
+                            (n) => n['detMatriculaId'] == course.detMatriculaId,
+                          )
+                          .toList();
+
                       String monthName(int mes) {
                         const meses = [
-                          'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
-                          'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+                          'ENERO',
+                          'FEBRERO',
+                          'MARZO',
+                          'ABRIL',
+                          'MAYO',
+                          'JUNIO',
+                          'JULIO',
+                          'AGOSTO',
+                          'SETIEMBRE',
+                          'OCTUBRE',
+                          'NOVIEMBRE',
+                          'DICIEMBRE',
                         ];
                         if (mes >= 1 && mes <= 12) return meses[mes - 1];
                         return mes.toString();
                       }
-                      
+
                       String notaText = '—';
                       final notasList = <Map<String, dynamic>>[];
-                      
+
                       if (match.isNotEmpty) {
                         final data = match.first as Map<String, dynamic>;
                         notaText = data['promedio']?.toString() ?? '—';
-                        if (notaText == '0' || notaText == '0.0' || notaText == '0.00') notaText = '—';
+                        if (notaText == '0' ||
+                            notaText == '0.0' ||
+                            notaText == '0.00')
+                          notaText = '—';
 
                         for (int i = 1; i <= 6; i++) {
-                          if (data['nota$i'] != null && data['nota$i'] > 0) {
-                            notasList.add({
-                              'label': 'Nota $i',
-                              'grade': (data['nota$i'] as num).toDouble(),
-                            });
+                          final raw = data['nota$i'];
+                          final nota = raw is num
+                              ? raw.toDouble()
+                              : raw is String
+                              ? double.tryParse(raw)
+                              : null;
+                          if (nota != null && nota > 0) {
+                            notasList.add({'label': 'Nota $i', 'grade': nota});
                           }
                         }
                       }
@@ -1213,7 +1247,8 @@ class _IdiomasDetalleSheet extends StatelessWidget {
                         children: [
                           GradeHeader(
                             titulo: course.asignatura,
-                            subtitulo: '${course.anio}-${monthName(course.mes)} · ${course.idiomaNombre}',
+                            subtitulo:
+                                '${course.anio}-${monthName(course.mes)} · ${course.idiomaNombre}',
                             notaFinalText: notaText,
                           ),
                           const SizedBox(height: 16),
@@ -1221,9 +1256,9 @@ class _IdiomasDetalleSheet extends StatelessWidget {
                             EmptyState(
                               icon: Icons.access_time_rounded,
                               title: 'Sin calificaciones',
-                              subtitle: match.isEmpty 
-                                ? 'Aún no se han registrado notas para este curso en el sistema de Idiomas.' 
-                                : 'Las notas están en proceso de ser publicadas.',
+                              subtitle: match.isEmpty
+                                  ? 'Aún no se han registrado notas para este curso en el sistema de Idiomas.'
+                                  : 'Las notas están en proceso de ser publicadas.',
                               color: NexoTheme.textMuted,
                             )
                           else
@@ -1252,4 +1287,3 @@ class _IdiomasDetalleSheet extends StatelessWidget {
     );
   }
 }
-

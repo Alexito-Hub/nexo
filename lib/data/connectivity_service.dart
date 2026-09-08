@@ -19,6 +19,18 @@ class ConnectivityService extends ChangeNotifier {
   ServerStatus _intranetStatus = ServerStatus.offline;
   ServerStatus _idiomasAuthStatus = ServerStatus.offline;
   ServerStatus _idiomasApiStatus = ServerStatus.offline;
+
+  /// Completer que se resuelve cuando el primer health-check termina.
+  /// Permite a `AppShell` esperar antes de disparar `loadHomeEssentials`,
+  /// evitando que `ErrorHandler` vea `hasInternet = false` prematuramente.
+  final Completer<void> _firstCheckCompleter = Completer<void>();
+
+  /// Future que se resuelve al completar el primer chequeo de conectividad.
+  Future<void> get firstCheckDone => _firstCheckCompleter.future;
+
+  /// `true` una vez que el primer health-check haya terminado.
+  bool get firstCheckCompleted => _firstCheckCompleter.isCompleted;
+
   bool get hasInternet => _hasInternet;
   ServerStatus get sigmaStatus => _sigmaStatus;
   ServerStatus get intranetStatus => _intranetStatus;
@@ -39,6 +51,9 @@ class ConnectivityService extends ChangeNotifier {
     });
     final initialResults = await _connectivity.checkConnectivity();
     await _handleConnectivityChange(initialResults);
+    if (!_firstCheckCompleter.isCompleted) {
+      _firstCheckCompleter.complete();
+    }
     _timer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (_hasInternet) {
         _healthCheck();
@@ -52,7 +67,8 @@ class ConnectivityService extends ChangeNotifier {
     notifyListeners();
     try {
       final results = await _connectivity.checkConnectivity();
-      _hasInternet = results.isNotEmpty && !results.contains(ConnectivityResult.none);
+      _hasInternet =
+          results.isNotEmpty && !results.contains(ConnectivityResult.none);
       await _healthCheck();
     } finally {
       _isChecking = false;
@@ -80,12 +96,17 @@ class ConnectivityService extends ChangeNotifier {
     final idiomasApiFuture = _pingServer(
       Uri.parse('https://apidiomas.upla.edu.pe'),
     );
-    final results = await Future.wait([sigmaFuture, intranetFuture, idiomasAuthFuture, idiomasApiFuture]);
+    final results = await Future.wait([
+      sigmaFuture,
+      intranetFuture,
+      idiomasAuthFuture,
+      idiomasApiFuture,
+    ]);
     _sigmaStatus = results[0];
     _intranetStatus = results[1];
     _idiomasAuthStatus = results[2];
     _idiomasApiStatus = results[3];
-    
+
     if (results.any((s) => s != ServerStatus.offline)) {
       _hasInternet = true;
     }

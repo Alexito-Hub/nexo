@@ -353,10 +353,13 @@ class RecordCourse {
   factory RecordCourse.fromRow(List<dynamic> r) {
     String at(int i) => (i < r.length ? r[i]?.toString() ?? '' : '').trim();
     double cred = 0;
-    // Buscar créditos en las columnas aledañas. Suelen venir como número entero (1, 2, 3, 4, 5).
+    // Buscar créditos en las columnas 9-11 (la 12 es la nota vigesimal).
+    // Solo se aceptan valores enteros en rango 1-10: ningún curso de la UPLA
+    // tiene más de 10 créditos, y acotar el rango evita confundir la nota
+    // (0-20) u otra columna numérica con créditos.
     for (final i in [9, 10, 11]) {
       final val = double.tryParse(at(i));
-      if (val != null && val > 0 && val <= 20) {
+      if (val != null && val >= 1 && val <= 10 && val == val.roundToDouble()) {
         cred = val;
         break;
       }
