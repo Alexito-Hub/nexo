@@ -1176,98 +1176,68 @@ class _IdiomasDetalleSheet extends StatelessWidget {
                 controller: controller,
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
-                  Center(
-                    child: Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade400.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: Colors.orange.shade400.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '—',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.orange.shade400,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    course.asignatura,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: NexoTheme.textPrimary,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.language_rounded, size: 14, color: NexoTheme.textMuted),
-                      const SizedBox(width: 4),
-                      Text(
-                        course.idiomaNombre,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: NexoTheme.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
                   Builder(
                     builder: (context) {
                       final allNotas = store.idiomasNotas.value ?? [];
                       final match = allNotas.where((n) => n['detMatriculaId'] == course.detMatriculaId).toList();
-                      if (match.isEmpty) {
-                        return EmptyState(
-                          icon: Icons.access_time_rounded,
-                          title: 'Sin calificaciones',
-                          subtitle: 'Aún no se han registrado notas para este curso en el sistema de Idiomas.',
-                          color: NexoTheme.textMuted,
-                        );
+                      
+                      String monthName(int mes) {
+                        const meses = [
+                          'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+                          'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+                        ];
+                        if (mes >= 1 && mes <= 12) return meses[mes - 1];
+                        return mes.toString();
                       }
                       
-                      final data = match.first as Map<String, dynamic>;
+                      String notaText = '—';
                       final notasList = <Map<String, dynamic>>[];
-                      for (int i = 1; i <= 6; i++) {
-                        if (data['nota$i'] != null && data['nota$i'] > 0) {
-                          notasList.add({
-                            'label': 'Nota $i',
-                            'grade': (data['nota$i'] as num).toDouble(),
-                          });
+                      
+                      if (match.isNotEmpty) {
+                        final data = match.first as Map<String, dynamic>;
+                        notaText = data['promedio']?.toString() ?? '—';
+                        if (notaText == '0' || notaText == '0.0' || notaText == '0.00') notaText = '—';
+
+                        for (int i = 1; i <= 6; i++) {
+                          if (data['nota$i'] != null && data['nota$i'] > 0) {
+                            notasList.add({
+                              'label': 'Nota $i',
+                              'grade': (data['nota$i'] as num).toDouble(),
+                            });
+                          }
                         }
                       }
-                      
-                      if (notasList.isEmpty) {
-                        return EmptyState(
-                          icon: Icons.access_time_rounded,
-                          title: 'Sin calificaciones',
-                          subtitle: 'Las notas están en proceso de ser publicadas.',
-                          color: NexoTheme.textMuted,
-                        );
-                      }
 
-                      return GradeSectionCard(
-                        titulo: 'Evaluaciones',
-                        rawAverage: data['promedio']?.toString() ?? '-',
-                        rows: [
-                          for (var i = 0; i < notasList.length; i++)
-                            GradeRow(
-                              label: notasList[i]['label'] as String,
-                              valueRaw: notasList[i]['grade'].toString(),
-                              last: i == notasList.length - 1,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          GradeHeader(
+                            titulo: course.asignatura,
+                            subtitulo: '${course.anio}-${monthName(course.mes)} · ${course.idiomaNombre}',
+                            notaFinalText: notaText,
+                          ),
+                          const SizedBox(height: 16),
+                          if (match.isEmpty || notasList.isEmpty)
+                            EmptyState(
+                              icon: Icons.access_time_rounded,
+                              title: 'Sin calificaciones',
+                              subtitle: match.isEmpty 
+                                ? 'Aún no se han registrado notas para este curso en el sistema de Idiomas.' 
+                                : 'Las notas están en proceso de ser publicadas.',
+                              color: NexoTheme.textMuted,
+                            )
+                          else
+                            GradeSectionCard(
+                              titulo: 'Evaluaciones',
+                              rawAverage: notaText,
+                              rows: [
+                                for (var i = 0; i < notasList.length; i++)
+                                  GradeRow(
+                                    label: notasList[i]['label'] as String,
+                                    valueRaw: notasList[i]['grade'].toString(),
+                                    last: i == notasList.length - 1,
+                                  ),
+                              ],
                             ),
                         ],
                       );

@@ -505,10 +505,14 @@ class _GrupoTileState extends State<_GrupoTile> {
                               ),
                             if (widget.grupo.sessions.isNotEmpty)
                               Builder(builder: (_) {
-                                var s = widget.grupo.sessions.first.section.trim();
+                                final first = widget.grupo.sessions.first;
+                                var s = first.section.trim();
                                 if (s.toLowerCase().startsWith('sec')) {
                                   s = s.replaceFirst(RegExp(r'sec\.?\s*', caseSensitive: false), '');
                                 }
+                                final isIdiomasVirtual = first.id.startsWith('ING') && 
+                                                         first.modality.toUpperCase() == 'VIRTUAL';
+                                if (s.isEmpty || isIdiomasVirtual) return const SizedBox.shrink();
                                 return _meta(
                                   Icons.tag_rounded,
                                   'Sección $s',

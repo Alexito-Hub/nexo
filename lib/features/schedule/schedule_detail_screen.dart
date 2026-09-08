@@ -4,6 +4,7 @@ import 'package:nexo/core/design/tokens.dart';
 import 'package:nexo/core/storage.dart';
 import 'package:nexo/data/app_store.dart';
 import 'package:nexo/domain/unified_models.dart';
+import 'package:nexo/domain/course_status.dart';
 
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/shared/util/formatters.dart';
@@ -117,27 +118,6 @@ class _Hero extends StatelessWidget {
           Row(
             children: [
               _DayBadge(idDia: grupo.weekday, isToday: isToday),
-              const Gap.h(AppSpacing.sm),
-              if (first.nrc.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm + 2,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: AppRadii.rPill,
-                  ),
-                  child: Text(
-                    '${l.detailNrc} ${first.nrc}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: AppFont.small,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
             ],
           ),
           const Gap(AppSpacing.lg),
@@ -151,35 +131,50 @@ class _Hero extends StatelessWidget {
               height: 1.15,
             ),
           ),
-          if (first.section.isNotEmpty || first.modality.isNotEmpty) ...[
-            const Gap(AppSpacing.xs),
-            Builder(builder: (_) {
-              var s = first.section.trim();
-              if (s.toLowerCase().startsWith('sec')) {
-                s = s.replaceFirst(RegExp(r'sec\.?\s*', caseSensitive: false), '');
+          const Gap(AppSpacing.xs),
+          Builder(builder: (_) {
+            var s = first.section.trim();
+            if (s.toLowerCase().startsWith('sec')) {
+              s = s.replaceFirst(RegExp(r'sec\.?\s*', caseSensitive: false), '');
+            }
+            final isIdiomasVirtual = first.id.startsWith('ING') && 
+                                     first.modality.toUpperCase() == 'VIRTUAL';
+            final parts = <String>[];
+            if (first.nrc.isNotEmpty) {
+              parts.add('${l.detailNrc} ${first.nrc}');
+            }
+            if (s.isNotEmpty && !isIdiomasVirtual) {
+              parts.add('Sección $s');
+            }
+            if (first.level.isNotEmpty) {
+              parts.add('Nivel ${first.level}');
+            }
+            if (store != null) {
+              final p = store!.periodoActivo;
+              if (p != null) {
+                final b = store!.boletaOf(p.year, p.number).value;
+                if (b != null) {
+                  final target = grupo.activeWorkshopName ?? grupo.subject;
+                  final match = b.where((c) => normalizeSubject(c.name) == normalizeSubject(target)).toList();
+                  if (match.isNotEmpty && match.first.credit > 0) {
+                    parts.add('${match.first.credit.toInt()} Créditos');
+                  }
+                }
               }
-              final isIdiomasVirtual = first.id.startsWith('ING') && 
-                                       first.modality.toUpperCase() == 'VIRTUAL';
-              final parts = <String>[];
-              if (s.isNotEmpty && !isIdiomasVirtual) {
-                parts.add('Sección $s');
-              }
-              if (first.level.isNotEmpty) {
-                parts.add('Nivel ${first.level}');
-              }
-              if (first.modality.isNotEmpty) {
-                parts.add(first.modality);
-              }
-              return Text(
-                parts.join(' · '),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: AppFont.body,
-                  fontWeight: FontWeight.w500,
-                ),
-              );
-            }),
-          ],
+            }
+            if (first.modality.isNotEmpty) {
+              parts.add(first.modality);
+            }
+            if (parts.isEmpty) return const SizedBox.shrink();
+            return Text(
+              parts.join(' · '),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: AppFont.body,
+                fontWeight: FontWeight.w500,
+              ),
+            );
+          }),
 
         ],
       ),
