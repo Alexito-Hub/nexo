@@ -77,15 +77,11 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 14),
                       Reveal(index: 1, child: _AcademicCard(profile: p)),
-                      if (store.idiomasMatricula.hasValue &&
-                          (store.idiomasMatricula.value?.isNotEmpty ??
-                              false)) ...[
+                      if (store.idiomasVigentes.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         Reveal(
                           index: 2,
-                          child: _IdiomasCard(
-                            courses: store.idiomasMatricula.value!,
-                          ),
+                          child: _IdiomasCard(courses: store.idiomasVigentes),
                         ),
                       ],
                       const SizedBox(height: 14),

@@ -196,7 +196,38 @@ class AppStore extends ChangeNotifier {
   AsyncValue<List<IdiomasCourse>> idiomasMatricula = const AsyncValue.idle();
   AsyncValue<List<dynamic>> idiomasNotas = const AsyncValue.idle();
   AsyncValue<List<Payment>> cuotas = const AsyncValue.idle();
-  AsyncValue<List<ScheduleClass>> schedule = const AsyncValue.idle();
+  AsyncValue<List<ScheduleClass>> _baseSchedule = const AsyncValue.idle();
+
+  List<IdiomasCourse> get idiomasVigentes {
+    final list = idiomasMatricula.value;
+    if (list == null || list.isEmpty) return [];
+    final now = DateTime.now();
+    return list.where((c) => c.anio == now.year && c.mes == now.month).toList();
+  }
+
+  AsyncValue<List<ScheduleClass>> get schedule {
+    final base = _baseSchedule;
+    final idiomas = idiomasVigentes;
+    if (idiomas.isEmpty) return base;
+
+    final idiomasClasses = idiomas
+        .expand((c) => c.toScheduleClasses())
+        .toList();
+    if (!base.hasValue) {
+      if (base.loading) return const AsyncValue.loading();
+      return AsyncValue.data(idiomasClasses);
+    }
+
+    final current = base.value ?? [];
+    final filtered = current.where((s) => s.typeCode != 'I').toList();
+    return AsyncValue.data([...filtered, ...idiomasClasses]);
+  }
+
+  @visibleForTesting
+  void setBaseScheduleForTesting(AsyncValue<List<ScheduleClass>> value) {
+    _baseSchedule = value;
+  }
+
   AsyncValue<GradesSummary> resumen = const AsyncValue.idle();
   AsyncValue<List<TermAverage>> promedios = const AsyncValue.idle();
   AsyncValue<List<RecordCourse>> record = const AsyncValue.idle();
@@ -503,7 +534,7 @@ class AppStore extends ChangeNotifier {
     }
     final h = s.getCache(_ckHorario);
     if (h is List) {
-      schedule = AsyncValue.data(
+      _baseSchedule = AsyncValue.data(
         h
             .map(
               (e) => ScheduleClass.fromJson((e as Map).cast<String, dynamic>()),
@@ -632,8 +663,8 @@ class AppStore extends ChangeNotifier {
 
   Future<List<ScheduleClass>?> loadHorarioActual() => _wrap(
     () => _resolveOrEmpty(_horarioRes),
-    () => schedule,
-    (v) => schedule = v,
+    () => _baseSchedule,
+    (v) => _baseSchedule = v,
     cached: () => _cache.getHorario(),
     persist: (v) => _cache.saveHorario(v),
     operationName: 'loadHorarioActual',
@@ -677,18 +708,8 @@ class AppStore extends ChangeNotifier {
         idiomasNotas = const AsyncValue.data([]);
       }
 
-      // Inyectar clases de idiomas en el horario existente.
-      // B6: No filtrar por mes — la API solo retorna cursos activos.
-      if (courses.isNotEmpty) {
-        final idiomasClasses = courses
-            .expand((c) => c.toScheduleClasses())
-            .toList();
-        final current = schedule.value ?? [];
-        // B5: Usar typeCode == 'I' para identificar clases de idiomas
-        // inyectadas previamente, en vez del frágil startsWith('ING').
-        final filtered = current.where((s) => s.typeCode != 'I').toList();
-        schedule = AsyncValue.data([...filtered, ...idiomasClasses]);
-      }
+      // La inyección en el horario ya no se hace aquí. El getter `schedule`
+      // se encarga de combinar `_baseSchedule` y `idiomasVigentes` al vuelo.
       _notify();
     } catch (e) {
       idiomasMatricula = AsyncValue.failure(e);
@@ -1101,7 +1122,7 @@ class AppStore extends ChangeNotifier {
     periodos = const AsyncValue.idle();
     // Otro estudiante puede tener otra regla de aprobación: no se hereda.
     PassingRule.current = PassingRule.standard;
-    schedule = const AsyncValue.idle();
+    _baseSchedule = const AsyncValue.idle();
     resumen = const AsyncValue.idle();
     promedios = const AsyncValue.idle();
     pendingInstallments = const AsyncValue.idle();
@@ -1114,7 +1135,8 @@ class AppStore extends ChangeNotifier {
     _detalle.clear();
     record = const AsyncValue.idle();
     certificate = const AsyncValue.idle();
-    schedule = const AsyncValue.idle();
+    idiomasMatricula = const AsyncValue.idle();
+    idiomasNotas = const AsyncValue.idle();
     publications = const AsyncValue.idle();
     wifi = const AsyncValue.idle();
     gradesCount = const AsyncValue.idle();

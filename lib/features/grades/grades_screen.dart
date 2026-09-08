@@ -172,9 +172,7 @@ class _GradesScreenState extends State<GradesScreen> {
                             store: widget.store,
                           ),
                         ),
-                      if (widget.store.idiomasMatricula.hasValue &&
-                          (widget.store.idiomasMatricula.value?.isNotEmpty ??
-                              false)) ...[
+                      if (widget.store.idiomasVigentes.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         Reveal(
                           index: 3,
@@ -1034,7 +1032,7 @@ class _IdiomasGradesList extends StatelessWidget {
       return mes.toString();
     }
 
-    final courses = store.idiomasMatricula.value ?? [];
+    final courses = store.idiomasVigentes;
     if (courses.isEmpty) return const SizedBox.shrink();
     return SectionCard(
       title: 'Centro de Idiomas',
