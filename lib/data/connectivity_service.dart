@@ -17,9 +17,13 @@ class ConnectivityService extends ChangeNotifier {
   bool _hasInternet = false;
   ServerStatus _sigmaStatus = ServerStatus.offline;
   ServerStatus _intranetStatus = ServerStatus.offline;
+  ServerStatus _idiomasAuthStatus = ServerStatus.offline;
+  ServerStatus _idiomasApiStatus = ServerStatus.offline;
   bool get hasInternet => _hasInternet;
   ServerStatus get sigmaStatus => _sigmaStatus;
   ServerStatus get intranetStatus => _intranetStatus;
+  ServerStatus get idiomasAuthStatus => _idiomasAuthStatus;
+  ServerStatus get idiomasApiStatus => _idiomasApiStatus;
   bool get isFullyOnline =>
       _hasInternet &&
       _sigmaStatus == ServerStatus.online &&
@@ -48,15 +52,8 @@ class ConnectivityService extends ChangeNotifier {
     notifyListeners();
     try {
       final results = await _connectivity.checkConnectivity();
-      final hasNet =
-          results.isNotEmpty && !results.contains(ConnectivityResult.none);
-      _hasInternet = hasNet;
-      if (_hasInternet) {
-        await _healthCheck();
-      } else {
-        _sigmaStatus = ServerStatus.offline;
-        _intranetStatus = ServerStatus.offline;
-      }
+      _hasInternet = results.isNotEmpty && !results.contains(ConnectivityResult.none);
+      await _healthCheck();
     } finally {
       _isChecking = false;
       notifyListeners();
@@ -68,16 +65,8 @@ class ConnectivityService extends ChangeNotifier {
   ) async {
     final hasNet =
         results.isNotEmpty && !results.contains(ConnectivityResult.none);
-    if (_hasInternet != hasNet) {
-      _hasInternet = hasNet;
-      if (_hasInternet) {
-        await _healthCheck();
-      } else {
-        _sigmaStatus = ServerStatus.offline;
-        _intranetStatus = ServerStatus.offline;
-        notifyListeners();
-      }
-    }
+    _hasInternet = hasNet;
+    await _healthCheck();
   }
 
   Future<void> _healthCheck() async {
@@ -85,9 +74,21 @@ class ConnectivityService extends ChangeNotifier {
     final intranetFuture = _pingServer(
       Uri.parse('https://intranet.upla.edu.pe'),
     );
-    final results = await Future.wait([sigmaFuture, intranetFuture]);
+    final idiomasAuthFuture = _pingServer(
+      Uri.parse('https://services.upla.edu.pe'),
+    );
+    final idiomasApiFuture = _pingServer(
+      Uri.parse('https://apidiomas.upla.edu.pe'),
+    );
+    final results = await Future.wait([sigmaFuture, intranetFuture, idiomasAuthFuture, idiomasApiFuture]);
     _sigmaStatus = results[0];
     _intranetStatus = results[1];
+    _idiomasAuthStatus = results[2];
+    _idiomasApiStatus = results[3];
+    
+    if (results.any((s) => s != ServerStatus.offline)) {
+      _hasInternet = true;
+    }
     notifyListeners();
   }
 

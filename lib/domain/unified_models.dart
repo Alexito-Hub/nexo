@@ -487,6 +487,7 @@ class ScheduleClass {
     'T' => 'Teoría',
     'P' => 'Práctica',
     'L' => 'Laboratorio',
+    'I' => 'Idiomas',
     _ => typeCode,
   };
   int get durationMinutes {

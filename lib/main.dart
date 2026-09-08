@@ -33,6 +33,7 @@ import 'package:nexo/core/shortcuts.dart';
 import 'package:nexo/data/teacher_repository.dart';
 import 'package:nexo/data/intranet_client.dart';
 import 'package:nexo/data/intranet_repository.dart';
+import 'package:nexo/domain/idiomas_repository.dart';
 import 'package:nexo/data/secure_http.dart';
 import 'package:nexo/data/update_service.dart';
 import 'package:nexo/features/auth/login_screen.dart';
@@ -138,12 +139,14 @@ Future<void> main(List<String> args) async {
   );
   final intranet = IntranetRepository(IntranetClient(transport: secureHttp));
   final teacher = TeacherRepository(api);
+  final idiomas = IdiomasRepository();
   final store = AppStore(
     repo,
     cache: cache,
     errorHandler: errorHandler,
     intranet: intranet,
     teacher: teacher,
+    idiomas: idiomas,
   );
   final theme = ThemeController()..load();
   final widgets = HomeWidgetService();

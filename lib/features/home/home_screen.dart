@@ -235,6 +235,8 @@ class _Header extends StatelessWidget {
               final isOnline = connectivity.hasInternet;
               final sigma = connectivity.sigmaStatus;
               final intranet = connectivity.intranetStatus;
+              final idiomasAuth = connectivity.idiomasAuthStatus;
+              final idiomasApi = connectivity.idiomasApiStatus;
               Widget buildStatusTile(
                 String title,
                 bool active,
@@ -357,6 +359,8 @@ class _Header extends StatelessWidget {
                     buildStatusTile(l.connectivityInternet, isOnline, null),
                     buildStatusTile(l.connectivitySigma, isOnline, sigma),
                     buildStatusTile(l.connectivityIntranet, isOnline, intranet),
+                    buildStatusTile('Auth Idiomas', isOnline, idiomasAuth),
+                    buildStatusTile('API Idiomas', isOnline, idiomasApi),
                     const SizedBox(height: 16),
                     Text(
                       l.connectivityBackupNote,

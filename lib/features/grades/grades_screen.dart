@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nexo/core/design/theme.dart';
 import 'package:nexo/core/errors.dart';
 import 'package:nexo/data/app_store.dart';
+import 'package:nexo/domain/idiomas_models.dart';
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/domain/grade_calculator.dart';
 import 'package:nexo/domain/models.dart';
@@ -171,6 +172,14 @@ class _GradesScreenState extends State<GradesScreen> {
                             store: widget.store,
                           ),
                         ),
+                      if (widget.store.idiomasMatricula.hasValue &&
+                          (widget.store.idiomasMatricula.value?.isNotEmpty ?? false)) ...[
+                        const SizedBox(height: 14),
+                        Reveal(
+                          index: 3,
+                          child: _IdiomasGradesList(store: widget.store),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -365,11 +374,6 @@ class _CursoTile extends StatelessWidget {
                           Icons.tag_rounded,
                           '${l.detailSection} ${course.section}',
                         ),
-                        if (course.credit > 0)
-                          _meta(
-                            Icons.stars_rounded,
-                            '${course.credit % 1 == 0 ? course.credit.toInt() : course.credit} créditos',
-                          ),
                         if (course.attendance != null)
                           _meta(
                             Icons.fact_check_outlined,
@@ -1003,3 +1007,279 @@ class _Chip extends StatelessWidget {
     );
   }
 }
+
+class _IdiomasGradesList extends StatelessWidget {
+  final AppStore store;
+  const _IdiomasGradesList({required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    String monthName(int mes) {
+      const meses = [
+        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+        'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+      ];
+      if (mes >= 1 && mes <= 12) return meses[mes - 1];
+      return mes.toString();
+    }
+    
+    final courses = store.idiomasMatricula.value ?? [];
+    if (courses.isEmpty) return const SizedBox.shrink();
+    return SectionCard(
+      title: 'Centro de Idiomas',
+      icon: Icons.translate_rounded,
+      iconColor: Colors.orange.shade400,
+      trailing: StatusChip(
+        text: '${courses.length} cursos',
+        color: Colors.orange.shade400,
+      ),
+      child: gradeTileGrid(context, [
+        for (final c in courses) ...[
+          Builder(
+            builder: (context) {
+              final avgText = c.promedio > 0 ? c.promedio.toStringAsFixed(2) : '—';
+              final color = c.promedio > 0
+                  ? (c.promedio >= 10.5 ? NexoTheme.success : NexoTheme.danger)
+                  : Colors.orange.shade400;
+
+              return Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => _IdiomasDetalleSheet(course: c, store: store),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: NexoTheme.bg,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: NexoTheme.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            avgText,
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            c.asignatura,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: NexoTheme.textPrimary,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${c.anio}-${monthName(c.mes)} · ${c.idiomaNombre}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: NexoTheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: NexoTheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '—',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: NexoTheme.textMuted,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ),
+            );
+          },
+        ),
+      ],
+      ]),
+    );
+  }
+}
+
+class _IdiomasDetalleSheet extends StatelessWidget {
+  final IdiomasCourse course;
+  final AppStore store;
+  const _IdiomasDetalleSheet({required this.course, required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (_, controller) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: NexoTheme.bg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: NexoTheme.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: ListView(
+                controller: controller,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade400.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.orange.shade400.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '—',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.orange.shade400,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    course.asignatura,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: NexoTheme.textPrimary,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.language_rounded, size: 14, color: NexoTheme.textMuted),
+                      const SizedBox(width: 4),
+                      Text(
+                        course.idiomaNombre,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: NexoTheme.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Builder(
+                    builder: (context) {
+                      final allNotas = store.idiomasNotas.value ?? [];
+                      final match = allNotas.where((n) => n['detMatriculaId'] == course.detMatriculaId).toList();
+                      if (match.isEmpty) {
+                        return EmptyState(
+                          icon: Icons.access_time_rounded,
+                          title: 'Sin calificaciones',
+                          subtitle: 'Aún no se han registrado notas para este curso en el sistema de Idiomas.',
+                          color: NexoTheme.textMuted,
+                        );
+                      }
+                      
+                      final data = match.first as Map<String, dynamic>;
+                      final notasList = <Map<String, dynamic>>[];
+                      for (int i = 1; i <= 6; i++) {
+                        if (data['nota$i'] != null && data['nota$i'] > 0) {
+                          notasList.add({
+                            'label': 'Nota $i',
+                            'grade': (data['nota$i'] as num).toDouble(),
+                          });
+                        }
+                      }
+                      
+                      if (notasList.isEmpty) {
+                        return EmptyState(
+                          icon: Icons.access_time_rounded,
+                          title: 'Sin calificaciones',
+                          subtitle: 'Las notas están en proceso de ser publicadas.',
+                          color: NexoTheme.textMuted,
+                        );
+                      }
+
+                      return GradeSectionCard(
+                        titulo: 'Evaluaciones',
+                        rawAverage: data['promedio']?.toString() ?? '-',
+                        rows: [
+                          for (var i = 0; i < notasList.length; i++)
+                            GradeRow(
+                              label: notasList[i]['label'] as String,
+                              valueRaw: notasList[i]['grade'].toString(),
+                              last: i == notasList.length - 1,
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

@@ -281,9 +281,11 @@ class _SessionRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            session.typeCode.toUpperCase() == 'T'
-                ? Icons.menu_book_outlined
-                : Icons.science_outlined,
+            session.typeCode.toUpperCase() == 'I'
+                ? Icons.language_rounded
+                : session.typeCode.toUpperCase() == 'T'
+                    ? Icons.menu_book_outlined
+                    : Icons.science_outlined,
             size: AppIcon.xs,
             color: c,
           ),

@@ -4,7 +4,7 @@ import 'package:nexo/core/design/tokens.dart';
 import 'package:nexo/core/storage.dart';
 import 'package:nexo/data/app_store.dart';
 import 'package:nexo/domain/unified_models.dart';
-import 'package:nexo/domain/course_status.dart';
+
 import 'package:nexo/l10n/app_localizations.dart';
 import 'package:nexo/shared/util/formatters.dart';
 import 'package:nexo/shared/widgets/empty_state.dart';
@@ -151,17 +151,27 @@ class _Hero extends StatelessWidget {
               height: 1.15,
             ),
           ),
-          if (first.section.isNotEmpty) ...[
+          if (first.section.isNotEmpty || first.modality.isNotEmpty) ...[
             const Gap(AppSpacing.xs),
             Builder(builder: (_) {
               var s = first.section.trim();
               if (s.toLowerCase().startsWith('sec')) {
                 s = s.replaceFirst(RegExp(r'sec\.?\s*', caseSensitive: false), '');
               }
+              final isIdiomasVirtual = first.id.startsWith('ING') && 
+                                       first.modality.toUpperCase() == 'VIRTUAL';
+              final parts = <String>[];
+              if (s.isNotEmpty && !isIdiomasVirtual) {
+                parts.add('Sección $s');
+              }
+              if (first.level.isNotEmpty) {
+                parts.add('Nivel ${first.level}');
+              }
+              if (first.modality.isNotEmpty) {
+                parts.add(first.modality);
+              }
               return Text(
-                'Sección $s'
-                '${first.level.isNotEmpty ? ' · Nivel ${first.level}' : ''}'
-                '${first.modality.isNotEmpty ? ' · ${first.modality}' : ''}',
+                parts.join(' · '),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.9),
                   fontSize: AppFont.body,
@@ -170,35 +180,7 @@ class _Hero extends StatelessWidget {
               );
             }),
           ],
-          if (store != null)
-            Builder(builder: (_) {
-              final p = store!.periodoActivo;
-              if (p == null) return const SizedBox.shrink();
-              final b = store!.boletaOf(p.year, p.number).value;
-              if (b == null) return const SizedBox.shrink();
-              final target = grupo.activeWorkshopName ?? grupo.subject;
-              final match = b.where((c) => normalizeSubject(c.name) == normalizeSubject(target)).toList();
-              if (match.isNotEmpty && match.first.credit > 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Row(
-                    children: [
-                      Icon(Icons.military_tech_outlined, size: 14, color: Colors.white.withValues(alpha: 0.9)),
-                      const Gap(4),
-                      Text(
-                        '${match.first.credit.toInt()} Créditos',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            }),
+
         ],
       ),
     );
@@ -341,7 +323,7 @@ class _LocationCard extends StatelessWidget {
               _kv(entry.key.toUpperCase() == 'T' ? 'Aula' : 'Laboratorio', Fmt.cleanRoom(entry.value.room)),
             ],
           if (first.campus.isNotEmpty) ...[
-            const Gap(12),
+            const Gap(2),
             _kv(label.detailCampus, first.campus),
           ]
         ],
