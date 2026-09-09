@@ -3,7 +3,7 @@
 #
 # Para añadir un nuevo idioma:
 #   1. Crea lib/l10n/app_<codigo>.arb (ej. app_qu.arb para quechua).
-#   2. Copia las claves de app_es.arb y traduce los valores.
+#   2. Copia las claves de app_es.arb y traduce los valores.  
 #   3. Las claves faltantes hacen fallback al idioma plantilla (es).
 
 arb-dir: lib/l10n
@@ -12,5 +12,4 @@ output-localization-file: app_localizations.dart
 output-class: AppLocalizations
 nullable-getter: false
 output-dir: lib/l10n
-synthetic-package: false
 untranslated-messages-file: untranslated.json

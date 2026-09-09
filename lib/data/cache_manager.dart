@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:nexo/domain/models.dart';
 import 'package:nexo/domain/unified_models.dart';
@@ -8,6 +9,7 @@ class CacheManager {
   CacheManager({Database? database}) : _db = database;
   Database? _db;
   Future<void> init() async {
+    if (kIsWeb) return;
     if (_db != null) return;
     final path = join(await getDatabasesPath(), 'nexo_cache.db');
     _db = await openDatabase(
@@ -38,6 +40,7 @@ class CacheManager {
   }
 
   Future<void> _createTables(Database db, int version) async {
+    if (!isReady) return;
     await db.execute('''
       CREATE TABLE student_profile (
         id TEXT PRIMARY KEY,
@@ -260,6 +263,7 @@ class CacheManager {
   }
 
   Future<void> saveHorario(List<ScheduleClass> clases) async {
+    if (!isReady) return;
     await db.insert('schedule', {
       'id': 'current',
       'json_data': jsonEncode(clases.map((c) => c.toJson()).toList()),
@@ -285,6 +289,7 @@ class CacheManager {
   }
 
   Future<void> saveDocenteHorario(List<ScheduleClass> clases) async {
+    if (!isReady) return;
     await db.insert('schedule', {
       'id': 'docente_current',
       'json_data': jsonEncode(clases.map((c) => c.toJson()).toList()),
@@ -310,6 +315,7 @@ class CacheManager {
   }
 
   Future<void> savePeriodos(List<Term> periodos) async {
+    if (!isReady) return;
     await db.insert('periodos', {
       'id': 'current',
       'json_data': jsonEncode(periodos.map((p) => p.toJson()).toList()),
@@ -333,6 +339,7 @@ class CacheManager {
   }
 
   Future<void> savePromedios(List<TermAverage> promedios) async {
+    if (!isReady) return;
     await db.insert('promedios', {
       'id': 'current',
       'json_data': jsonEncode(promedios.map((p) => p.toJson()).toList()),
@@ -358,6 +365,7 @@ class CacheManager {
   }
 
   Future<void> savePagos(List<Payment> pagos) async {
+    if (!isReady) return;
     await db.insert('pagos', {
       'id': 'current',
       'json_data': jsonEncode(pagos.map((p) => p.toJson()).toList()),
@@ -383,6 +391,7 @@ class CacheManager {
   }
 
   Future<void> saveDocenteInfo(TeacherInfo info) async {
+    if (!isReady) return;
     final data = {
       'codigo': info.code,
       'nombres': info.firstName,
@@ -413,6 +422,7 @@ class CacheManager {
   }
 
   Future<void> saveDocenteCursos(List<TeacherSubject> courses) async {
+    if (!isReady) return;
     final list = courses
         .map(
           (c) => {
@@ -489,6 +499,7 @@ class CacheManager {
   }
 
   Future<void> saveStudent(Student student) async {
+    if (!isReady) return;
     await db.insert('unified_student', {
       'id': student.id.isNotEmpty ? student.id : 'current',
       'json_data': jsonEncode(student.toJson()),
@@ -512,6 +523,7 @@ class CacheManager {
   }
 
   Future<void> saveTeacher(Teacher teacher) async {
+    if (!isReady) return;
     await db.insert('unified_teacher', {
       'id': teacher.id.isNotEmpty ? teacher.id : 'current',
       'json_data': jsonEncode(teacher.toJson()),
@@ -535,6 +547,7 @@ class CacheManager {
   }
 
   Future<void> clearAll() async {
+    if (!isReady) return;
     final tables = [
       'student_profile',
       'boleta_cursos',
@@ -558,6 +571,7 @@ class CacheManager {
   }
 
   Future<void> clearExpired(Duration maxAge) async {
+    if (!isReady) return;
     final cutoff =
         DateTime.now().millisecondsSinceEpoch - maxAge.inMilliseconds;
     final tables = [

@@ -308,7 +308,7 @@ class NexoApp extends StatelessWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (ctx, child) {
             final palette = theme.resolvedPalette(ctx);
-            final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+            final isTest = !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
             if (!kIsWeb && Platform.isWindows && !isTest) {
               windowManager.setBackgroundColor(palette.bg);
             }
@@ -514,7 +514,7 @@ class _GateState extends State<_Gate> {
               FadeTransition(opacity: anim, child: c),
           child: KeyedSubtree(key: ValueKey(key), child: gated),
         );
-        final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+        final isTest = !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
         if (!kIsWeb && Platform.isWindows && !isTest) {
           child = Scaffold(
             backgroundColor: NexoTheme.bg,
